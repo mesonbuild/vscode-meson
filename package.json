@@ -1,0 +1,38 @@
+{
+    "name": "meson",
+    "displayName": "Meson",
+    "description": "Meson langage support for Visual Studio Code",
+    "icon": "graphics/icon.png",
+    "version": "1.0.0",
+    "license": "Apache",
+    "publisher": "asabil",
+    "author": {
+        "name": "Ali Sabil"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/asabil/vscode-meson.git"
+    },
+    "bugs": {
+        "url": "https://github.com/asabil/vscode-meson/issues"
+    },
+    "homepage": "https://github.com/asabil/vscode-meson/blob/master/README.md",
+    "engines": {
+        "vscode": "^1.12.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "meson",
+            "aliases": ["Meson", "meson", "mesonbuild"],
+            "filenames": ["meson.build", "meson_options.txt"]
+        }],
+        "grammars": [{
+            "language": "meson",
+            "scopeName": "source.meson",
+            "path": "./syntaxes/meson.tmLanguage.json"
+        }]
+    }
+}
