@@ -1,6 +1,6 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "Meson",
+	"scopeName": "source.meson",
 	"author": "Patrick Griffis",
 	"fileTypes": [
 		"meson.build",
@@ -32,6 +32,10 @@
 			"name": "constant.numeric.float.meson"
 		},
 		{
+			"match": "\\b(?i:(0x[0-9a-f]+))",
+			"name": "constant.numeric.integer.hexadecimal.meson"
+		},
+		{
 			"match": "\\b([1-9]+[0-9]*|0)",
 			"name": "constant.numeric.integer.decimal.meson"
 		},
@@ -60,7 +64,7 @@
 			"name": "keyword.operator.arithmetic.meson"
 		},
 		{
-			"match": "(?x)\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_link_arguments|add_test_setup|benchmark|build_target|configuration_data|configure_file|custom_target|declare_dependency|dependency|error|environment|executable|find_program|find_library|files|generator|get_option|get_variable|import|include_directories|install_data|install_headers|install_man|install_subdir|is_variable|jar|join_paths|library|message|option|project|run_command|run_target|set_variable|shared_library|shared_module|static_library|subdir|subproject|test|vcs_tag\n)\\b\\s*(?=\\()",
+			"match": "(?x)\\b(add_global_arguments|add_project_arguments|add_global_link_arguments|add_project_link_arguments|add_test_setup|add_languages|assert|benchmark|build_target|configuration_data|configure_file|custom_target|declare_dependency|dependency|environment|error|executable|generator|gettext|get_option|get_variable|files|find_library|find_program|include_directories|import|install_data|install_headers|install_man|install_subdir|is_variable|jar|join_paths|library|message|option|project|run_target|run_command|set_variable|subdir|subproject|shared_library|shared_module|static_library|test|vcs_tag\n)\\b\\s*(?=\\()",
 			"name": "support.function.builtin.meson"
 		}
 	],
@@ -71,24 +75,24 @@
 		},
 		"escaped_character": {
 			"captures": {
-					"1": {
-						"name": "constant.character.escape.newline.meson"
-					},
-					"2": {
-						"name": "constant.character.escape.backlash.meson"
-					},
-					"3": {
-						"name": "constant.character.escape.single-quote.meson"
-					},
-					"4": {
-						"name": "constant.character.escape.linefeed.meson"
-					},
-					"5": {
-						"name": "constant.character.escape.return.meson"
-					},
-					"6": {
-						"name": "constant.character.escape.tab.meson"
-					}
+				"1": {
+					"name": "constant.character.escape.newline.meson"
+				},
+				"2": {
+					"name": "constant.character.escape.backlash.meson"
+				},
+				"3": {
+					"name": "constant.character.escape.single-quote.meson"
+				},
+				"4": {
+					"name": "constant.character.escape.linefeed.meson"
+				},
+				"5": {
+					"name": "constant.character.escape.return.meson"
+				},
+				"6": {
+					"name": "constant.character.escape.tab.meson"
+				}
 			},
 			"match": "((\\\\\\n)|(\\\\\\\\)|(\\\\')|(\\\\n)|(\\\\r)|(\\\\t))"
 		},
@@ -97,10 +101,10 @@
 				{
 					"captures": {
 						"1": {
-							"name": "puncutation.definition.string.begin.meson"
+							"name": "punctuation.definition.string.begin.meson"
 						},
 						"2": {
-							"name": "puncutation.definition.string.end.meson"
+							"name": "punctuation.definition.string.end.meson"
 						},
 						"3": {
 							"name": "meta.empty-string.single.meson"
@@ -163,12 +167,5 @@
 				}
 			]
 		}
-	},
-	"scopeName": "source.meson"
-
-
-
-
-
-
+	}
 }
