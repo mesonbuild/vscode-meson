@@ -21,18 +21,30 @@
         "vscode": "^1.12.0"
     },
     "categories": [
-        "Languages"
+        "Programming Languages"
     ],
     "contributes": {
-        "languages": [{
-            "id": "meson",
-            "aliases": ["Meson", "meson", "mesonbuild"],
-            "filenames": ["meson.build", "meson_options.txt"]
-        }],
-        "grammars": [{
-            "language": "meson",
-            "scopeName": "source.meson",
-            "path": "./syntaxes/meson.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "meson",
+                "aliases": [
+                    "Meson",
+                    "meson",
+                    "mesonbuild"
+                ],
+                "filenames": [
+                    "meson.build",
+                    "meson_options.txt"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "meson",
+                "scopeName": "source.meson",
+                "path": "./syntaxes/meson.tmLanguage.json"
+            }
+        ]
     }
 }
