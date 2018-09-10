@@ -6,16 +6,3 @@ This is entirely based on the grammar found in the [atom extension](https://gith
 ## Features
 
 * Syntax highlighting
-
-## Release Notes
-
-### 1.1.0
-
-- Add support for toggling comments
-- Auto-close brackets and strings
-- Add support for hex literals
-
-
-### 1.0.0
-
-Initial release
