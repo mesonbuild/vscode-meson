@@ -3,7 +3,7 @@
 	"displayName": "Meson",
 	"description": "Meson langage support for Visual Studio Code",
 	"icon": "graphics/icon.png",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"license": "Apache",
 	"publisher": "asabil",
 	"author": {
@@ -18,12 +18,34 @@
 	},
 	"homepage": "https://github.com/asabil/vscode-meson/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.12.0"
+		"vscode": "^1.26.0"
 	},
 	"categories": [
 		"Programming Languages"
 	],
+	"activationEvents": [
+		"onCommand:workbench.action.tasks.runTask"
+	],
+	"main": "./out/src/extension",
 	"contributes": {
+		"taskDefinitions": [
+			{
+				"type": "meson",
+				"required": [
+					"task"
+				],
+				"properties": {
+					"task": {
+						"type": "string",
+						"description": "The Meson task to customize"
+					},
+					"file": {
+						"type": "string",
+						"description": "The Meson file that provides the task. Can be omitted."
+					}
+				}
+			}
+		],
 		"languages": [
 			{
 				"id": "meson",
@@ -46,5 +68,16 @@
 				"path": "./syntaxes/meson.tmLanguage.json"
 			}
 		]
+	},
+	"scripts": {
+		"vscode:prepublish": "tsc -p ./",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install"
+	},
+	"devDependencies": {
+		"typescript": "^2.4.1",
+		"vscode": "^1.1.17",
+		"@types/node": "*"
 	}
 }
