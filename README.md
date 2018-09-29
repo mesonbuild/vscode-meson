@@ -7,3 +7,4 @@ This is entirely based on the grammar found in the [atom extension](https://gith
 
 * Syntax Highlighting
 * Automatic Task Provider
+* Code Snippets
