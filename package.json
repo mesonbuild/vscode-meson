@@ -67,6 +67,12 @@
 				"scopeName": "source.meson",
 				"path": "./syntaxes/meson.tmLanguage.json"
 			}
+		],
+		"snippets": [
+			{
+				"language": "meson",
+				"path": "./snippets/meson.json"
+			}
 		]
 	},
 	"scripts": {
