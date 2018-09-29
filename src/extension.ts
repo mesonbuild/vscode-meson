@@ -7,12 +7,12 @@ import { getMesonTasks } from './tasks';
 let mesonTaskProvider: vscode.Disposable | undefined;
 
 export function activate(_context: vscode.ExtensionContext): void {
-	let workspaceRoot = vscode.workspace.rootPath;
+	const workspaceRoot = vscode.workspace.rootPath;
 	if (!workspaceRoot) return;
 	
-	let pattern = path.join(workspaceRoot, 'meson.build');
+	const pattern = path.join(workspaceRoot, 'meson.build');
+	const fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 	let mesonPromise: Thenable<vscode.Task[]> | undefined = undefined;
-	let fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 	fileWatcher.onDidChange(() => mesonPromise = undefined);
 	fileWatcher.onDidCreate(() => mesonPromise = undefined);
 	fileWatcher.onDidDelete(() => mesonPromise = undefined);

@@ -9,19 +9,19 @@ interface MesonTaskDefinition extends vscode.TaskDefinition {
 	file?: string;
 }
 
-export async function getMesonTasks(_dir: string): Promise<vscode.Task[]> {
+export async function getMesonTasks(dir: string): Promise<vscode.Task[]> {
 	let emptyTasks: vscode.Task[] = [];
-	if (!_dir) {
+	if (!dir) {
 		return emptyTasks;
 	}
-	let mesonFile = path.join(_dir, 'meson.build');
+	let mesonFile = path.join(dir, 'meson.build');
 	if (!await exists(mesonFile)) {
 		return emptyTasks;
 	}
 
 	let commandLine = 'meson . .meson';
 	try {
-		let { stdout, stderr } = await exec(commandLine, { cwd: _dir });
+		let { stdout, stderr } = await exec(commandLine, { cwd: dir });
 		if (stderr && stderr.length > 0) {
 			getOutputChannel().appendLine(stderr);
 			getOutputChannel().show(true);
@@ -33,7 +33,7 @@ export async function getMesonTasks(_dir: string): Promise<vscode.Task[]> {
 				type: 'meson',
 				task: taskName
 			};
-			let task = new vscode.Task(kind, taskName, 'meson', new vscode.ShellExecution("ninja", {cwd: _dir+"/.meson"}));
+			let task = new vscode.Task(kind, taskName, 'meson', new vscode.ShellExecution("ninja", {cwd: dir+"/.meson"}));
 			task.group = vscode.TaskGroup.Build;
 			result.push(task);
 		}
