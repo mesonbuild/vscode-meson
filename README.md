@@ -5,4 +5,6 @@ This is entirely based on the grammar found in the [atom extension](https://gith
 
 ## Features
 
-* Syntax highlighting
+* Syntax Highlighting
+* Automatic Task Provider
+* Code Snippets

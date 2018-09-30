@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.0
+- Add support for automatic task provider for meson.build file
+- Add code snippets
+
 ## 1.1.1
 - Remove configuration for {} as special tokens
 - Add licensing information
