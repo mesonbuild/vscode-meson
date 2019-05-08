@@ -59,11 +59,7 @@
         "properties": {
           "task": {
             "type": "string",
-            "description": "The Meson task to customize"
-          },
-          "file": {
-            "type": "string",
-            "description": "The Meson file that provides the task. Can be omitted."
+            "description": "The Meson target to execute"
           }
         }
       }
