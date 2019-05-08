@@ -1,35 +1,52 @@
-'use strict';
+import * as path from "path";
+import * as vscode from "vscode";
+import { MesonTargetsExplorer } from "./meson/targets/explorer";
+import { MesonTestsExplorer } from "./meson/tests/explorer";
+import {
+  runMesonConfigure,
+  runMesonBuild,
+  runMesonTest,
+  runMesonReconfigure
+} from "./meson/runners";
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import { getMesonTasks } from './tasks';
+let targetExplorer: MesonTargetsExplorer | undefined;
+let testExplorer: MesonTestsExplorer | undefined;
 
-let mesonTaskProvider: vscode.Disposable | undefined;
+export function activate(ctx: vscode.ExtensionContext): void {
+  const root = vscode.workspace.rootPath;
+  // TODO: Make build dir configurable
+  const buildDir = path.join(root, "build");
+  if (!root) return;
 
-export function activate(_context: vscode.ExtensionContext): void {
-	const workspaceRoot = vscode.workspace.rootPath;
-	if (!workspaceRoot) return;
-	
-	const pattern = path.join(workspaceRoot, 'meson.build');
-	const fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
-	let mesonPromise: Thenable<vscode.Task[]> | undefined = undefined;
-	fileWatcher.onDidChange(() => mesonPromise = undefined);
-	fileWatcher.onDidCreate(() => mesonPromise = undefined);
-	fileWatcher.onDidDelete(() => mesonPromise = undefined);
-	mesonTaskProvider = vscode.tasks.registerTaskProvider('meson', {
-		provideTasks: () => {
-			if (!mesonPromise)
-				mesonPromise = getMesonTasks(workspaceRoot);
-			return mesonPromise;
-		},
-		resolveTask(_task: vscode.Task): vscode.Task | undefined {
-			return undefined;
-		}
-	});
-}
+  targetExplorer = new MesonTargetsExplorer(ctx, buildDir);
+  testExplorer = new MesonTestsExplorer(ctx, buildDir);
 
-export function deactivate(): void {
-	if (mesonTaskProvider) {
-		mesonTaskProvider.dispose();
-	}
+  vscode.commands.registerCommand("mesonbuild.configure", async () => {
+    await runMesonConfigure(root, "build");
+    targetExplorer.refresh();
+    testExplorer.refresh();
+  });
+  vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
+    await runMesonReconfigure(buildDir);
+    targetExplorer.refresh();
+    testExplorer.refresh();
+  });
+  vscode.commands.registerCommand("mesonbuild.build", async () => {
+    await runMesonBuild(buildDir);
+    targetExplorer.refresh();
+    testExplorer.refresh();
+  });
+  vscode.commands.registerCommand("mesonbuild.test", async (name?: string) => {
+    await runMesonTest(buildDir, name);
+    targetExplorer.refresh();
+    testExplorer.refresh();
+  });
+
+  // Run command on activation
+  vscode.commands
+    .executeCommand<boolean>("mesonbuild.configure")
+    .then(isFresh => {
+      targetExplorer.refresh();
+      testExplorer.refresh();
+    });
 }

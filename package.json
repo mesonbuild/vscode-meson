@@ -24,10 +24,32 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:workbench.action.tasks.runTask"
+    "onLanguage:meson",
+    "onCommand:mesonbuild.configure",
+    "onCommand:mesonbuild.build",
+    "onCommand:mesonbuild.test",
+    "workspaceContains:meson.build"
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "mesonbuild.configure",
+        "title": "Meson: Run Configure"
+      },
+      {
+        "command": "mesonbuild.reconfigure",
+        "title": "Meson: Force reconfigure"
+      },
+      {
+        "command": "mesonbuild.build",
+        "title": "Meson: Build"
+      },
+      {
+        "command": "mesonbuild.test",
+        "title": "Run unit tests"
+      }
+    ],
     "taskDefinitions": [
       {
         "type": "meson",
@@ -73,7 +95,28 @@
         "language": "meson",
         "path": "./snippets/meson.json"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "meson-sidebar",
+          "title": "Meson Build",
+          "icon": "res/meson_32.svg"
+        }
+      ]
+    },
+    "views": {
+      "meson-sidebar": [
+        {
+          "id": "meson-tests",
+          "name": "Tests"
+        },
+        {
+          "id": "meson-targets",
+          "name": "Targets"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
