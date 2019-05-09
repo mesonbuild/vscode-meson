@@ -31,24 +31,35 @@ export function activate(ctx: vscode.ExtensionContext): void {
     }
   });
 
-  vscode.commands.registerCommand("mesonbuild.configure", async () => {
-    await runMesonConfigure(root, buildDir);
-    targetExplorer.refresh();
-    testExplorer.refresh();
-  });
-  vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
-    await runMesonReconfigure();
-    targetExplorer.refresh();
-    testExplorer.refresh();
-  });
-  vscode.commands.registerCommand("mesonbuild.build", async (name?: string) => {
-    await runMesonBuild(name);
-    targetExplorer.refresh();
-    testExplorer.refresh();
-  });
-  vscode.commands.registerCommand("mesonbuild.test", async () => {
-    await runMesonTests(buildDir);
-  });
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.configure", async () => {
+      await runMesonConfigure(root, buildDir);
+      targetExplorer.refresh();
+      testExplorer.refresh();
+    })
+  );
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
+      await runMesonReconfigure();
+      targetExplorer.refresh();
+      testExplorer.refresh();
+    })
+  );
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
+      "mesonbuild.build",
+      async (name?: string) => {
+        await runMesonBuild(name);
+        targetExplorer.refresh();
+        testExplorer.refresh();
+      }
+    )
+  );
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.test", async () => {
+      await runMesonTests(buildDir);
+    })
+  );
 
   ctx.subscriptions.push(tasksDisposable);
 
