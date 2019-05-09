@@ -5,46 +5,76 @@ import * as vscode from "vscode";
 import { getMesonTargets } from "./meson/introspection";
 import { exists, exec, getOutputChannel } from "./utils";
 
+import "array-flat-polyfill";
+
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
-  task: string;
+  target: string;
+  mode?: "build" | "run";
 }
 
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   try {
     const targets = await getMesonTargets(buildDir);
-    const tasks = [
-      new vscode.Task(
-        { type: "meson", task: "build all" },
-        "build all",
-        "meson",
-        new vscode.ShellExecution("ninja", { cwd: buildDir })
-      ),
-      new vscode.Task(
-        { type: "meson", task: "reconfigure" },
-        "reconfigure",
-        "meson",
-        new vscode.ShellExecution("ninja reconfigure", { cwd: buildDir })
-      ),
-      new vscode.Task(
-        { type: "meson", task: "clean" },
-        "clean",
-        "meson",
-        new vscode.ShellExecution("ninja clean", { cwd: buildDir })
-      )
-    ];
+    const defaultBuildTask = new vscode.Task(
+      { type: "meson", target: "all", mode: "build" },
+      "Build all targets",
+      "Meson",
+      new vscode.ShellExecution("ninja", { cwd: buildDir })
+    );
+    const defaultReconfigureTask = new vscode.Task(
+      { type: "meson", target: "reconfigure" },
+      "Reconfigure",
+      "Meson",
+      new vscode.ShellExecution("ninja reconfigure", { cwd: buildDir })
+    );
+    const defaultCleanTask = new vscode.Task(
+      { type: "meson", target: "clean" },
+      "Clean",
+      "Meson",
+      new vscode.ShellExecution("ninja clean", { cwd: buildDir })
+    );
+    defaultBuildTask.group = vscode.TaskGroup.Build;
+    defaultReconfigureTask.group = vscode.TaskGroup.Rebuild;
+    defaultCleanTask.group = vscode.TaskGroup.Clean;
+    const tasks = [defaultBuildTask, defaultReconfigureTask, defaultCleanTask];
     tasks.push(
-      ...targets.map(t => {
-        const def: MesonTaskDefinition = { type: "meson", task: t.name };
-        const task = new vscode.Task(
-          def,
-          t.name,
-          "meson",
-          new vscode.ShellExecution(`ninja ${t.name}`, { cwd: buildDir })
-        );
-        task.group = vscode.TaskGroup.Build;
-        return task;
-      })
+      ...targets
+        .map(t => {
+          const def: MesonTaskDefinition = {
+            type: "meson",
+            target: t.name,
+            mode: "build",
+            label: `build ${t.name}`
+          };
+          const buildTask = new vscode.Task(
+            def,
+            `Build ${t.name}`,
+            "Meson",
+            new vscode.ShellExecution(`ninja ${t.name}`, { cwd: buildDir })
+          );
+          buildTask.group = vscode.TaskGroup.Build;
+          if (t.type == "executable") {
+            const runTask = new vscode.Task(
+              {
+                type: "meson",
+                target: t.name,
+                mode: "run",
+                label: `run ${t.name}`,
+                dependsOn: `build ${t.name}`
+              },
+              `Run ${t.name}`,
+              "Meson",
+              new vscode.ShellExecution(t.filename[0], {
+                cwd: vscode.workspace.rootPath
+              })
+            );
+            runTask.group = vscode.TaskGroup.Test;
+            return [buildTask, runTask];
+          }
+          return buildTask;
+        })
+        .flat(1)
     );
     return tasks;
   } catch (e) {
@@ -76,12 +106,12 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       let taskName = "build";
       let kind: MesonTaskDefinition = {
         type: "meson",
-        task: taskName
+        target: taskName
       };
       let task = new vscode.Task(
         kind,
         taskName,
-        "meson",
+        "Meson",
         new vscode.ShellExecution("ninja", { cwd: dir + "/.meson" })
       );
       task.group = vscode.TaskGroup.Build;
