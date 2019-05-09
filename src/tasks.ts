@@ -95,71 +95,22 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
 
     return [];
   }
-  /* let emptyTasks: vscode.Task[] = [];
-  if (!dir) {
-    return emptyTasks;
-  }
-  let mesonFile = path.join(dir, "meson.build");
-  if (!(await exists(mesonFile))) {
-    return emptyTasks;
-  }
-
-  let commandLine = "meson . .meson";
-  try {
-    let { stdout, stderr } = await exec(commandLine, { cwd: dir });
-    if (stderr && stderr.length > 0) {
-      getOutputChannel().appendLine(stderr);
-      getOutputChannel().show(true);
-    }
-    let result: vscode.Task[] = [];
-    if (stdout) {
-      let taskName = "build";
-      let kind: MesonTaskDefinition = {
-        type: "meson",
-        target: taskName
-      };
-      let task = new vscode.Task(
-        kind,
-        taskName,
-        "Meson",
-        new vscode.ShellExecution("ninja", { cwd: dir + "/.meson" })
-      );
-      task.group = vscode.TaskGroup.Build;
-      result.push(task);
-    }
-    return result;
-  } catch (err) {
-    const channel = getOutputChannel();
-    if (err.stderr) {
-      channel.appendLine(err.stderr);
-    }
-    if (err.stdout) {
-      channel.appendLine(err.stdout);
-    }
-    channel.appendLine("Auto detecting meson task failed.");
-    channel.show(true);
-    return emptyTasks;
-  } */
 }
 
-/*
-const buildNames: string[] = ['build', 'compile', 'watch'];
-function isBuildTask(name: string): boolean {
-	for (let buildName of buildNames) {
-		if (name.indexOf(buildName) !== -1) {
-			return true;
-		}
-	}
-	return false;
+export async function getBuildTask(name?: string) {
+  return getTask(name || "all", "build");
 }
 
-const testNames: string[] = ['test'];
-function isTestTask(name: string): boolean {
-	for (let testName of testNames) {
-		if (name.indexOf(testName) !== -1) {
-			return true;
-		}
-	}
-	return false;
+export async function getRunTask(name: string) {
+  return getTask(name, "run");
 }
-*/
+
+async function getTask(name: string, mode: string) {
+  const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
+  const filtered = tasks.filter(
+    t => t.definition.mode === mode && t.definition.target === name
+  );
+  if (filtered.length === 0)
+    throw new Error(`Cannot find ${mode} target ${name}.`);
+  return filtered[0];
+}
