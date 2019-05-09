@@ -12,7 +12,6 @@ import { getMesonTasks } from "./tasks";
 
 let targetExplorer: MesonTargetsExplorer | undefined;
 let testExplorer: MesonTestsExplorer | undefined;
-let taskProvider;
 
 export function activate(ctx: vscode.ExtensionContext): void {
   const root = vscode.workspace.rootPath;
@@ -22,7 +21,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
   targetExplorer = new MesonTargetsExplorer(ctx, buildDir);
   testExplorer = new MesonTestsExplorer(ctx, buildDir);
-  taskProvider = vscode.tasks.registerTaskProvider("meson", {
+
+  const tasksDisposable = vscode.tasks.registerTaskProvider("meson", {
     provideTasks(token) {
       return getMesonTasks(buildDir);
     },
@@ -30,6 +30,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       return undefined;
     }
   });
+
   vscode.commands.registerCommand("mesonbuild.configure", async () => {
     await runMesonConfigure(root, buildDir);
     targetExplorer.refresh();
@@ -49,7 +50,8 @@ export function activate(ctx: vscode.ExtensionContext): void {
     await runMesonTests(buildDir);
   });
 
-  // Run command on activation
+  ctx.subscriptions.push(tasksDisposable);
+
   vscode.commands
     .executeCommand<boolean>("mesonbuild.configure")
     .then(isFresh => {
