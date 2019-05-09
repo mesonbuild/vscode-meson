@@ -5,7 +5,7 @@ import { MesonTestsExplorer } from "./meson/tests/explorer";
 import {
   runMesonConfigure,
   runMesonBuild,
-  runMesonTest,
+  runMesonTests,
   runMesonReconfigure
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
@@ -31,24 +31,22 @@ export function activate(ctx: vscode.ExtensionContext): void {
     }
   });
   vscode.commands.registerCommand("mesonbuild.configure", async () => {
-    await runMesonConfigure(root, "build");
+    await runMesonConfigure(root, buildDir);
     targetExplorer.refresh();
     testExplorer.refresh();
   });
   vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
-    await runMesonReconfigure(buildDir);
+    await runMesonReconfigure();
     targetExplorer.refresh();
     testExplorer.refresh();
   });
-  vscode.commands.registerCommand("mesonbuild.build", async () => {
-    await runMesonBuild(buildDir);
+  vscode.commands.registerCommand("mesonbuild.build", async (name?: string) => {
+    await runMesonBuild(name);
     targetExplorer.refresh();
     testExplorer.refresh();
   });
-  vscode.commands.registerCommand("mesonbuild.test", async (name?: string) => {
-    await runMesonTest(buildDir, name);
-    targetExplorer.refresh();
-    testExplorer.refresh();
+  vscode.commands.registerCommand("mesonbuild.test", async () => {
+    await runMesonTests(buildDir);
   });
 
   // Run command on activation
