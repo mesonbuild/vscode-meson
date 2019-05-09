@@ -38,7 +38,7 @@ export interface Target {
   type: TargetType;
   defined_in: string;
   subproject: string | null;
-  filename: string[];
+  filename: string;
   build_by_default: boolean;
   target_sources?: TargetSource[];
   installed: boolean;
