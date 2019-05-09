@@ -65,7 +65,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
               },
               `Run ${t.name}`,
               "Meson",
-              new vscode.ShellExecution(t.filename[0], {
+              new vscode.ShellExecution(path.join(buildDir, t.filename), {
                 cwd: vscode.workspace.rootPath
               })
             );
