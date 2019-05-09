@@ -87,6 +87,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     );
     return tasks;
   } catch (e) {
+    getOutputChannel().appendLine(e);
     if (e.stderr) getOutputChannel().appendLine(e.stderr);
     vscode.window.showErrorMessage(
       "Could not fetch targets. See Meson Build output tab for more info."
