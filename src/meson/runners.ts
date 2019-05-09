@@ -5,7 +5,7 @@ import { getBuildTask } from "../tasks";
 export async function runMesonConfigure(source: string, build: string) {
   try {
     vscode.window.showInformationMessage(`Configuring meson into '${build}'`);
-    await execAsTask(`meson ${build}`, { cwd: source });
+    await exec(`meson ${build}`, { cwd: source });
     vscode.window.showInformationMessage("Configured!");
     return true;
   } catch (e) {
