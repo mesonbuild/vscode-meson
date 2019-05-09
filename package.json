@@ -54,12 +54,18 @@
       {
         "type": "meson",
         "required": [
-          "task"
+          "target"
         ],
         "properties": {
-          "task": {
+          "target": {
             "type": "string",
-            "description": "The Meson target to execute"
+            "description": "The Meson target to... target",
+            "default": "all"
+          },
+          "mode": {
+            "type": "string",
+            "description": "Whether to build or to run the target.",
+            "default": "build"
           }
         }
       }
@@ -121,8 +127,11 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
+    "@types/node": "*",
     "typescript": "^2.4.1",
-    "vscode": "^1.1.17",
-    "@types/node": "*"
+    "vscode": "^1.1.17"
+  },
+  "dependencies": {
+    "array-flat-polyfill": "^1.0.1"
   }
 }
