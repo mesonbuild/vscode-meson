@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
-import { exec, getOutputChannel } from "../utils";
+import { exec, execAsTask, getOutputChannel } from "../utils";
+import { getBuildTask } from "../tasks";
 
 export async function runMesonConfigure(source: string, build: string) {
   try {
     vscode.window.showInformationMessage(`Configuring meson into '${build}'`);
-    const { stdout, stderr } = await exec(`meson ${build}`, { cwd: source });
+    await execAsTask(`meson ${build}`, { cwd: source });
     vscode.window.showInformationMessage("Configured!");
-    getOutputChannel().appendLine(stdout);
-    getOutputChannel().appendLine(stderr);
     return true;
   } catch (e) {
     vscode.window.showInformationMessage("Meson is already configured.");
@@ -15,17 +14,19 @@ export async function runMesonConfigure(source: string, build: string) {
   }
 }
 
-export async function runMesonReconfigure(build: string) {
+export async function runMesonReconfigure() {
   try {
-    vscode.window.showInformationMessage("Force reconfiguring project...");
-    const { stdout, stderr } = await exec("ninja reconfigure", { cwd: build });
-    vscode.window.showInformationMessage("Done!");
-    getOutputChannel().appendLine(stdout);
-    getOutputChannel().appendLine(stderr);
+    await vscode.tasks.executeTask(await getBuildTask("reconfigure"));
   } catch (e) {
-    vscode.window.showErrorMessage(
-      "Couldn't reconfigure project. See output tab for more info."
-    );
+    vscode.window.showErrorMessage("Couldn't reconfigure project.");
+  }
+}
+
+export async function runMesonBuild(name?: string) {
+  try {
+    await vscode.tasks.executeTask(await getBuildTask(name));
+  } catch (e) {
+    vscode.window.showErrorMessage("Build failed.");
     if (e.stderr) {
       getOutputChannel().appendLine(e.stderr);
       getOutputChannel().show(true);
@@ -33,46 +34,12 @@ export async function runMesonReconfigure(build: string) {
   }
 }
 
-export async function runMesonBuild(build: string, name?: string) {
+export async function runMesonTests(build: string) {
   try {
-    vscode.window.showInformationMessage(
-      `Building ${!!name ? name : "project"}`
-    );
-    const { stdout, stderr } = await exec(
-      "ninja" + (!!name ? ` ${name}` : ""),
-      { cwd: build }
-    );
-    getOutputChannel().appendLine(stdout);
-    getOutputChannel().appendLine(stderr);
-    vscode.window.showInformationMessage("Done!");
-  } catch (e) {
-    vscode.window.showErrorMessage(
-      "Build failed. See output tab for more info."
-    );
-    if (e.stderr) {
-      getOutputChannel().appendLine(e.stderr);
-      getOutputChannel().show(true);
-    }
-  }
-}
-
-export async function runMesonTest(build: string, name?: string) {
-  try {
-    const { stdout, stderr } = await exec(
-      "ninja test" + (!!name ? ` ${name}` : ""),
-      {
-        cwd: build
-      }
-    );
-    getOutputChannel().appendLine(stdout);
-    getOutputChannel().appendLine(stderr);
+    await execAsTask("ninja test", { cwd: build });
   } catch (e) {
     if (e.stderr) {
-      vscode.window.showErrorMessage(
-        "Tests failed. See output tab for more info."
-      );
-      getOutputChannel().appendLine(e.stderr);
-      getOutputChannel().show(true);
+      vscode.window.showErrorMessage("Tests failed.");
     }
   }
 }
