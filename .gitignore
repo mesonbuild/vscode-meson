@@ -2,3 +2,7 @@
 /node_modules
 package-lock.json
 /testproj
+.vscode
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
