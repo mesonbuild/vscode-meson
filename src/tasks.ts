@@ -28,6 +28,12 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       "Meson",
       new vscode.ShellExecution("ninja test", { cwd: buildDir })
     );
+    const defaultBenchmarkTask = new vscode.Task(
+      { type: "meson", target: "benchmark" },
+      "Run benchmarks",
+      "Meson",
+      new vscode.ShellExecution("ninja benchmark", { cwd: buildDir })
+    );
     const defaultReconfigureTask = new vscode.Task(
       { type: "meson", target: "reconfigure" },
       "Reconfigure",
@@ -42,11 +48,13 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     );
     defaultBuildTask.group = vscode.TaskGroup.Build;
     defaultTestTask.group = vscode.TaskGroup.Test;
+    defaultBenchmarkTask.group = vscode.TaskGroup.Test;
     defaultReconfigureTask.group = vscode.TaskGroup.Rebuild;
     defaultCleanTask.group = vscode.TaskGroup.Clean;
     const tasks = [
       defaultBuildTask,
       defaultTestTask,
+      defaultBenchmarkTask,
       defaultReconfigureTask,
       defaultCleanTask
     ];
