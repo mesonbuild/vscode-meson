@@ -56,8 +56,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           const def: MesonTaskDefinition = {
             type: "meson",
             target: t.name,
-            mode: "build",
-            label: `build ${t.name}`
+            mode: "build"
           };
           const buildTask = new vscode.Task(
             def,
@@ -71,9 +70,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
               {
                 type: "meson",
                 target: t.name,
-                mode: "run",
-                label: `run ${t.name}`,
-                dependsOn: `build ${t.name}`
+                mode: "run"
               },
               `Run ${t.name}`,
               "Meson",
