@@ -27,6 +27,25 @@ export function exec(
   });
 }
 
+export function execAsTask(
+  command: string,
+  options: vscode.ShellExecutionOptions,
+  reveal = false
+) {
+  const task = new vscode.Task(
+    { type: "temp" },
+    command,
+    "Meson",
+    new vscode.ShellExecution(command, options)
+  );
+  task.presentationOptions.echo = false;
+  task.presentationOptions.focus = false;
+  task.presentationOptions.reveal = reveal
+    ? vscode.TaskRevealKind.Always
+    : vscode.TaskRevealKind.Silent;
+  return vscode.tasks.executeTask(task);
+}
+
 let _channel: vscode.OutputChannel;
 export function getOutputChannel(): vscode.OutputChannel {
   if (!_channel) {
