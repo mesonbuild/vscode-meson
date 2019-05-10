@@ -26,11 +26,7 @@ export async function runMesonBuild(name?: string) {
   try {
     await vscode.tasks.executeTask(await getBuildTask(name));
   } catch (e) {
-    vscode.window.showErrorMessage("Build failed.");
-    if (e.stderr) {
-      getOutputChannel().appendLine(e.stderr);
-      getOutputChannel().show(true);
-    }
+    vscode.window.showErrorMessage("Build failed.\n\n" + e);
   }
 }
 
