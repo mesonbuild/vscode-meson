@@ -7,7 +7,14 @@ export async function getMesonTargets(build: string) {
   const { stdout } = await exec("meson introspect --targets", {
     cwd: build
   });
-  return JSON.parse(stdout) as Targets;
+  const parsed: Targets = JSON.parse(stdout);
+  if (getMesonVersion()[1] < 50) {
+    return parsed.map(t => {
+      if (typeof t.filename === "string") t.filename = [t.filename]; // Old versions would directly pass a string with only 1 filename on the target
+      return t;
+    });
+  }
+  return parsed;
 }
 export async function getMesonBuildOptions(build: string) {
   const { stdout } = await exec("meson introspect --buildoptions", {
