@@ -155,7 +155,7 @@ class TargetSourceFileNode extends BaseNode {
     item.command = {
       command: "vscode.open",
       title: "Open file",
-      arguments: [this.file]
+      arguments: [vscode.Uri.file(this.file)]
     };
     return item;
   }
