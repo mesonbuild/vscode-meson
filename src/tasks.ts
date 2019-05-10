@@ -124,9 +124,9 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           { type: "meson", mode: "test", target: t.name },
           `Test ${t.name}`,
           "Meson",
-          new vscode.ShellExecution(t.cmd.join(" "), {
+          new vscode.ShellExecution(`meson test ${t.name}`, {
             env: t.env,
-            cwd: t.workdir || vscode.workspace.rootPath
+            cwd: buildDir
           })
         );
         testTask.group = vscode.TaskGroup.Test;
