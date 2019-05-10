@@ -20,7 +20,10 @@ export class MesonTestsDataProvider
 
   getChildren(element?: BaseNode): vscode.ProviderResult<BaseNode[]> {
     if (element) return element.getChildren();
-    else getMesonTests(this.buildDir).then(tt => tt.map(t => new TestNode(t)));
+    else
+      return getMesonTests(this.buildDir).then(tt =>
+        tt.map(t => new TestNode(t))
+      );
   }
 
   private refresh() {
