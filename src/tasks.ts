@@ -2,24 +2,29 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
-import { getMesonTargets, getMesonTests } from "./meson/introspection";
+import {
+  getMesonTargets,
+  getMesonTests,
+  getMesonBenchmarks
+} from "./meson/introspection";
 import { exists, exec, getOutputChannel } from "./utils";
 
 import "array-flat-polyfill";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
-  target: string;
-  mode?: "build" | "run";
+  target?: string;
+  mode?: "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure";
   filename?: string;
 }
 
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   try {
     // const targets = await getMesonTargets(buildDir);
-    const [targets, tests] = await Promise.all([
+    const [targets, tests, benchmarks] = await Promise.all([
       getMesonTargets(buildDir),
-      getMesonTests(buildDir)
+      getMesonTests(buildDir),
+      getMesonBenchmarks(buildDir)
     ]);
     const defaultBuildTask = new vscode.Task(
       { type: "meson", mode: "build" },
@@ -34,7 +39,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       new vscode.ShellExecution("ninja test", { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
-      { type: "meson", target: "benchmark" },
+      { type: "meson", mode: "benchmark" },
       "Run benchmarks",
       "Meson",
       new vscode.ShellExecution("ninja benchmark", { cwd: buildDir })
@@ -131,6 +136,19 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
         );
         testTask.group = vscode.TaskGroup.Test;
         return testTask;
+      }),
+      ...benchmarks.map(b => {
+        const benchmarkTask = new vscode.Task(
+          { type: "meson", mode: "benchmark", target: b.name },
+          `Benchmark ${b.name}`,
+          "Meson",
+          new vscode.ShellExecution(`meson benchmark ${b.name}`, {
+            env: b.env,
+            cwd: buildDir
+          })
+        );
+        benchmarkTask.group = vscode.TaskGroup.Test;
+        return benchmarkTask;
       })
     );
     return tasks;
@@ -145,15 +163,27 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   }
 }
 
+export async function getReconfigureTask() {
+  return getTask("reconfigure");
+}
+
+export async function getCleanTask() {
+  return getTask("clean");
+}
+
 export async function getBuildTask(name?: string) {
-  return getTask(name || "all", "build");
+  return getTask("build", name);
 }
 
 export async function getRunTask(name: string) {
-  return getTask(name, "run");
+  return getTask("run", name);
 }
 
-async function getTask(name: string, mode: string) {
+export async function getTestTask(name?: string) {
+  return getTask("test", name);
+}
+
+async function getTask(mode: string, name?: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
   const filtered = tasks.filter(
     t => t.definition.mode === mode && t.definition.target === name

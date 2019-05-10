@@ -53,6 +53,17 @@ export async function getMesonTests(build: string) {
   const { stdout } = await exec("meson introspect --tests", { cwd: build });
   return JSON.parse(stdout) as Tests;
 }
+export async function getMesonBenchmarks(build: string) {
+  const parsed = await parseJSONFileIfExists<Tests>(
+    path.join(build, "meson-info/intro-benchmarks.json")
+  );
+  if (parsed) return parsed;
+
+  const { stdout } = await exec("meson introspect --benchmarks", {
+    cwd: build
+  });
+  return JSON.parse(stdout) as Tests;
+}
 
 export async function getMesonVersion(): Promise<[number, number, number]> {
   const { stdout } = await exec("meson --version", {});
