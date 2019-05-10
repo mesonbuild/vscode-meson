@@ -17,6 +17,7 @@ export class TargetNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem();
     item.iconPath = extensionRelative(this.getIconPath());
+    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.label = this.target.name;
     item.command = {
       title: `Build ${this.target.name}`,
@@ -55,6 +56,7 @@ export class TargetSourceNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem();
     item.label = `${this.source.language} sources (${this.source.compiler})`;
+    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.iconPath = "res/meson-symbolic.svg";
     return item;
   }
