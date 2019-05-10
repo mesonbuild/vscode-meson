@@ -1,5 +1,5 @@
 import { exec } from "../utils";
-import { Targets, Dependencies, BuildOptions, Test } from "./types";
+import { Targets, Dependencies, BuildOptions, Test, Tests } from "./types";
 
 const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/g;
 
@@ -29,7 +29,8 @@ export async function getMesonDependencies(build: string) {
   return JSON.parse(stdout) as Dependencies;
 }
 export async function getMesonTests(build: string) {
-  return [] as Test[];
+  const { stdout } = await exec("meson introspect --tests", { cwd: build });
+  return JSON.parse(stdout) as Tests;
 }
 
 export async function getMesonVersion(): Promise<[number, number, number]> {
