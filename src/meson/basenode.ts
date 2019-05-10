@@ -1,8 +1,11 @@
 import { TreeItem } from "vscode";
 
-export abstract class BaseNode {
+export class BaseNode {
   constructor(public readonly id: string) {}
-  abstract getChildren(): BaseNode[];
+  getChildren(): BaseNode[] {
+    return [];
+  }
+
   getTreeItem() {
     const item = new TreeItem(this.id);
     item.id = this.id;

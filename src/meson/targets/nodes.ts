@@ -1,6 +1,8 @@
+import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
-import { Target, TargetSource } from "../types";
-import { extensionRelative } from "../../utils";
+import { Target } from "../types";
+import { extensionRelative, randomString } from "../../utils";
 import { BaseNode } from "../basenode";
 
 export class TargetNode extends BaseNode {
@@ -11,7 +13,18 @@ export class TargetNode extends BaseNode {
   getChildren() {
     if (!this.target.target_sources) return [];
     else {
-      return this.target.target_sources.map(s => new TargetSourceNode(s));
+      const sources = new Array<string>();
+      const generated_sources = new Array<string>();
+      for (const s of this.target.target_sources) {
+        sources.push(...s.sources);
+        sources.push(...s.generated_sources);
+      }
+      return [
+        new TargetSourcesNode(sources),
+        generated_sources.length > 0
+          ? new TargetGeneratedSourcesNode(generated_sources)
+          : void 0
+      ];
     }
   }
   getTreeItem() {
@@ -43,41 +56,106 @@ export class TargetNode extends BaseNode {
   }
 }
 
-export class TargetSourceNode extends BaseNode {
-  constructor(private readonly source: TargetSource) {
-    super(source.generated_sources.join(";"));
-  }
+class BaseDirectoryNode extends BaseNode {
+  readonly subfolders: Map<string, string[]>;
 
-  getChildren() {
-    if (!this.source.sources) return [];
-    else this.source.sources.map(s => new TargetSourceSourceNode(s));
+  constructor(readonly folder: string, readonly filepaths: string[]) {
+    super(folder + randomString());
+    this.subfolders = this.buildFileTree(filepaths);
   }
 
   getTreeItem() {
     const item = super.getTreeItem();
-    item.label = `${this.source.language} sources (${this.source.compiler})`;
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    item.iconPath = "res/meson-symbolic.svg";
+
+    return item;
+  }
+
+  getChildren() {
+    return Array.from(this.subfolders.entries())
+      .map(([folder, files]) => {
+        if (folder === ".") {
+          return files.map(f => new TargetSourceFileNode(f));
+        } else return new DirectoryNode(folder, files);
+      })
+      .flat(1);
+  }
+
+  private buildFileTree(fpaths: string[]) {
+    const folders = new Map<string, string[]>();
+    folders.set(".", new Array());
+    for (const f of fpaths) {
+      let folderName = path.relative(this.folder, f);
+      if (path.dirname(folderName) === ".") {
+        folders.get(".").push(f);
+        continue;
+      }
+      while (path.dirname(folderName) !== ".")
+        folderName = path.dirname(folderName);
+      const absFolder = path.join(this.folder, folderName);
+      if (folders.has(absFolder)) {
+        folders.get(absFolder).push(f);
+      } else {
+        folders.set(absFolder, [f]);
+      }
+    }
+
+    return folders;
+  }
+}
+
+class TargetSourcesNode extends BaseDirectoryNode {
+  constructor(private readonly allFiles: string[]) {
+    super(vscode.workspace.rootPath, allFiles);
+  }
+
+  getTreeItem() {
+    const item = super.getTreeItem();
+    item.label = "Sources" + (this.allFiles.length === 0 ? " (no files)" : "");
+    item.iconPath = extensionRelative("res/meson_64.svg");
     return item;
   }
 }
 
-export class TargetSourceSourceNode extends BaseNode {
-  constructor(private readonly source: string) {
-    super(source);
+class TargetGeneratedSourcesNode extends BaseDirectoryNode {
+  constructor(files: string[]) {
+    super(vscode.workspace.rootPath, files);
   }
 
-  getChildren() {
-    return [];
-  }
   getTreeItem() {
     const item = super.getTreeItem();
-    item.resourceUri = vscode.Uri.file(this.source);
-    item.contextValue = "nodeType=file";
+    item.label = "Sources (generated)";
+    item.iconPath = extensionRelative("res/meson_64.svg");
+    return item;
+  }
+}
+
+class DirectoryNode extends BaseDirectoryNode {
+  constructor(folder: string, files: string[]) {
+    super(folder, files);
+  }
+
+  getTreeItem() {
+    const item = super.getTreeItem();
+    item.label = path.basename(this.folder);
+    item.resourceUri = vscode.Uri.file(this.folder);
+    return item;
+  }
+}
+
+class TargetSourceFileNode extends BaseNode {
+  constructor(private readonly file: string) {
+    super(file + randomString());
+  }
+
+  getTreeItem() {
+    const item = super.getTreeItem();
+    item.resourceUri = vscode.Uri.file(this.file);
+    item.label = path.basename(this.file);
     item.command = {
-      title: "Open file",
       command: "vscode.open",
-      arguments: [item.resourceUri]
+      title: "Open file",
+      arguments: [this.file]
     };
     return item;
   }
