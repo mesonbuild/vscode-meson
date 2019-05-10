@@ -62,9 +62,24 @@
             "description": "The Meson target to... target",
             "default": "all"
           },
+          "filename": {
+            "type": "string",
+            "description": "Filename to run as part of the target",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "run"
+                ]
+              }
+            }
+          },
           "mode": {
             "type": "string",
             "description": "Whether to build or to run the target.",
+            "enum": [
+              "build",
+              "run"
+            ],
             "default": "build"
           }
         }

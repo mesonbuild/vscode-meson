@@ -74,20 +74,23 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           );
           buildTask.group = vscode.TaskGroup.Build;
           if (t.type == "executable") {
-            const runTask = new vscode.Task(
-              {
-                type: "meson",
-                target: t.name,
-                mode: "run"
-              },
-              `Run ${t.name}`,
-              "Meson",
-              new vscode.ShellExecution(path.join(buildDir, t.filename), {
-                cwd: vscode.workspace.rootPath
-              })
-            );
-            runTask.group = vscode.TaskGroup.Test;
-            return [buildTask, runTask];
+            const runTasks = t.filename.map(f => {
+              const runTask = new vscode.Task(
+                {
+                  type: "meson",
+                  target: t.name,
+                  mode: "run"
+                },
+                `Run ${t.name}`,
+                "Meson",
+                new vscode.ShellExecution(path.join(buildDir, f), {
+                  cwd: vscode.workspace.rootPath
+                })
+              );
+              runTask.group = vscode.TaskGroup.Test;
+              return runTask;
+            });
+            return [buildTask, ...runTasks];
           }
           return buildTask;
         })
