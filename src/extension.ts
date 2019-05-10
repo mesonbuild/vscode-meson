@@ -56,9 +56,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
     )
   );
   ctx.subscriptions.push(
-    vscode.commands.registerCommand("mesonbuild.test", async () => {
-      await runMesonTests(buildDir);
-    })
+    vscode.commands.registerCommand(
+      "mesonbuild.test",
+      async (name?: string) => {
+        await runMesonTests(buildDir, name);
+      }
+    )
   );
 
   ctx.subscriptions.push(tasksDisposable);

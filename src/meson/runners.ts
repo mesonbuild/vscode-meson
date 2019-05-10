@@ -34,9 +34,10 @@ export async function runMesonBuild(name?: string) {
   }
 }
 
-export async function runMesonTests(build: string) {
+export async function runMesonTests(build: string, name?: string) {
   try {
-    await execAsTask("ninja test", { cwd: build });
+    if (name) return await execAsTask(`meson test ${name}`, { cwd: build });
+    return await execAsTask("ninja test", { cwd: build });
   } catch (e) {
     if (e.stderr) {
       vscode.window.showErrorMessage("Tests failed.");
