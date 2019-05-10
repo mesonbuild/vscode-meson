@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { BaseNode } from "../basenode";
-import { TargetNode } from "./nodes";
 import { getMesonTargets } from "../introspection";
+import { TargetDirectoryNode } from "./nodes/targets";
 
 export class MesonTargetsDataProvider
   implements vscode.TreeDataProvider<BaseNode> {
@@ -25,8 +25,8 @@ export class MesonTargetsDataProvider
   getChildren(element?: BaseNode): vscode.ProviderResult<BaseNode[]> {
     if (element) return element.getChildren();
     else
-      return getMesonTargets(this.buildDir).then(t =>
-        t.map(tt => new TargetNode(tt))
+      return getMesonTargets(this.buildDir).then(targets =>
+        new TargetDirectoryNode(".", targets).getChildren()
       );
   }
 }
