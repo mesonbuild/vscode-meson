@@ -5,7 +5,6 @@ import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
 import { randomBytes } from "crypto";
-import { TextEncoder } from "util";
 
 export function exists(file: string): Promise<boolean> {
   return new Promise<boolean>((resolve, _reject) => {
