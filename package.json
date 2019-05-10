@@ -78,7 +78,8 @@
             "description": "Whether to build or to run the target.",
             "enum": [
               "build",
-              "run"
+              "run",
+              "test"
             ],
             "default": "build"
           }

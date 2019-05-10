@@ -2,7 +2,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
-import { getMesonTargets } from "./meson/introspection";
+import { getMesonTargets, getMesonTests } from "./meson/introspection";
 import { exists, exec, getOutputChannel } from "./utils";
 
 import "array-flat-polyfill";
@@ -11,19 +11,24 @@ interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
   target: string;
   mode?: "build" | "run";
+  filename?: string;
 }
 
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   try {
-    const targets = await getMesonTargets(buildDir);
+    // const targets = await getMesonTargets(buildDir);
+    const [targets, tests] = await Promise.all([
+      getMesonTargets(buildDir),
+      getMesonTests(buildDir)
+    ]);
     const defaultBuildTask = new vscode.Task(
-      { type: "meson", target: "all", mode: "build" },
+      { type: "meson", mode: "build" },
       "Build all targets",
       "Meson",
       new vscode.ShellExecution("ninja", { cwd: buildDir })
     );
     const defaultTestTask = new vscode.Task(
-      { type: "meson", target: "test" },
+      { type: "meson", mode: "test" },
       "Run tests",
       "Meson",
       new vscode.ShellExecution("ninja test", { cwd: buildDir })
@@ -61,40 +66,72 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     tasks.push(
       ...targets
         .map(t => {
+          const targetName = path.join(
+            path.relative(
+              vscode.workspace.rootPath,
+              path.dirname(t.defined_in)
+            ),
+            t.name
+          );
           const def: MesonTaskDefinition = {
             type: "meson",
-            target: t.name,
+            target: targetName,
             mode: "build"
           };
           const buildTask = new vscode.Task(
             def,
-            `Build ${t.name}`,
+            `Build ${targetName}`,
             "Meson",
-            new vscode.ShellExecution(`ninja ${t.name}`, { cwd: buildDir })
+            new vscode.ShellExecution(`ninja ${targetName}`, { cwd: buildDir })
           );
           buildTask.group = vscode.TaskGroup.Build;
           if (t.type == "executable") {
-            const runTasks = t.filename.map(f => {
+            if (t.filename.length == 1) {
               const runTask = new vscode.Task(
-                {
-                  type: "meson",
-                  target: t.name,
-                  mode: "run"
-                },
-                `Run ${t.name}`,
+                { type: "meson", target: targetName, mode: "run" },
+                `Run ${targetName}`,
                 "Meson",
-                new vscode.ShellExecution(path.join(buildDir, f), {
-                  cwd: vscode.workspace.rootPath
-                })
+                new vscode.ShellExecution(t.filename[0])
               );
               runTask.group = vscode.TaskGroup.Test;
-              return runTask;
-            });
-            return [buildTask, ...runTasks];
+              return [buildTask, runTask];
+            } else {
+              const runTasks = t.filename.map(f => {
+                const runTask = new vscode.Task(
+                  {
+                    type: "meson",
+                    target: targetName,
+                    filename: f,
+                    mode: "run"
+                  },
+                  `Run ${targetName}: ${f}`,
+                  "Meson",
+                  new vscode.ShellExecution(f, {
+                    cwd: vscode.workspace.rootPath
+                  })
+                );
+                runTask.group = vscode.TaskGroup.Test;
+                return runTask;
+              });
+              return [buildTask, ...runTasks];
+            }
           }
           return buildTask;
         })
-        .flat(1)
+        .flat(1),
+      ...tests.map(t => {
+        const testTask = new vscode.Task(
+          { type: "meson", mode: "test", target: t.name },
+          `Test ${t.name}`,
+          "Meson",
+          new vscode.ShellExecution(t.cmd.join(" "), {
+            env: t.env,
+            cwd: t.workdir || vscode.workspace.rootPath
+          })
+        );
+        testTask.group = vscode.TaskGroup.Test;
+        return testTask;
+      })
     );
     return tasks;
   } catch (e) {
