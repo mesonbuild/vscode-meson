@@ -5,6 +5,7 @@ import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
 import { randomBytes } from "crypto";
+import { Target } from "./meson/types";
 
 export function exists(file: string): Promise<boolean> {
   return new Promise<boolean>((resolve, _reject) => {
@@ -75,6 +76,13 @@ export function thisExtension() {
 
 export function extensionRelative(filepath: string) {
   return path.join(thisExtension().extensionPath, filepath);
+}
+
+export function getTargetName(t: Target) {
+  return path.join(
+    path.relative(vscode.workspace.rootPath, path.dirname(t.defined_in)),
+    t.name
+  );
 }
 
 export function randomString(length = 4) {

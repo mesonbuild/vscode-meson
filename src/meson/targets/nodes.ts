@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Target } from "../types";
-import { extensionRelative, randomString } from "../../utils";
+import { extensionRelative, randomString, getTargetName } from "../../utils";
 import { BaseNode } from "../basenode";
 
 export class TargetNode extends BaseNode {
@@ -31,11 +31,11 @@ export class TargetNode extends BaseNode {
     const item = super.getTreeItem();
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    item.label = this.target.name;
+    item.label = getTargetName(this.target);
     item.command = {
       title: `Build ${this.target.name}`,
       command: "mesonbuild.build",
-      arguments: [this.target.name]
+      arguments: [getTargetName(this.target)]
     };
     return item;
   }

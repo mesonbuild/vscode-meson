@@ -7,7 +7,7 @@ import {
   getMesonTests,
   getMesonBenchmarks
 } from "./meson/introspection";
-import { exists, exec, getOutputChannel } from "./utils";
+import { getOutputChannel, getTargetName } from "./utils";
 
 import "array-flat-polyfill";
 
@@ -71,13 +71,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     tasks.push(
       ...targets
         .map(t => {
-          const targetName = path.join(
-            path.relative(
-              vscode.workspace.rootPath,
-              path.dirname(t.defined_in)
-            ),
-            t.name
-          );
+          const targetName = getTargetName(t);
           const def: MesonTaskDefinition = {
             type: "meson",
             target: targetName,
@@ -163,27 +157,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   }
 }
 
-export async function getReconfigureTask() {
-  return getTask("reconfigure");
-}
-
-export async function getCleanTask() {
-  return getTask("clean");
-}
-
-export async function getBuildTask(name?: string) {
-  return getTask("build", name);
-}
-
-export async function getRunTask(name: string) {
-  return getTask("run", name);
-}
-
-export async function getTestTask(name?: string) {
-  return getTask("test", name);
-}
-
-async function getTask(mode: string, name?: string) {
+export async function getTask(mode: string, name?: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
   const filtered = tasks.filter(
     t => t.definition.mode === mode && t.definition.target === name

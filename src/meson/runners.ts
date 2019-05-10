@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { exec, execAsTask, getOutputChannel } from "../utils";
-import { getBuildTask } from "../tasks";
+import { getTask } from "../tasks";
 
 export async function runMesonConfigure(source: string, build: string) {
   try {
@@ -16,7 +16,7 @@ export async function runMesonConfigure(source: string, build: string) {
 
 export async function runMesonReconfigure() {
   try {
-    await vscode.tasks.executeTask(await getBuildTask("reconfigure"));
+    await vscode.tasks.executeTask(await getTask("reconfigure"));
   } catch (e) {
     vscode.window.showErrorMessage("Couldn't reconfigure project.");
   }
@@ -24,7 +24,7 @@ export async function runMesonReconfigure() {
 
 export async function runMesonBuild(name?: string) {
   try {
-    await vscode.tasks.executeTask(await getBuildTask(name));
+    await vscode.tasks.executeTask(await getTask("build", name));
   } catch (e) {
     vscode.window.showErrorMessage("Build failed.\n\n" + e);
   }
