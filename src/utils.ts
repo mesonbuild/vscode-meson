@@ -47,6 +47,18 @@ export function execAsTask(
   return vscode.tasks.executeTask(task);
 }
 
+export function parseJSONFileIfExists<T = object>(path: string) {
+  return new Promise<T | false>((resolve, reject) => {
+    fs.exists(path, exists => {
+      if (!exists) reject(false);
+      fs.readFile(path, (err, data) => {
+        if (err) resolve(false);
+        resolve(JSON.parse(data.toString()) as T);
+      });
+    });
+  });
+}
+
 let _channel: vscode.OutputChannel;
 export function getOutputChannel(): vscode.OutputChannel {
   if (!_channel) {
