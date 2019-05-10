@@ -35,11 +35,15 @@
     "commands": [
       {
         "command": "mesonbuild.configure",
-        "title": "Meson: Run Configure"
+        "title": "Meson: Create build directory"
       },
       {
         "command": "mesonbuild.reconfigure",
-        "title": "Meson: Force reconfigure"
+        "title": "Meson: Reconfigure"
+      },
+      {
+        "command": "mesonbuild.clean",
+        "title": "Meson: clean built objects"
       },
       {
         "command": "mesonbuild.build",
@@ -54,13 +58,21 @@
       {
         "type": "meson",
         "required": [
-          "target"
+          "mode"
         ],
         "properties": {
           "target": {
             "type": "string",
             "description": "The Meson target to... target",
-            "default": "all"
+            "default": "all",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "build",
+                  "test"
+                ]
+              }
+            }
           },
           "filename": {
             "type": "string",
@@ -79,7 +91,9 @@
             "enum": [
               "build",
               "run",
-              "test"
+              "test",
+              "reconfigure",
+              "clean"
             ],
             "default": "build"
           }
