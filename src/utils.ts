@@ -30,6 +30,31 @@ export function exec(
   });
 }
 
+export function execStream(
+  command: string | string[],
+  options: cp.SpawnOptions
+) {
+  //FIXME: Force string array and fix callers
+  if (typeof command === "string") {
+    command = command.split(" ");
+  }
+  const spawned = cp.spawn(command[0], command.slice(1), options);
+  return {
+    onLine(fn: (line: string, isError: boolean) => void) {
+      spawned.stdout.on("data", (msg: Buffer) => fn(msg.toString(), false));
+      spawned.stderr.on("data", (msg: Buffer) => fn(msg.toString(), true));
+    },
+    kill(signal?: string) {
+      spawned.kill(signal || "SIGKILL");
+    },
+    finishP() {
+      return new Promise<number>(res => {
+        spawned.on("exit", code => res(code));
+      });
+    }
+  };
+}
+
 export function execAsTask(
   command: string,
   options: vscode.ShellExecutionOptions,
@@ -77,6 +102,10 @@ export function thisExtension() {
 
 export function extensionRelative(filepath: string) {
   return path.join(thisExtension().extensionPath, filepath);
+}
+
+export function workspaceRelative(filepath: string) {
+  return path.join(vscode.workspace.rootPath, filepath);
 }
 
 export function getTargetName(t: Target) {
