@@ -3,7 +3,8 @@ import {
   exec,
   execAsTask,
   getOutputChannel,
-  extensionConfiguration
+  extensionConfiguration,
+  execStream
 } from "../utils";
 import { getTask } from "../tasks";
 import { existsSync } from "fs";
@@ -36,7 +37,7 @@ export async function runMesonConfigure(source: string, build: string) {
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
-        await vscode.tasks.executeTask(await getTask("reconfigure"));
+        await exec("ninja reconfigure", { cwd: build });
       } else {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
@@ -47,6 +48,7 @@ export async function runMesonConfigure(source: string, build: string) {
         await execAsTask(`meson ${configureOpts} ${build}`, { cwd: source });
       }
       progress.report({ message: "Done.", increment: 100 });
+      return new Promise(res => setTimeout(res, 2000));
     }
   );
 }
@@ -59,12 +61,41 @@ export async function runMesonReconfigure() {
   }
 }
 
-export async function runMesonBuild(name?: string) {
-  try {
-    await vscode.tasks.executeTask(await getTask("build", name));
-  } catch (e) {
-    vscode.window.showErrorMessage("Build failed.\n\n" + e);
-  }
+export async function runMesonBuild(buildDir: string, name?: string) {
+  let command = !!name ? `ninja ${name}` : "ninja";
+  const stream = execStream(command, { cwd: buildDir });
+
+  return vscode.window.withProgress(
+    {
+      title: name ? `Building target ${name}` : "Building project",
+      location: vscode.ProgressLocation.Notification,
+      cancellable: true
+    },
+    async (progress, token) => {
+      token.onCancellationRequested(() => stream.kill());
+      let oldPercentage = 0;
+      stream.onLine((msg, isError) => {
+        const match = /^\[(\d+)\/(\d+)\] (.*)/g.exec(msg);
+        if (match) {
+          const percentage = (100 * parseInt(match[1])) / parseInt(match[2]);
+          const increment = percentage - oldPercentage;
+          oldPercentage = percentage;
+          if (increment > 0) progress.report({ increment, message: match[3] });
+        }
+        getOutputChannel().appendLine(msg);
+        if (isError) getOutputChannel().show(true);
+      });
+
+      await stream.finishP().then(code => {
+        if (code !== 0)
+          throw new Error(
+            "Build failed. See Meson Build output for more details."
+          );
+      });
+      progress.report({ message: "Build finished." });
+      await new Promise(res => setTimeout(res, 5000));
+    }
+  );
 }
 
 export async function runMesonTests(build: string, name?: string) {
