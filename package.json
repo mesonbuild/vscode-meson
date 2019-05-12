@@ -132,7 +132,7 @@
       "activitybar": [
         {
           "id": "meson-sidebar",
-          "title": "Meson Build",
+          "title": "Meson",
           "icon": "res/meson_32.svg"
         }
       ]
@@ -141,7 +141,7 @@
       "meson-sidebar": [
         {
           "id": "meson-project",
-          "name": "Meson project"
+          "name": "Current project"
         }
       ]
     }
