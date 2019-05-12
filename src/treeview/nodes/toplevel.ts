@@ -22,7 +22,7 @@ export class ProjectNode extends BaseNode {
   }
   async getChildren() {
     return [
-      ...this.project.subprojetcs.map(
+      ...this.project.subprojects.map(
         s => new SubprojectNode(s, this.buildDir)
       ),
       new TargetDirectoryNode(

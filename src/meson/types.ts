@@ -54,7 +54,7 @@ export interface ProjectInfo {
   version: string;
   descriptive_name: string;
   subproject_dir: "subprojects";
-  subprojetcs: Subproject[];
+  subprojects: Subproject[];
 }
 
 export interface BuildOption<T extends OptionType> {
