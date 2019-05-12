@@ -8,6 +8,15 @@ import { extensionRelative, getTargetName } from "../../utils";
 import { BaseDirectoryNode } from "./base";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
+  getTreeItem() {
+    const item = super.getTreeItem();
+    if (this.folder === ".") {
+      item.label = "Targets";
+      item.iconPath = extensionRelative("res/meson_32.svg");
+    }
+    return item;
+  }
+
   getChildren() {
     return Array.from(this.subfolders.entries())
       .map(([folder, targets]) => {
