@@ -1,3 +1,5 @@
+import * as vscode from "vscode";
+
 import { BaseNode } from "./base";
 import { Test } from "../../meson/types";
 import { extensionRelative } from "../../utils";
@@ -12,7 +14,7 @@ export class TestNode extends BaseNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     item.label = this.test.name;
     item.iconPath = extensionRelative("res/meson_64.svg");
     item.command = {

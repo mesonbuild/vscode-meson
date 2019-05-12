@@ -31,7 +31,7 @@ export async function getMesonTargets(build: string) {
   return parsed;
 }
 export async function getMesonBuildOptions(build: string) {
-  const parsed = await parseJSONFileIfExists(
+  const parsed = await parseJSONFileIfExists<BuildOptions>(
     path.join(build, "meson-info/intro-buildoptions.json")
   );
   if (parsed) return parsed;
@@ -43,7 +43,7 @@ export async function getMesonBuildOptions(build: string) {
 }
 
 export async function getMesonProjectInfo(build: string) {
-  const parsed = parseJSONFileIfExists<ProjectInfo>(
+  const parsed = await parseJSONFileIfExists<ProjectInfo>(
     path.join(build, "meson-info/intro-projectinfo.json")
   );
   if (parsed) return parsed;

@@ -9,11 +9,11 @@ import { TreeItem } from "vscode";
 
 export class BaseNode {
   constructor(public readonly id: string) {}
-  getChildren(): BaseNode[] {
+  getChildren(): vscode.ProviderResult<BaseNode[]> {
     return [];
   }
 
-  getTreeItem() {
+  getTreeItem(): vscode.ProviderResult<TreeItem> {
     const item = new TreeItem(this.id);
     item.id = this.id;
     return item;
@@ -29,7 +29,7 @@ export abstract class BaseDirectoryNode<T> extends BaseNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     // item.resourceUri = vscode.Uri.file(this.folder);
     item.label = path.basename(this.folder);
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;

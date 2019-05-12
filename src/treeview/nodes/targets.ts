@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { BaseNode } from "../../meson/basenode";
+import { BaseNode } from "./base";
 import { Target, Targets } from "../../meson/types";
 import { TargetSourcesNode, TargetGeneratedSourcesNode } from "./sources";
 import { extensionRelative, getTargetName } from "../../utils";
@@ -62,7 +62,7 @@ export class TargetNode extends BaseNode {
     }
   }
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.label = getTargetName(this.target);

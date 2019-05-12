@@ -2,7 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { extensionRelative, randomString } from "../../utils";
-import { BaseNode } from "../../meson/basenode";
+import { BaseNode } from "./base";
 import { BaseFileDirectoryNode } from "./base";
 
 export class TargetSourcesNode extends BaseFileDirectoryNode {
@@ -11,7 +11,7 @@ export class TargetSourcesNode extends BaseFileDirectoryNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     item.label = "Sources" + (this.allFiles.length === 0 ? " (no files)" : "");
     item.iconPath = extensionRelative("res/meson_64.svg");
     return item;
@@ -24,7 +24,7 @@ export class TargetGeneratedSourcesNode extends BaseFileDirectoryNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     item.label = "Sources (generated)";
     item.iconPath = extensionRelative("res/meson_64.svg");
     return item;
@@ -50,7 +50,7 @@ export class TargetSourceFileNode extends BaseNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem();
+    const item = super.getTreeItem() as vscode.TreeItem;
     item.resourceUri = vscode.Uri.file(this.file);
     item.label = path.basename(this.file);
     item.command = {

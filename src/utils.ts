@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash, BinaryLike } from "crypto";
 import { Target } from "./meson/types";
 
 export function exists(file: string): Promise<boolean> {
@@ -89,4 +89,10 @@ export function randomString(length = 4) {
   return randomBytes(length)
     .toString("base64")
     .substr(0, length);
+}
+
+export function hash(input: BinaryLike) {
+  const hashObj = createHash("sha1");
+  hashObj.update(input);
+  return hashObj.digest("hex");
 }
