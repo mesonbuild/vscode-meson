@@ -1,17 +1,54 @@
 import * as vscode from "vscode";
-import { exec, execAsTask, getOutputChannel } from "../utils";
+import {
+  exec,
+  execAsTask,
+  getOutputChannel,
+  extensionConfiguration
+} from "../utils";
 import { getTask } from "../tasks";
+import { existsSync } from "fs";
+import { join, relative } from "path";
+import { checkMesonIsConfigured } from "./utils";
 
 export async function runMesonConfigure(source: string, build: string) {
-  try {
-    vscode.window.showInformationMessage(`Configuring meson into '${build}'`);
-    await exec(`meson ${build}`, { cwd: source });
-    vscode.window.showInformationMessage("Configured!");
-    return true;
-  } catch (e) {
-    vscode.window.showInformationMessage("Meson is already configured.");
-    return false;
-  }
+  return vscode.window.withProgress(
+    {
+      title: "Configuring",
+      location: vscode.ProgressLocation.Notification,
+      cancellable: false
+    },
+    async progress => {
+      progress.report({
+        message: `Checking if Meson is configured in ${relative(
+          source,
+          build
+        )}...`
+      });
+      if (checkMesonIsConfigured(build)) {
+        progress.report({ message: "Applying configure options..." });
+        await execAsTask(
+          `meson configure ${extensionConfiguration("configureOptions").join(
+            " "
+          )} ${build}`,
+          { cwd: source }
+        );
+        progress.report({ message: "Reconfiguring build..." });
+        await vscode.tasks.executeTask(await getTask("reconfigure"));
+        progress.report({ message: "Done.", increment: 100 });
+      } else {
+        progress.report({
+          message: `Configuring Meson into ${relative(source, build)}...`
+        });
+        await execAsTask(
+          `meson ${extensionConfiguration("configureOptions").join(
+            " "
+          )} ${build}`,
+          { cwd: source }
+        );
+        progress.report({ message: "Done.", increment: 100 });
+      }
+    }
+  );
 }
 
 export async function runMesonReconfigure() {
