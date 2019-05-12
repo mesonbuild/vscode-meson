@@ -16,7 +16,7 @@ export class TestNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.label = this.test.name;
-    item.iconPath = extensionRelative("res/meson_64.svg");
+    item.iconPath = extensionRelative("res/meson_32.svg");
     item.command = {
       title: "Run test",
       command: "mesonbuild.test",

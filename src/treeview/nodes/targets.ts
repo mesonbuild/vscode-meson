@@ -94,7 +94,7 @@ export class TargetNode extends BaseNode {
       case "shared module":
         return "res/lib.svg";
       default:
-        return "res/meson_64.svg";
+        return "res/meson_32.svg";
     }
   }
 }

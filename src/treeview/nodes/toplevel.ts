@@ -82,7 +82,7 @@ export class TestRootNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.label = "Tests";
-    item.iconPath = extensionRelative("res/meson_64.svg");
+    item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     return item;
   }
