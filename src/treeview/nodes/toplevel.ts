@@ -45,7 +45,7 @@ export class SubprojectsRootNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.label = "Subprojects";
-    item.iconPath = extensionRelative("res/meson_32.svg");
+    item.iconPath = extensionRelative("res/icon-subprojects.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 
     return item;
@@ -102,7 +102,7 @@ export class SubprojectNode extends BaseNode {
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
-    item.iconPath = extensionRelative("res/meson_32.svg");
+    item.iconPath = extensionRelative("res/icon-subproject.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
     return item;
   }

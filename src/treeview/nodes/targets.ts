@@ -87,12 +87,13 @@ export class TargetNode extends BaseNode {
     switch (this.target.type) {
       case "executable":
       case "run":
+        return "res/icon-executable.svg";
       case "jar":
-        return "res/exe.svg";
+        return "res/icon-run-java.svg";
       case "shared library":
       case "static library":
       case "shared module":
-        return "res/lib.svg";
+        return "res/icon-library.svg";
       default:
         return "res/meson_32.svg";
     }
