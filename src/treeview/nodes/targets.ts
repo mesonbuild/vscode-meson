@@ -13,6 +13,11 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
     if (this.folder === ".") {
       item.label = "Targets";
       item.iconPath = extensionRelative("res/meson_32.svg");
+    } else {
+      item.iconPath =
+        item.collapsibleState === vscode.TreeItemCollapsibleState.Expanded
+          ? extensionRelative("res/icon-folder-open.svg")
+          : extensionRelative("res/icon-folder.svg");
     }
     return item;
   }
