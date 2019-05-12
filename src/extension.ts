@@ -15,7 +15,7 @@ let explorer: MesonProjectExplorer;
 export function activate(ctx: vscode.ExtensionContext): void {
   const root = vscode.workspace.rootPath;
   // TODO: Make build dir configurable
-  const buildDir = path.join(root, extensionConfiguration("buildDirectory"));
+  const buildDir = path.join(root, extensionConfiguration("buildFolder"));
   if (!root) return;
 
   explorer = new MesonProjectExplorer(ctx, buildDir);
