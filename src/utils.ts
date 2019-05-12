@@ -6,6 +6,7 @@ import * as cp from "child_process";
 import * as vscode from "vscode";
 import { randomBytes, createHash, BinaryLike } from "crypto";
 import { Target } from "./meson/types";
+import { ExtensionConfiguration } from "./types";
 
 export function exists(file: string): Promise<boolean> {
   return new Promise<boolean>((resolve, _reject) => {
@@ -95,4 +96,11 @@ export function hash(input: BinaryLike) {
   const hashObj = createHash("sha1");
   hashObj.update(input);
   return hashObj.digest("hex");
+}
+
+export function extensionConfiguration<K extends keyof ExtensionConfiguration>(
+  key: K
+) {
+  const conf = vscode.workspace.getConfiguration("mesonbuild");
+  return conf.get<ExtensionConfiguration[K]>(key);
 }

@@ -8,13 +8,14 @@ import {
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
+import { extensionConfiguration } from "./utils";
 
 let explorer: MesonProjectExplorer;
 
 export function activate(ctx: vscode.ExtensionContext): void {
   const root = vscode.workspace.rootPath;
   // TODO: Make build dir configurable
-  const buildDir = path.join(root, "build");
+  const buildDir = path.join(root, extensionConfiguration("buildDirectory"));
   if (!root) return;
 
   explorer = new MesonProjectExplorer(ctx, buildDir);
@@ -60,9 +61,10 @@ export function activate(ctx: vscode.ExtensionContext): void {
 
   ctx.subscriptions.push(tasksDisposable);
 
-  vscode.commands
-    .executeCommand<boolean>("mesonbuild.configure")
-    .then(isFresh => {
-      explorer.refresh();
-    });
+  if (extensionConfiguration("configureOnOpen"))
+    vscode.commands
+      .executeCommand<boolean>("mesonbuild.configure")
+      .then(isFresh => {
+        explorer.refresh();
+      });
 }

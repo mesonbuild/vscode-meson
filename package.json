@@ -54,6 +54,29 @@
         "title": "Run unit tests"
       }
     ],
+    "configuration": {
+      "title": "Meson build configuration",
+      "properties": {
+        "mesonbuild.configureOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Have the extension run meson configure/ninja reconfigure on folder open."
+        },
+        "mesonbuild.buildFolder": {
+          "type": "string",
+          "default": "build",
+          "description": "Specify in which folder Meson build configure and build the project."
+        },
+        "mesonbuild.configureOptions": {
+          "type": "array",
+          "default": [
+            "--buildtype=debug",
+            "--layout=flat"
+          ],
+          "description": "Specify the list of configuration options used for Meson configuration."
+        }
+      }
+    },
     "taskDefinitions": [
       {
         "type": "meson",
