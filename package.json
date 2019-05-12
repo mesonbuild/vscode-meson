@@ -140,12 +140,8 @@
     "views": {
       "meson-sidebar": [
         {
-          "id": "meson-tests",
-          "name": "Tests"
-        },
-        {
-          "id": "meson-targets",
-          "name": "Targets"
+          "id": "meson-project",
+          "name": "Meson project"
         }
       ]
     }

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { BaseNode } from "../basenode";
 import { getMesonTargets } from "../introspection";
-import { TargetDirectoryNode } from "./nodes/targets";
+import { TargetDirectoryNode } from "../../treeview/nodes/targets";
 
 export class MesonTargetsDataProvider
   implements vscode.TreeDataProvider<BaseNode> {

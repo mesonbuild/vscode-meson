@@ -1,6 +1,5 @@
-import * as vscode from "vscode";
-import { BaseNode } from "../basenode";
-import { Test } from "../types";
+import { BaseNode } from "./base";
+import { Test } from "../../meson/types";
 import { extensionRelative } from "../../utils";
 
 export class TestNode extends BaseNode {
