@@ -24,7 +24,7 @@ export async function runMesonConfigure(source: string, build: string) {
           build
         )}...`
       });
-      if (checkMesonIsConfigured(build)) {
+      if (await checkMesonIsConfigured(build)) {
         progress.report({ message: "Applying configure options..." });
         await execAsTask(
           `meson configure ${extensionConfiguration("configureOptions").join(
@@ -34,19 +34,16 @@ export async function runMesonConfigure(source: string, build: string) {
         );
         progress.report({ message: "Reconfiguring build..." });
         await vscode.tasks.executeTask(await getTask("reconfigure"));
-        progress.report({ message: "Done.", increment: 100 });
       } else {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
         });
-        await execAsTask(
-          `meson ${extensionConfiguration("configureOptions").join(
-            " "
-          )} ${build}`,
-          { cwd: source }
+        const configureOpts = extensionConfiguration("configureOptions").join(
+          " "
         );
-        progress.report({ message: "Done.", increment: 100 });
+        await execAsTask(`meson ${configureOpts} ${build}`, { cwd: source });
       }
+      progress.report({ message: "Done.", increment: 100 });
     }
   );
 }

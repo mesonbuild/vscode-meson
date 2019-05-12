@@ -6,7 +6,7 @@ export async function checkMesonIsConfigured(dir: string) {
   return (await Promise.all([
     existsP(join(dir, "meson-info")),
     existsP(join(dir, "meson-private"))
-  ])).some(v => v);
+  ])).every(v => v);
 }
 
 function existsP(path: string) {
