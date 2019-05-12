@@ -2,7 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { extensionRelative, randomString } from "../../utils";
-import { BaseNode } from "./base";
+import { BaseNode } from "../basenode";
 import { BaseFileDirectoryNode } from "./base";
 
 export class TargetSourcesNode extends BaseFileDirectoryNode {

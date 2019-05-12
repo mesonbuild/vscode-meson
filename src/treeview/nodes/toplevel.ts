@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { BaseNode } from "./base";
+import { BaseNode } from "../basenode";
 import { ProjectInfo, Subproject, Tests } from "../../meson/types";
 import { extensionRelative, hash } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";

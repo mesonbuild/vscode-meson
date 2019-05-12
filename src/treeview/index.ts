@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { BaseNode } from "./nodes/base";
+import { BaseNode } from "./basenode";
 import { getMesonProjectInfo } from "../meson/introspection";
 import { ProjectNode } from "./nodes/toplevel";
 

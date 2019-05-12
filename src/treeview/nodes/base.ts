@@ -1,24 +1,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { getTargetName, randomString } from "../../utils";
-import { Target, Targets } from "../../meson/types";
+import { randomString } from "../../utils";
 import { DirectoryNode, TargetSourceFileNode } from "./sources";
-import { TargetNode } from "./targets";
-
-import { TreeItem } from "vscode";
-
-export class BaseNode {
-  constructor(public readonly id: string) {}
-  getChildren(): vscode.ProviderResult<BaseNode[]> {
-    return [];
-  }
-
-  getTreeItem(): vscode.ProviderResult<TreeItem> {
-    const item = new TreeItem(this.id);
-    item.id = this.id;
-    return item;
-  }
-}
+import { BaseNode } from "../basenode";
 
 export abstract class BaseDirectoryNode<T> extends BaseNode {
   readonly subfolders: Map<string, T[]>;
