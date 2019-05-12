@@ -35,7 +35,7 @@
     "commands": [
       {
         "command": "mesonbuild.configure",
-        "title": "Meson: Create build directory"
+        "title": "Meson: Configure"
       },
       {
         "command": "mesonbuild.reconfigure",
