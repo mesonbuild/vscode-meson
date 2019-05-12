@@ -1,6 +1,13 @@
 import * as path from "path";
 import { exec, parseJSONFileIfExists } from "../utils";
-import { Targets, Dependencies, BuildOptions, Test, Tests } from "./types";
+import {
+  Targets,
+  Dependencies,
+  BuildOptions,
+  Test,
+  Tests,
+  ProjectInfo
+} from "./types";
 
 const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/g;
 
@@ -34,6 +41,18 @@ export async function getMesonBuildOptions(build: string) {
   });
   return JSON.parse(stdout) as BuildOptions;
 }
+
+export async function getMesonProjectInfo(build: string) {
+  const parsed = parseJSONFileIfExists<ProjectInfo>(
+    path.join(build, "meson-info/intro-projectinfo.json")
+  );
+  if (parsed) return parsed;
+  const { stdout } = await exec("meson introspect --project-info", {
+    cwd: build
+  });
+  return JSON.parse(stdout) as ProjectInfo;
+}
+
 export async function getMesonDependencies(build: string) {
   const parsed = parseJSONFileIfExists<Dependencies>(
     path.join(build, "meson-info/intro-dependencies.json")

@@ -44,6 +44,19 @@ export interface Target {
   installed: boolean;
   install_filename?: string;
 }
+
+export interface Subproject {
+  name: string;
+  version: string;
+  descriptive_name: string;
+}
+export interface ProjectInfo {
+  version: string;
+  descriptive_name: string;
+  subproject_dir: "subprojects";
+  subprojetcs: Subproject[];
+}
+
 export interface BuildOption<T extends OptionType> {
   name: string;
   desciption: string;
