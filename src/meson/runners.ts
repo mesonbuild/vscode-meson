@@ -92,7 +92,7 @@ export async function runMesonBuild(buildDir: string, name?: string) {
             "Build failed. See Meson Build output for more details."
           );
       });
-      progress.report({ message: "Build finished." });
+      progress.report({ message: "Build finished.", increment: 100 });
       await new Promise(res => setTimeout(res, 5000));
     }
   );
