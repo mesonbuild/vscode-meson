@@ -63,7 +63,7 @@
         "mesonbuild.configureOnOpen": {
           "type": "boolean",
           "default": false,
-          "description": "Have the extension run meson configure/ninja reconfigure on folder open."
+          "description": "Have VS Code run meson configure/ninja reconfigure on folder open."
         },
         "mesonbuild.buildFolder": {
           "type": "string",
