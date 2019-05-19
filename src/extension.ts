@@ -54,7 +54,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       async (name?: string) => {
         await runMesonBuild(
           workspaceRelative(extensionConfiguration("buildFolder")),
-          await new Promise((resolve, reject) => {
+          await new Promise<string>((resolve, reject) => {
             if (name) {
               return resolve(name);
             }
