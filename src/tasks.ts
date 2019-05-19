@@ -45,13 +45,13 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       new vscode.ShellExecution("ninja benchmark", { cwd: buildDir })
     );
     const defaultReconfigureTask = new vscode.Task(
-      { type: "meson", target: "reconfigure" },
+      { type: "meson", mode: "reconfigure" },
       "Reconfigure",
       "Meson",
       new vscode.ShellExecution("ninja reconfigure", { cwd: buildDir })
     );
     const defaultCleanTask = new vscode.Task(
-      { type: "meson", target: "clean" },
+      { type: "meson", mode: "clean" },
       "Clean",
       "Meson",
       new vscode.ShellExecution("ninja clean", { cwd: buildDir })
@@ -162,7 +162,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
 export async function getTask(mode: string, name?: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
   const filtered = tasks.filter(
-    t => t.definition.mode === mode && t.definition.target === name
+    t => t.definition.mode === mode && (!name || t.definition.target === name)
   );
   if (filtered.length === 0)
     throw new Error(`Cannot find ${mode} target ${name}.`);
