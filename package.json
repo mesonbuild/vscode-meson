@@ -46,7 +46,7 @@
       },
       {
         "command": "mesonbuild.clean",
-        "title": "Meson: clean built objects"
+        "title": "Meson: Clean"
       },
       {
         "command": "mesonbuild.build",
@@ -54,7 +54,7 @@
       },
       {
         "command": "mesonbuild.test",
-        "title": "Run unit tests"
+        "title": "Meson: Run Unit Tests"
       }
     ],
     "configuration": {
