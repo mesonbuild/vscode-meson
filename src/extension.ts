@@ -12,9 +12,14 @@ import {
   extensionConfiguration,
   execAsTask,
   workspaceRelative,
-  extensionConfigurationSet
+  extensionConfigurationSet,
+  getTargetName
 } from "./utils";
-import { getMesonTargets } from "./meson/introspection";
+import {
+  getMesonTargets,
+  getMesonTests,
+  getMesonBenchmarks
+} from "./meson/introspection";
 
 let explorer: MesonProjectExplorer;
 
@@ -87,10 +92,17 @@ export function activate(ctx: vscode.ExtensionContext): void {
             itemsP.then(items => {
               picker.items = items;
               picker.busy = false;
-              picker.onDidAccept(() => {
+              picker.onDidAccept(async () => {
                 const active = picker.activeItems[0];
                 if (active.label === "all") resolve(undefined);
-                else resolve(path.join(active.detail, active.label));
+                else
+                  resolve(
+                    getTargetName(
+                      (await getMesonTargets(buildDir)).filter(
+                        t => t.name === active.label
+                      )[0]
+                    )
+                  );
                 picker.dispose();
               });
               picker.onDidHide(() => reject());
@@ -105,10 +117,53 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "mesonbuild.test",
       async (name?: string) => {
-        await runMesonTests(
-          workspaceRelative(extensionConfiguration("buildFolder")),
-          name
-        );
+        const resolvedName = await new Promise<string>((resolve, reject) => {
+          if (name) return resolve(name);
+          const picker = vscode.window.createQuickPick();
+          picker.busy = true;
+          picker.onDidAccept(() => {
+            const active = picker.activeItems[0];
+            if (active.label === "all") resolve(undefined);
+            else resolve(active.label);
+            picker.dispose();
+          });
+          picker.onDidHide(() => reject());
+          Promise.all([getMesonTests(buildDir), getMesonBenchmarks(buildDir)])
+            .then<vscode.QuickPickItem[]>(([tests, benchmarks]) => [
+              {
+                label: "all",
+                detail: "Run all tests",
+                description: "(meta-target)",
+                picked: true
+              },
+              ...tests.map<vscode.QuickPickItem>(t => ({
+                label: t.name,
+                detail: `Test timeout: ${t.timeout}s, ${
+                  t.is_parallel ? "Run in parallel" : "Run serially"
+                }`,
+                description: t.suite.join(","),
+                picked: false
+              })),
+              ...benchmarks.map<vscode.QuickPickItem>(b => ({
+                label: b.name,
+                detail: `Benchmark timeout: ${
+                  b.timeout
+                }s, benchmarks always run serially`,
+                description: b.suite.join(","),
+                picked: false
+              }))
+            ])
+            .then(items => {
+              picker.busy = false;
+              picker.items = items;
+            });
+          picker.show();
+        }).catch<null>(() => null);
+        if (resolvedName != null)
+          await runMesonTests(
+            workspaceRelative(extensionConfiguration("buildFolder")),
+            resolvedName
+          );
       }
     )
   );
