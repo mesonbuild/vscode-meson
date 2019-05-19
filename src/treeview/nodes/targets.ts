@@ -22,8 +22,8 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
     return item;
   }
 
-  getChildren() {
-    return Array.from(this.subfolders.entries())
+  async getChildren() {
+    return Array.from((await this.subfolders).entries())
       .map(([folder, targets]) => {
         if (folder === ".") return targets.map(tgt => new TargetNode(tgt));
         return new TargetDirectoryNode(folder, targets);
@@ -31,11 +31,11 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
       .flat(1);
   }
 
-  buildFileTree(targets: Targets) {
+  async buildFileTree(targets: Targets) {
     const folders = new Map<string, Targets>();
     folders.set(".", new Array());
     for (const tgt of targets) {
-      let folderName = path.relative(this.folder, getTargetName(tgt));
+      let folderName = path.relative(this.folder, await getTargetName(tgt));
       if (path.dirname(folderName) === ".") {
         folders.get(".").push(tgt);
         continue;
@@ -75,11 +75,11 @@ export class TargetNode extends BaseNode {
       ];
     }
   }
-  getTreeItem() {
+  async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    item.label = getTargetName(this.target);
+    item.label = await getTargetName(this.target);
     item.command = {
       title: `Build ${this.target.name}`,
       command: "mesonbuild.build",

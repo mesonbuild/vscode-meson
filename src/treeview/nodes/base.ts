@@ -1,15 +1,20 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { randomString } from "../../utils";
+import { randomString, isThenable } from "../../utils";
 import { DirectoryNode, TargetSourceFileNode } from "./sources";
 import { BaseNode } from "../basenode";
 
 export abstract class BaseDirectoryNode<T> extends BaseNode {
-  readonly subfolders: Map<string, T[]>;
+  subfolders: Thenable<Map<string, T[]>>;
 
   constructor(readonly folder: string, readonly filepaths: T[]) {
     super(folder + randomString());
-    this.subfolders = this.buildFileTree(filepaths);
+    const subs = this.buildFileTree(filepaths);
+    if (isThenable(subs)) {
+      this.subfolders = subs;
+    } else {
+      this.subfolders = Promise.resolve(subs);
+    }
   }
 
   getTreeItem() {
@@ -21,12 +26,12 @@ export abstract class BaseDirectoryNode<T> extends BaseNode {
     return item;
   }
 
-  abstract buildFileTree(fpaths: T[]): Map<string, T[]>;
+  abstract buildFileTree(fpaths: T[]): vscode.ProviderResult<Map<string, T[]>>;
 }
 
 export class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
-  getChildren() {
-    return Array.from(this.subfolders.entries())
+  async getChildren() {
+    return Array.from((await this.subfolders).entries())
       .map(([folder, files]) => {
         if (folder === ".") {
           return files.map(f => new TargetSourceFileNode(f));

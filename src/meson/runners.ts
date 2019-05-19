@@ -82,7 +82,7 @@ export async function runMesonBuild(buildDir: string, name?: string) {
           oldPercentage = percentage;
           if (increment > 0) progress.report({ increment, message: match[3] });
         }
-        getOutputChannel().appendLine(msg);
+        getOutputChannel().append(msg);
         if (isError) getOutputChannel().show(true);
       });
 

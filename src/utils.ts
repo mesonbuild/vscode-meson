@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { randomBytes, createHash, BinaryLike } from "crypto";
 import { Target } from "./meson/types";
 import { ExtensionConfiguration } from "./types";
+import { getMesonBuildOptions } from "./meson/introspection";
 
 export function exists(file: string): Promise<boolean> {
   return new Promise<boolean>((resolve, _reject) => {
@@ -58,7 +59,7 @@ export function execStream(
 export function execAsTask(
   command: string,
   options: vscode.ShellExecutionOptions,
-  reveal = false
+  revealMode = vscode.TaskRevealKind.Silent
 ) {
   const task = new vscode.Task(
     { type: "temp" },
@@ -68,9 +69,7 @@ export function execAsTask(
   );
   task.presentationOptions.echo = false;
   task.presentationOptions.focus = false;
-  task.presentationOptions.reveal = reveal
-    ? vscode.TaskRevealKind.Always
-    : vscode.TaskRevealKind.Silent;
+  task.presentationOptions.reveal = revealMode;
   return vscode.tasks.executeTask(task);
 }
 
@@ -108,11 +107,16 @@ export function workspaceRelative(filepath: string) {
   return path.join(vscode.workspace.rootPath, filepath);
 }
 
-export function getTargetName(t: Target) {
-  return path.join(
-    path.relative(vscode.workspace.rootPath, path.dirname(t.defined_in)),
-    t.name
-  );
+export async function getTargetName(t: Target) {
+  const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+  const buildOptions = await getMesonBuildOptions(buildDir);
+  const layoutOption = buildOptions.filter(o => o.name === "layout")[0];
+  if (layoutOption.value === "mirror")
+    return path.join(
+      path.relative(vscode.workspace.rootPath, path.dirname(t.defined_in)),
+      t.name
+    );
+  else return `meson-out/${t.name}`;
 }
 
 export function randomString(length = 4) {
@@ -127,9 +131,30 @@ export function hash(input: BinaryLike) {
   return hashObj.digest("hex");
 }
 
+export function getConfiguration() {
+  return vscode.workspace.getConfiguration("mesonbuild");
+}
+
 export function extensionConfiguration<K extends keyof ExtensionConfiguration>(
   key: K
 ) {
-  const conf = vscode.workspace.getConfiguration("mesonbuild");
-  return conf.get<ExtensionConfiguration[K]>(key);
+  return getConfiguration().get<ExtensionConfiguration[K]>(key);
+}
+
+export function extensionConfigurationSet<
+  K extends keyof ExtensionConfiguration
+>(
+  key: K,
+  value: ExtensionConfiguration[K],
+  target = vscode.ConfigurationTarget.Global
+) {
+  return getConfiguration().update(key, value, target);
+}
+
+export function arrayIncludes<T>(array: T[], value: T) {
+  return array.indexOf(value) !== -1;
+}
+
+export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
+  return arrayIncludes(Object.getOwnPropertyNames(x), "then");
 }

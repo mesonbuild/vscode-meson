@@ -8,7 +8,12 @@ import {
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
-import { extensionConfiguration, execAsTask, workspaceRelative } from "./utils";
+import {
+  extensionConfiguration,
+  execAsTask,
+  workspaceRelative,
+  extensionConfigurationSet
+} from "./utils";
 import { getMesonTargets } from "./meson/introspection";
 
 let explorer: MesonProjectExplorer;
@@ -121,4 +126,42 @@ export function activate(ctx: vscode.ExtensionContext): void {
       .then(isFresh => {
         explorer.refresh();
       });
+  else {
+    vscode.window
+      .showInformationMessage(
+        "Meson project detected, would you like VS Code to configure it?",
+        "No",
+        "This workspace",
+        "Yes"
+      )
+      .then(response => {
+        switch (response) {
+          case "Yes":
+            extensionConfigurationSet(
+              "configureOnOpen",
+              true,
+              vscode.ConfigurationTarget.Global
+            );
+            break;
+          case "This workspace":
+            extensionConfigurationSet(
+              "configureOnOpen",
+              true,
+              vscode.ConfigurationTarget.Workspace
+            );
+            break;
+          default:
+            extensionConfigurationSet(
+              "configureOnOpen",
+              false,
+              vscode.ConfigurationTarget.Global
+            );
+        }
+        if (response !== "No") {
+          vscode.commands
+            .executeCommand("mesonbuild.configure")
+            .then(() => explorer.refresh());
+        }
+      });
+  }
 }

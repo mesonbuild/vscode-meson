@@ -69,9 +69,9 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       defaultCleanTask
     ];
     tasks.push(
-      ...targets
-        .map(t => {
-          const targetName = getTargetName(t);
+      ...(await Promise.all(
+        targets.map(async t => {
+          const targetName = await getTargetName(t);
           const def: MesonTaskDefinition = {
             type: "meson",
             target: targetName,
@@ -81,7 +81,9 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
             def,
             `Build ${targetName}`,
             "Meson",
-            new vscode.ShellExecution(`ninja ${targetName}`, { cwd: buildDir })
+            new vscode.ShellExecution(`ninja ${targetName}`, {
+              cwd: buildDir
+            })
           );
           buildTask.group = vscode.TaskGroup.Build;
           if (t.type == "executable") {
@@ -117,7 +119,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           }
           return buildTask;
         })
-        .flat(1),
+      )).flat(1),
       ...tests.map(t => {
         const testTask = new vscode.Task(
           { type: "meson", mode: "test", target: t.name },
