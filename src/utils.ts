@@ -79,7 +79,7 @@ export function parseJSONFileIfExists<T = object>(path: string) {
       if (!exists) reject(false);
       fs.readFile(path, (err, data) => {
         if (err) resolve(false);
-        resolve(JSON.parse(data.toString()) as T);
+        else resolve(JSON.parse(data.toString()) as T);
       });
     });
   });
