@@ -7,8 +7,7 @@ import {
   execStream
 } from "../utils";
 import { getTask } from "../tasks";
-import { existsSync } from "fs";
-import { join, relative } from "path";
+import { relative } from "path";
 import { checkMesonIsConfigured } from "./utils";
 
 export async function runMesonConfigure(source: string, build: string) {
@@ -30,7 +29,7 @@ export async function runMesonConfigure(source: string, build: string) {
           message: "Applying configure options...",
           increment: 30
         });
-        await execAsTask(
+        await exec(
           `meson configure ${extensionConfiguration("configureOptions").join(
             " "
           )} ${build}`,
@@ -45,7 +44,13 @@ export async function runMesonConfigure(source: string, build: string) {
         const configureOpts = extensionConfiguration("configureOptions").join(
           " "
         );
-        await execAsTask(`meson ${configureOpts} ${build}`, { cwd: source });
+        const { stdout, stderr } = await exec(
+          `meson ${configureOpts} ${build}`,
+          { cwd: source }
+        );
+        getOutputChannel().appendLine(stdout);
+        getOutputChannel().appendLine(stderr);
+        if (stderr.length > 0) getOutputChannel().show(true);
       }
       progress.report({ message: "Done.", increment: 100 });
       return new Promise(res => setTimeout(res, 2000));
@@ -58,6 +63,9 @@ export async function runMesonReconfigure() {
     await vscode.tasks.executeTask(await getTask("reconfigure"));
   } catch (e) {
     vscode.window.showErrorMessage("Couldn't reconfigure project.");
+    getOutputChannel().appendLine("Reconfiguring Meson:");
+    getOutputChannel().appendLine(e);
+    getOutputChannel().show(true);
   }
 }
 
@@ -100,8 +108,17 @@ export async function runMesonBuild(buildDir: string, name?: string) {
 
 export async function runMesonTests(build: string, name?: string) {
   try {
-    if (name) return await execAsTask(`meson test ${name}`, { cwd: build });
-    return await execAsTask("ninja test", { cwd: build });
+    if (name)
+      return await execAsTask(
+        `meson test ${name}`,
+        { cwd: build },
+        vscode.TaskRevealKind.Always
+      );
+    return await execAsTask(
+      "ninja test",
+      { cwd: build },
+      vscode.TaskRevealKind.Always
+    );
   } catch (e) {
     if (e.stderr) {
       vscode.window.showErrorMessage("Tests failed.");
