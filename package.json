@@ -9,6 +9,9 @@
   "author": {
     "name": "Ali Sabil"
   },
+  "contributors": [
+    "Nathan Graule <solarliner@gmail.com> (https://solarliner.me)"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/asabil/vscode-meson.git"
