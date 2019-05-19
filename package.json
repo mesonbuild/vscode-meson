@@ -113,7 +113,7 @@
           },
           "mode": {
             "type": "string",
-            "description": "Whether to build or to run the target.",
+            "description": "Specify the kind of task to perform",
             "enum": [
               "build",
               "run",
