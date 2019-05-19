@@ -62,53 +62,55 @@ export function activate(ctx: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(
       "mesonbuild.build",
       async (name?: string) => {
-        await runMesonBuild(
-          workspaceRelative(extensionConfiguration("buildFolder")),
-          await new Promise<string>((resolve, reject) => {
-            if (name) {
-              return resolve(name);
-            }
-            const itemsP: Promise<vscode.QuickPickItem[]> = getMesonTargets(
-              buildDir
-            ).then<vscode.QuickPickItem[]>(tt => [
-              {
-                label: "all",
-                detail: "Build all targets",
-                description: "(meta-target)",
-                picked: true
-              },
-              ...tt.map<vscode.QuickPickItem>(t => ({
-                label: t.name,
-                detail: path.relative(root, path.dirname(t.defined_in)),
-                description: t.type,
-                picked: false
-              }))
-            ]);
-            const picker = vscode.window.createQuickPick();
-            picker.busy = true;
-            picker.placeholder =
-              "Select target to build. Defaults to all targets";
-            picker.show();
-            itemsP.then(items => {
-              picker.items = items;
-              picker.busy = false;
-              picker.onDidAccept(async () => {
-                const active = picker.activeItems[0];
-                if (active.label === "all") resolve(undefined);
-                else
-                  resolve(
-                    getTargetName(
-                      (await getMesonTargets(buildDir)).filter(
-                        t => t.name === active.label
-                      )[0]
-                    )
-                  );
-                picker.dispose();
-              });
-              picker.onDidHide(() => reject());
+        const resolvedName = await new Promise<string>((resolve, reject) => {
+          if (name) {
+            return resolve(name);
+          }
+          const itemsP: Promise<vscode.QuickPickItem[]> = getMesonTargets(
+            buildDir
+          ).then<vscode.QuickPickItem[]>(tt => [
+            {
+              label: "all",
+              detail: "Build all targets",
+              description: "(meta-target)",
+              picked: true
+            },
+            ...tt.map<vscode.QuickPickItem>(t => ({
+              label: t.name,
+              detail: path.relative(root, path.dirname(t.defined_in)),
+              description: t.type,
+              picked: false
+            }))
+          ]);
+          const picker = vscode.window.createQuickPick();
+          picker.busy = true;
+          picker.placeholder =
+            "Select target to build. Defaults to all targets";
+          picker.show();
+          itemsP.then(items => {
+            picker.items = items;
+            picker.busy = false;
+            picker.onDidAccept(async () => {
+              const active = picker.activeItems[0];
+              if (active.label === "all") resolve(undefined);
+              else
+                resolve(
+                  getTargetName(
+                    (await getMesonTargets(buildDir)).filter(
+                      t => t.name === active.label
+                    )[0]
+                  )
+                );
+              picker.dispose();
             });
-          })
-        );
+            picker.onDidHide(() => reject());
+          });
+        }).catch<null>(() => null);
+        if (resolvedName !== null)
+          await runMesonBuild(
+            workspaceRelative(extensionConfiguration("buildFolder")),
+            resolvedName
+          );
         explorer.refresh();
       }
     )
@@ -164,6 +166,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
             workspaceRelative(extensionConfiguration("buildFolder")),
             resolvedName
           );
+        explorer.refresh();
       }
     )
   );
