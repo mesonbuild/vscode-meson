@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "type": "npm",
+      "label": "compile",
+      "script": "compile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "type": "npm",
+      "script": "watch",
+      "problemMatcher": [
+        "$tsc-watch"
+      ]
+    }
+  ]
+}

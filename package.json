@@ -9,6 +9,9 @@
   "author": {
     "name": "Ali Sabil"
   },
+  "contributors": [
+    "Nathan Graule <solarliner@gmail.com> (https://solarliner.me)"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/asabil/vscode-meson.git"
@@ -24,24 +27,101 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:workbench.action.tasks.runTask"
+    "onLanguage:meson",
+    "onCommand:mesonbuild.configure",
+    "onCommand:mesonbuild.build",
+    "onCommand:mesonbuild.test",
+    "workspaceContains:meson.build"
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "mesonbuild.configure",
+        "title": "Meson: Configure"
+      },
+      {
+        "command": "mesonbuild.reconfigure",
+        "title": "Meson: Reconfigure"
+      },
+      {
+        "command": "mesonbuild.clean",
+        "title": "Meson: Clean"
+      },
+      {
+        "command": "mesonbuild.build",
+        "title": "Meson: Build"
+      },
+      {
+        "command": "mesonbuild.test",
+        "title": "Meson: Run Unit Tests"
+      }
+    ],
+    "configuration": {
+      "title": "Meson build configuration",
+      "properties": {
+        "mesonbuild.configureOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Have VS Code run meson configure/ninja reconfigure on folder open."
+        },
+        "mesonbuild.buildFolder": {
+          "type": "string",
+          "default": "build",
+          "description": "Specify in which folder Meson build configure and build the project."
+        },
+        "mesonbuild.configureOptions": {
+          "type": "array",
+          "default": [
+            "--buildtype=debug",
+            "--layout=flat"
+          ],
+          "description": "Specify the list of configuration options used for Meson configuration."
+        }
+      }
+    },
     "taskDefinitions": [
       {
         "type": "meson",
         "required": [
-          "task"
+          "mode"
         ],
         "properties": {
-          "task": {
+          "target": {
             "type": "string",
-            "description": "The Meson task to customize"
+            "description": "The Meson target to... target",
+            "default": "all",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "build",
+                  "test"
+                ]
+              }
+            }
           },
-          "file": {
+          "filename": {
             "type": "string",
-            "description": "The Meson file that provides the task. Can be omitted."
+            "description": "Filename to run as part of the target",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "run"
+                ]
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "description": "Specify the kind of task to perform",
+            "enum": [
+              "build",
+              "run",
+              "test",
+              "reconfigure",
+              "clean"
+            ],
+            "default": "build"
           }
         }
       }
@@ -73,7 +153,24 @@
         "language": "meson",
         "path": "./snippets/meson.json"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "meson-sidebar",
+          "title": "Meson",
+          "icon": "res/meson_32.svg"
+        }
+      ]
+    },
+    "views": {
+      "meson-sidebar": [
+        {
+          "id": "meson-project",
+          "name": "Current project"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
@@ -82,8 +179,11 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
+    "@types/node": "*",
     "typescript": "^2.4.1",
-    "vscode": "^1.1.17",
-    "@types/node": "*"
+    "vscode": "^1.1.17"
+  },
+  "dependencies": {
+    "array-flat-polyfill": "^1.0.1"
   }
 }
