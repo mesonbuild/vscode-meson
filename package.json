@@ -179,9 +179,9 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
-    "@types/node": "*",
+    "@types/node": "^12.0.2",
     "typescript": "^2.4.1",
-    "vscode": "^1.1.17"
+    "vscode": "^1.1.34"
   },
   "dependencies": {
     "array-flat-polyfill": "^1.0.1"
