@@ -73,8 +73,7 @@
         "mesonbuild.configureOptions": {
           "type": "array",
           "default": [
-            "--buildtype=debug",
-            "--layout=flat"
+            "--buildtype=debug"
           ],
           "description": "Specify the list of configuration options used for Meson configuration."
         }
