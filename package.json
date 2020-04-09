@@ -67,7 +67,7 @@
         },
         "mesonbuild.buildFolder": {
           "type": "string",
-          "default": "build",
+          "default": "builddir",
           "description": "Specify in which folder Meson build configure and build the project."
         },
         "mesonbuild.configureOptions": {
