@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.0
+- Remove layout=flat from default options
+- Change default build folder to builddir
+- Add syntax highlighting for new builtins
+
 ## 1.2.0
 - Add support for automatic task provider using `meson introspect`
 - Add code snippets

@@ -45,7 +45,7 @@ export function execStream(
       spawned.stdout.on("data", (msg: Buffer) => fn(msg.toString(), false));
       spawned.stderr.on("data", (msg: Buffer) => fn(msg.toString(), true));
     },
-    kill(signal?: string) {
+    kill(signal?: NodeJS.Signals) {
       spawned.kill(signal || "SIGKILL");
     },
     finishP() {
