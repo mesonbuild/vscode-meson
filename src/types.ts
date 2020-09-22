@@ -4,4 +4,5 @@ export interface ExtensionConfiguration {
   configureOnOpen: boolean;
   configureOptions: string[];
   buildFolder: string;
+  sourceFolder: string;
 }

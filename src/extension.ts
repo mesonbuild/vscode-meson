@@ -46,7 +46,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {
       await runMesonConfigure(
-        root,
+        workspaceRelative(extensionConfiguration("sourceFolder")),
         workspaceRelative(extensionConfiguration("buildFolder"))
       );
       explorer.refresh();
