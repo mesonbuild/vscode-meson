@@ -184,11 +184,26 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^4.3.0",
+    "lint-staged": "^10.4.0",
     "prettier": "^2.1.2",
     "typescript": "^4.0.3",
     "vscode": "^1.1.37"
   },
   "dependencies": {
     "array-flat-polyfill": "^1.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix"
+    ],
+    "*.{js,ts,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
