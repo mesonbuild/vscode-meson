@@ -69,57 +69,59 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       defaultCleanTask
     ];
     tasks.push(
-      ...(await Promise.all(
-        targets.map(async t => {
-          const targetName = await getTargetName(t);
-          const def: MesonTaskDefinition = {
-            type: "meson",
-            target: targetName,
-            mode: "build"
-          };
-          const buildTask = new vscode.Task(
-            def,
-            `Build ${targetName}`,
-            "Meson",
-            new vscode.ShellExecution(`ninja ${targetName}`, {
-              cwd: buildDir
-            })
-          );
-          buildTask.group = vscode.TaskGroup.Build;
-          if (t.type == "executable") {
-            if (t.filename.length == 1) {
-              const runTask = new vscode.Task(
-                { type: "meson", target: targetName, mode: "run" },
-                `Run ${targetName}`,
-                "Meson",
-                new vscode.ShellExecution(t.filename[0])
-              );
-              runTask.group = vscode.TaskGroup.Test;
-              return [buildTask, runTask];
-            } else {
-              const runTasks = t.filename.map(f => {
+      ...(
+        await Promise.all(
+          targets.map(async t => {
+            const targetName = await getTargetName(t);
+            const def: MesonTaskDefinition = {
+              type: "meson",
+              target: targetName,
+              mode: "build"
+            };
+            const buildTask = new vscode.Task(
+              def,
+              `Build ${targetName}`,
+              "Meson",
+              new vscode.ShellExecution(`ninja ${targetName}`, {
+                cwd: buildDir
+              })
+            );
+            buildTask.group = vscode.TaskGroup.Build;
+            if (t.type == "executable") {
+              if (t.filename.length == 1) {
                 const runTask = new vscode.Task(
-                  {
-                    type: "meson",
-                    target: targetName,
-                    filename: f,
-                    mode: "run"
-                  },
-                  `Run ${targetName}: ${f}`,
+                  { type: "meson", target: targetName, mode: "run" },
+                  `Run ${targetName}`,
                   "Meson",
-                  new vscode.ShellExecution(f, {
-                    cwd: vscode.workspace.rootPath
-                  })
+                  new vscode.ShellExecution(t.filename[0])
                 );
                 runTask.group = vscode.TaskGroup.Test;
-                return runTask;
-              });
-              return [buildTask, ...runTasks];
+                return [buildTask, runTask];
+              } else {
+                const runTasks = t.filename.map(f => {
+                  const runTask = new vscode.Task(
+                    {
+                      type: "meson",
+                      target: targetName,
+                      filename: f,
+                      mode: "run"
+                    },
+                    `Run ${targetName}: ${f}`,
+                    "Meson",
+                    new vscode.ShellExecution(f, {
+                      cwd: vscode.workspace.rootPath
+                    })
+                  );
+                  runTask.group = vscode.TaskGroup.Test;
+                  return runTask;
+                });
+                return [buildTask, ...runTasks];
+              }
             }
-          }
-          return buildTask;
-        })
-      )).flat(1),
+            return buildTask;
+          })
+        )
+      ).flat(1),
       ...tests.map(t => {
         const testTask = new vscode.Task(
           { type: "meson", mode: "test", target: t.name },

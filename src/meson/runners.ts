@@ -70,7 +70,7 @@ export async function runMesonReconfigure() {
 }
 
 export async function runMesonBuild(buildDir: string, name?: string) {
-  let command = !!name ? `ninja ${name}` : "ninja";
+  const command = name ? `ninja ${name}` : "ninja";
   const stream = execStream(command, { cwd: buildDir });
 
   return vscode.window.withProgress(

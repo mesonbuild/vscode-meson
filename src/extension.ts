@@ -148,9 +148,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
               })),
               ...benchmarks.map<vscode.QuickPickItem>(b => ({
                 label: b.name,
-                detail: `Benchmark timeout: ${
-                  b.timeout
-                }s, benchmarks always run serially`,
+                detail: `Benchmark timeout: ${b.timeout}s, benchmarks always run serially`,
                 description: b.suite.join(","),
                 picked: false
               }))

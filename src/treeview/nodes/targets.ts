@@ -33,7 +33,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
 
   async buildFileTree(targets: Targets) {
     const folders = new Map<string, Targets>();
-    folders.set(".", new Array());
+    folders.set(".", []);
     for (const tgt of targets) {
       let folderName = path.relative(this.folder, await getTargetName(tgt));
       if (path.dirname(folderName) === ".") {

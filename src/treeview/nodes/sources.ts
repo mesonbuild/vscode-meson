@@ -11,7 +11,7 @@ export class TargetSourcesNode extends BaseFileDirectoryNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem() as vscode.TreeItem;
+    const item = super.getTreeItem();
     item.label = "Sources" + (this.allFiles.length === 0 ? " (no files)" : "");
     item.iconPath = extensionRelative("res/meson_32.svg");
     return item;
@@ -24,7 +24,7 @@ export class TargetGeneratedSourcesNode extends BaseFileDirectoryNode {
   }
 
   getTreeItem() {
-    const item = super.getTreeItem() as vscode.TreeItem;
+    const item = super.getTreeItem();
     item.label = "Sources (generated)";
     item.iconPath = extensionRelative("res/meson_32.svg");
     return item;

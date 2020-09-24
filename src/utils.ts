@@ -120,9 +120,7 @@ export async function getTargetName(t: Target) {
 }
 
 export function randomString(length = 4) {
-  return randomBytes(length)
-    .toString("base64")
-    .substr(0, length);
+  return randomBytes(length).toString("base64").substr(0, length);
 }
 
 export function hash(input: BinaryLike) {

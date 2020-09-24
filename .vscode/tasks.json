@@ -8,16 +8,12 @@
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": [
-        "$tsc"
-      ]
+      "problemMatcher": ["$tsc"]
     },
     {
       "type": "npm",
       "script": "watch",
-      "problemMatcher": [
-        "$tsc-watch"
-      ]
+      "problemMatcher": ["$tsc-watch"]
     }
   ]
 }

@@ -42,7 +42,7 @@ export class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
 
   buildFileTree(fpaths: string[]) {
     const folders = new Map<string, string[]>();
-    folders.set(".", new Array());
+    folders.set(".", []);
     for (const f of fpaths) {
       let folderName = path.relative(this.folder, f);
       if (path.dirname(folderName) === ".") {
