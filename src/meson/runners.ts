@@ -20,7 +20,7 @@ export async function runMesonConfigure(source: string, build: string) {
     async progress => {
       progress.report({
         message: `Checking if Meson is configured in ${relative(
-          source,
+          vscode.workspace.rootPath,
           build
         )}...`
       });
@@ -39,7 +39,7 @@ export async function runMesonConfigure(source: string, build: string) {
         await exec("ninja reconfigure", { cwd: build });
       } else {
         progress.report({
-          message: `Configuring Meson into ${relative(source, build)}...`
+          message: `Configuring Meson into ${relative(vscode.workspace.rootPath, build)}...`
         });
         const configureOpts = extensionConfiguration("configureOptions").join(
           " "
