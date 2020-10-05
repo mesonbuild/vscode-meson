@@ -109,11 +109,12 @@ export function workspaceRelative(filepath: string) {
 
 export async function getTargetName(t: Target) {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+  const sourceDir = workspaceRelative(extensionConfiguration("sourceFolder"));
   const buildOptions = await getMesonBuildOptions(buildDir);
   const layoutOption = buildOptions.filter(o => o.name === "layout")[0];
   if (layoutOption.value === "mirror")
     return path.join(
-      path.relative(vscode.workspace.rootPath, path.dirname(t.defined_in)),
+      path.relative(sourceDir, path.dirname(t.defined_in)),
       t.name
     );
   else return `meson-out/${t.name}`;
