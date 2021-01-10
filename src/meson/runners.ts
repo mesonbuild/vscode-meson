@@ -30,13 +30,13 @@ export async function runMesonConfigure(source: string, build: string) {
           increment: 30
         });
         await exec(
-          `meson configure ${extensionConfiguration("configureOptions").join(
+          `${extensionConfiguration("mesonPath")} configure ${extensionConfiguration("configureOptions").join(
             " "
           )} ${build}`,
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
-        await exec("ninja reconfigure", { cwd: build });
+        await exec(`${extensionConfiguration("ninjaPath")} reconfigure`, { cwd: build });
       } else {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
@@ -45,7 +45,7 @@ export async function runMesonConfigure(source: string, build: string) {
           " "
         );
         const { stdout, stderr } = await exec(
-          `meson ${configureOpts} ${build}`,
+          `${extensionConfiguration("mesonPath")} ${configureOpts} ${build}`,
           { cwd: source }
         );
         getOutputChannel().appendLine(stdout);
@@ -70,7 +70,7 @@ export async function runMesonReconfigure() {
 }
 
 export async function runMesonBuild(buildDir: string, name?: string) {
-  let command = !!name ? `ninja ${name}` : "ninja";
+  let command = !!name ? `${extensionConfiguration("ninjaPath")} ${name}` : "ninja";
   const stream = execStream(command, { cwd: buildDir });
 
   return vscode.window.withProgress(
@@ -110,12 +110,12 @@ export async function runMesonTests(build: string, name?: string) {
   try {
     if (name)
       return await execAsTask(
-        `meson test ${name}`,
+        `${extensionConfiguration("mesonPath")} test ${name}`,
         { cwd: build },
         vscode.TaskRevealKind.Always
       );
     return await execAsTask(
-      "ninja test",
+      `${extensionConfiguration("ninjaPath")} test`,
       { cwd: build },
       vscode.TaskRevealKind.Always
     );

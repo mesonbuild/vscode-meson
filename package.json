@@ -76,6 +76,16 @@
             "--buildtype=debug"
           ],
           "description": "Specify the list of configuration options used for Meson configuration."
+        },
+        "mesonbuild.mesonPath": {
+          "type": "string",
+          "default": "meson",
+          "description": "Specify the meson executable to use"
+        },
+        "mesonbuild.ninjaPath": {
+          "type": "string",
+          "default": "ninja",
+          "description": "Specify the ninja executable to use"
         }
       }
     },

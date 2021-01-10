@@ -7,7 +7,7 @@ import {
   getMesonTests,
   getMesonBenchmarks
 } from "./meson/introspection";
-import { getOutputChannel, getTargetName } from "./utils";
+import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
 
 import "array-flat-polyfill";
 
@@ -30,31 +30,31 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       { type: "meson", mode: "build" },
       "Build all targets",
       "Meson",
-      new vscode.ShellExecution("ninja", { cwd: buildDir })
+      new vscode.ShellExecution(extensionConfiguration("ninjaPath"), { cwd: buildDir })
     );
     const defaultTestTask = new vscode.Task(
       { type: "meson", mode: "test" },
       "Run tests",
       "Meson",
-      new vscode.ShellExecution("ninja test", { cwd: buildDir })
+      new vscode.ShellExecution(`${extensionConfiguration("ninjaPath")} test`, { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },
       "Run benchmarks",
       "Meson",
-      new vscode.ShellExecution("ninja benchmark", { cwd: buildDir })
+      new vscode.ShellExecution(`${extensionConfiguration("ninjaPath")} benchmark`, { cwd: buildDir })
     );
     const defaultReconfigureTask = new vscode.Task(
       { type: "meson", mode: "reconfigure" },
       "Reconfigure",
       "Meson",
-      new vscode.ShellExecution("ninja reconfigure", { cwd: buildDir })
+      new vscode.ShellExecution(`${extensionConfiguration("ninjaPath")} reconfigure`, { cwd: buildDir })
     );
     const defaultCleanTask = new vscode.Task(
       { type: "meson", mode: "clean" },
       "Clean",
       "Meson",
-      new vscode.ShellExecution("ninja clean", { cwd: buildDir })
+      new vscode.ShellExecution(`${extensionConfiguration("ninjaPath")} clean`, { cwd: buildDir })
     );
     defaultBuildTask.group = vscode.TaskGroup.Build;
     defaultTestTask.group = vscode.TaskGroup.Test;
@@ -81,7 +81,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
             def,
             `Build ${targetName}`,
             "Meson",
-            new vscode.ShellExecution(`ninja ${targetName}`, {
+            new vscode.ShellExecution(`${extensionConfiguration("ninjaPath")} ${targetName}`, {
               cwd: buildDir
             })
           );
@@ -125,7 +125,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           { type: "meson", mode: "test", target: t.name },
           `Test ${t.name}`,
           "Meson",
-          new vscode.ShellExecution(`meson test ${t.name}`, {
+          new vscode.ShellExecution(`${extensionConfiguration("mesonPath")} test ${t.name}`, {
             env: t.env,
             cwd: buildDir
           })
@@ -138,7 +138,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           { type: "meson", mode: "benchmark", target: b.name },
           `Benchmark ${b.name}`,
           "Meson",
-          new vscode.ShellExecution(`meson benchmark ${b.name}`, {
+          new vscode.ShellExecution(`${extensionConfiguration("mesonPath")} benchmark ${b.name}`, {
             env: b.env,
             cwd: buildDir
           })
