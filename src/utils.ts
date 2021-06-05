@@ -158,3 +158,7 @@ export function arrayIncludes<T>(array: T[], value: T) {
 export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
   return arrayIncludes(Object.getOwnPropertyNames(x), "then");
 }
+
+export function resolveSymlinkPath(root, p) {
+  return path.join(root, path.relative(fs.realpathSync(root), p));
+}

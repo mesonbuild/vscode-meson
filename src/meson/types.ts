@@ -37,6 +37,7 @@ export interface Target {
   id: string;
   type: TargetType;
   defined_in: string;
+  extra_files?: string[];
   subproject: string | null;
   filename: string[];
   build_by_default: boolean;

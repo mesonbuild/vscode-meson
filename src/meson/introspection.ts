@@ -1,5 +1,6 @@
 import * as path from "path";
-import { exec, parseJSONFileIfExists } from "../utils";
+import { workspace } from "vscode";
+import { exec, parseJSONFileIfExists, extensionConfiguration, resolveSymlinkPath } from "../utils";
 import {
   Targets,
   Dependencies,
@@ -28,6 +29,20 @@ export async function getMesonTargets(build: string) {
       return t;
     });
   }
+  const root = workspace.workspaceFolders[0].uri.path;
+  let adapt = (p) => {
+    return resolveSymlinkPath(root, p);
+  };
+  parsed = parsed.map(t => {
+    t.defined_in = adapt(t.defined_in);
+    t.extra_files.map(adapt);
+    t.filename = t.filename.map(adapt);
+    t.target_sources.map(s => {
+      s.generated_sources.map(adapt);
+      s.sources.map(adapt);
+    });
+    return t;
+  });
   return parsed;
 }
 export async function getMesonBuildOptions(build: string) {

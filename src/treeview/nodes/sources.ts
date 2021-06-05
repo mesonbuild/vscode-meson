@@ -1,13 +1,13 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { extensionRelative, randomString } from "../../utils";
+import { extensionRelative, randomString, resolveSymlinkPath } from "../../utils";
 import { BaseNode } from "../basenode";
 import { BaseFileDirectoryNode } from "./base";
 
 export class TargetSourcesNode extends BaseFileDirectoryNode {
   constructor(rootFolder: string, private readonly allFiles: string[]) {
-    super(rootFolder, allFiles);
+    super(rootFolder, allFiles.map(p => resolveSymlinkPath(rootFolder, p)));
   }
 
   getTreeItem() {
