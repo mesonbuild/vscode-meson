@@ -30,7 +30,7 @@ export async function runMesonConfigure(source: string, build: string) {
           increment: 30
         });
         await exec(
-          `meson configure ${extensionConfiguration("configureOptions").join(
+          `${extensionConfiguration("mesonExecutable")} configure ${extensionConfiguration("configureOptions").join(
             " "
           )} ${build}`,
           { cwd: source }
@@ -45,7 +45,7 @@ export async function runMesonConfigure(source: string, build: string) {
           " "
         );
         const { stdout, stderr } = await exec(
-          `meson ${configureOpts} ${build}`,
+          `${extensionConfiguration("mesonExecutable")} ${configureOpts} ${build}`,
           { cwd: source }
         );
         getOutputChannel().appendLine(stdout);

@@ -76,6 +76,11 @@
             "--buildtype=debug"
           ],
           "description": "Specify the list of configuration options used for Meson configuration."
+        },
+        "mesonbuild.mesonExecutable": {
+          "type": "string",
+          "default": "meson",
+          "description": "Specify meson executable."
         }
       }
     },
