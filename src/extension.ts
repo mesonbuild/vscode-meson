@@ -28,11 +28,11 @@ let watcher: vscode.FileSystemWatcher;
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
 
-  const root = vscode.workspace.rootPath;
-  if (!root) {
-    return
-  };
+  if (!vscode.workspace.workspaceFolders) {
+    return;
+  }
 
+  const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
