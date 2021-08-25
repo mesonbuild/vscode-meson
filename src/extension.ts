@@ -213,7 +213,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
               vscode.ConfigurationTarget.Global
             );
         }
-        if (response !== "No") {
+        if (response !== undefined && response !== "No") {
           vscode.commands
             .executeCommand("mesonbuild.configure")
             .then(() => explorer.refresh());
