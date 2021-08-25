@@ -182,7 +182,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
       .then(isFresh => {
         explorer.refresh();
       });
-  else if (!ctx.workspaceState.get<boolean>("askedWhetherToConfigureOnOpen")) {
+  else if (!ctx.workspaceState.get<boolean>("answeredWhetherToConfigureOnOpen"))
     vscode.window
       .showInformationMessage(
         "Meson project detected, would you like VS Code to configure it?",
@@ -213,13 +213,12 @@ export function activate(ctx: vscode.ExtensionContext): void {
               vscode.ConfigurationTarget.Global
             );
         }
-        if (response !== undefined && response !== "No") {
-          vscode.commands
-            .executeCommand("mesonbuild.configure")
-            .then(() => explorer.refresh());
+        if (response !== undefined) {
+          if (response !== "No")
+            vscode.commands
+              .executeCommand("mesonbuild.configure")
+              .then(() => explorer.refresh());
+          ctx.workspaceState.update("answeredWhetherToConfigureOnOpen", true);
         }
       });
-    ctx.workspaceState.update("askedWhetherToConfigureOnOpen", true);
-  }
-}
 }
