@@ -3,23 +3,24 @@
   "displayName": "Meson",
   "description": "Meson language support for Visual Studio Code",
   "icon": "graphics/icon.png",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "license": "Apache-2.0",
-  "publisher": "asabil",
+  "publisher": "dcbaker",
   "author": {
-    "name": "Ali Sabil"
+    "name": "Dylan Baker"
   },
   "contributors": [
-    "Nathan Graule <solarliner@gmail.com> (https://solarliner.me)"
+    "Nathan Graule <solarliner@gmail.com> (https://solarliner.me)",
+    "Ali Sabil <ali.sabil@gmail.com>"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/asabil/vscode-meson.git"
+    "url": "https://github.com/dcbaker/vscode-meson.git"
   },
   "bugs": {
-    "url": "https://github.com/asabil/vscode-meson/issues"
+    "url": "https://github.com/dcbaker/vscode-meson/issues"
   },
-  "homepage": "https://github.com/asabil/vscode-meson/blob/master/README.md",
+  "homepage": "https://github.com/dcbaker/vscode-meson/blob/master/README.md",
   "engines": {
     "vscode": "^1.26.0"
   },
