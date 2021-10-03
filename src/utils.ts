@@ -94,7 +94,7 @@ export function getOutputChannel(): vscode.OutputChannel {
 }
 
 export function thisExtension() {
-  const ext = vscode.extensions.getExtension("asabil.meson");
+  const ext = vscode.extensions.getExtension("mesonbuild.meson");
   if (ext) return ext;
   else throw new Error("Extension not found");
 }
