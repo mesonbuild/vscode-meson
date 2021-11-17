@@ -57,24 +57,6 @@ export class SubprojectsRootNode extends BaseNode {
   }
 }
 
-export class TargetsRootNode extends BaseNode {
-  constructor(private readonly targets: Targets) {
-    super(hash(targets.map(t => `${t.subproject}/${t.name}`).join(";")));
-  }
-
-  getTreeItem() {
-    const item = super.getTreeItem() as vscode.TreeItem;
-    item.label = "Targets";
-    item.iconPath = extensionRelative("res/meson_32.svg");
-    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    return item;
-  }
-
-  getChildren() {
-    return this.targets.map(t => new TargetNode(t));
-  }
-}
-
 export class TestRootNode extends BaseNode {
   constructor(private readonly tests: Tests, private readonly isBenchmark) {
     super(hash(tests.map(t => t.suite + t.name).join(";") + `${isBenchmark ? "-benchmarks" : "-tests"}`));
@@ -109,8 +91,8 @@ export class SubprojectNode extends BaseNode {
   }
 
   async getChildren() {
-    return await getMesonTargets(this.buildDir)
-      .then(tts => tts.filter(t => t.subproject === this.subproject.name))
-      .then(tt => tt.map(t => new TargetNode(t)));
+    const targets = await getMesonTargets(this.buildDir);
+
+    return targets.filter(t => t.subproject === this.subproject.name).map(t => new TargetNode(t));
   }
 }
