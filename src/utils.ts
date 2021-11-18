@@ -51,14 +51,15 @@ export function execStream(
 
 export function execAsTask(
   command: string,
-  options: vscode.ShellExecutionOptions,
+  args: string[],
+  options: vscode.ProcessExecutionOptions,
   revealMode = vscode.TaskRevealKind.Silent
 ) {
   const task = new vscode.Task(
     { type: "temp" },
     command,
     "Meson",
-    new vscode.ShellExecution(command, options)
+    new vscode.ProcessExecution(command, args, options)
   );
   task.presentationOptions.echo = false;
   task.presentationOptions.focus = false;

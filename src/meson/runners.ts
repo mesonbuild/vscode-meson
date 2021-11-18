@@ -108,14 +108,9 @@ export async function runMesonBuild(buildDir: string, name?: string) {
 
 export async function runMesonTests(build: string, name?: string) {
   try {
-    if (name)
-      return await execAsTask(
-        `meson test ${name}`,
-        { cwd: build },
-        vscode.TaskRevealKind.Always
-      );
+    const args = ["test"].concat(name ?? []);
     return await execAsTask(
-      "ninja test",
+      "ninja", args,
       { cwd: build },
       vscode.TaskRevealKind.Always
     );
