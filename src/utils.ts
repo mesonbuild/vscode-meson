@@ -66,16 +66,14 @@ export function execAsTask(
   return vscode.tasks.executeTask(task);
 }
 
-export function parseJSONFileIfExists<T = object>(path: string) {
-  return new Promise<T | false>((resolve, reject) => {
-    fs.exists(path, exists => {
-      if (!exists) reject(false);
-      fs.readFile(path, (err, data) => {
-        if (err) resolve(false);
-        else resolve(JSON.parse(data.toString()) as T);
-      });
-    });
-  });
+export async function parseJSONFileIfExists<T = object>(path: string) {
+  try {
+    const data = await fs.promises.readFile(path);
+    return JSON.parse(data.toString()) as T;
+  }
+  catch (err) {
+    return false;
+  }
 }
 
 let _channel: vscode.OutputChannel;
