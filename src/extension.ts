@@ -159,7 +159,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
             });
           picker.show();
         }).catch<null>(() => null);
-        if (resolvedName != null)
+        if (resolvedName !== null)
           await runMesonTests(
             workspaceRelative(extensionConfiguration("buildFolder")),
             resolvedName
