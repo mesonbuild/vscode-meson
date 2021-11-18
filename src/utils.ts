@@ -11,7 +11,7 @@ import { getMesonBuildOptions } from "./meson/introspection";
 
 export async function exec(
   command: string,
-  options: cp.ExecOptions
+  options: cp.ExecOptions = {}
 ): Promise<{ stdout: string; stderr: string, error?: cp.ExecException }> {
   return new Promise<{ stdout: string; stderr: string, error?: cp.ExecException }>((resolve, reject) => {
     cp.exec(command, options, (error, stdout, stderr) => {

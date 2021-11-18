@@ -85,7 +85,7 @@ export async function getMesonBenchmarks(build: string) {
 }
 
 export async function getMesonVersion(): Promise<[number, number, number]> {
-  const { stdout } = await exec("meson --version", {});
+  const { stdout } = await exec("meson --version");
   const match = stdout.trim().match(MESON_VERSION_REGEX);
   if (match) {
     return match.slice(1, 3).map(s => Number.parseInt(s)) as [

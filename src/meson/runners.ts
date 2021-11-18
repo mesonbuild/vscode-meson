@@ -36,7 +36,8 @@ export async function runMesonConfigure(source: string, build: string) {
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
-        await exec("ninja reconfigure", { cwd: build });
+        // Note "setup --reconfigure" needs to be run from the root.
+        await exec(`meson setup --reconfigure ${build}`, { cwd: source });
       } else {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
@@ -110,7 +111,7 @@ export async function runMesonTests(build: string, name?: string) {
   try {
     const args = ["test"].concat(name ?? []);
     return await execAsTask(
-      "ninja", args,
+      "meson", args,
       { cwd: build },
       vscode.TaskRevealKind.Always
     );
