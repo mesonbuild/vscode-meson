@@ -25,14 +25,11 @@ export async function exec(
 }
 
 export function execStream(
-  command: string | string[],
+  command: string,
+  args: string[],
   options: cp.SpawnOptions
 ) {
-  //FIXME: Force string array and fix callers
-  if (typeof command === "string") {
-    command = command.split(" ");
-  }
-  const spawned = cp.spawn(command[0], command.slice(1), options);
+  const spawned = cp.spawn(command, args, options);
   return {
     onLine(fn: (line: string, isError: boolean) => void) {
       spawned.stdout.on("data", (msg: Buffer) => fn(msg.toString(), false));
