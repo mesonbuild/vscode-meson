@@ -140,17 +140,15 @@ export function activate(ctx: vscode.ExtensionContext): void {
               },
               ...tests.map<vscode.QuickPickItem>(t => ({
                 label: t.name,
-                detail: `Test timeout: ${t.timeout}s, ${
-                  t.is_parallel ? "Run in parallel" : "Run serially"
-                }`,
+                detail: `Test timeout: ${t.timeout}s, ${t.is_parallel ? "Run in parallel" : "Run serially"
+                  }`,
                 description: t.suite.join(","),
                 picked: false
               })),
               ...benchmarks.map<vscode.QuickPickItem>(b => ({
                 label: b.name,
-                detail: `Benchmark timeout: ${
-                  b.timeout
-                }s, benchmarks always run serially`,
+                detail: `Benchmark timeout: ${b.timeout
+                  }s, benchmarks always run serially`,
                 description: b.suite.join(","),
                 picked: false
               }))
@@ -172,7 +170,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   );
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask("ninja clean", {
+      await execAsTask("ninja", ["clean"], {
         cwd: workspaceRelative(extensionConfiguration("buildFolder"))
       });
     })
