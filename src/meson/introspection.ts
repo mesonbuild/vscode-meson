@@ -54,7 +54,7 @@ export async function getMesonProjectInfo(build: string) {
 }
 
 export async function getMesonDependencies(build: string) {
-  const parsed = parseJSONFileIfExists<Dependencies>(
+  const parsed = await parseJSONFileIfExists<Dependencies>(
     path.join(build, "meson-info/intro-dependencies.json")
   );
   if (parsed) return parsed;
