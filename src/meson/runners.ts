@@ -71,12 +71,15 @@ export async function runMesonReconfigure() {
 }
 
 export async function runMesonBuild(buildDir: string, name?: string) {
-  const args = name ? [name] : [];
-  const stream = execStream("ninja", args, { cwd: buildDir });
+  const title = name ? `Building target ${name}` : "Building project";
+  getOutputChannel().append(`\n${title}\n`);
+
+  const args = ["compile"].concat(name ?? []);
+  const stream = execStream("meson", args, { cwd: buildDir });
 
   return vscode.window.withProgress(
     {
-      title: name ? `Building target ${name}` : "Building project",
+      title,
       location: vscode.ProgressLocation.Notification,
       cancellable: true
     },
@@ -95,13 +98,15 @@ export async function runMesonBuild(buildDir: string, name?: string) {
         if (isError) getOutputChannel().show(true);
       });
 
-      await stream.finishP().then(code => {
-        if (code !== 0)
-          throw new Error(
-            "Build failed. See Meson Build output for more details."
-          );
-      });
-      progress.report({ message: "Build finished.", increment: 100 });
+      const code = await stream.finishP();
+      if (code !== 0) {
+        throw new Error(
+          "Build failed. See Meson Build output for more details."
+        );
+      }
+
+      getOutputChannel().append(`${title} finished.\n`);
+      progress.report({ message: "finished.", increment: 100 });
       await new Promise(res => setTimeout(res, 5000));
     }
   );
