@@ -11,10 +11,11 @@ import { getMesonBuildOptions } from "./meson/introspection";
 
 export async function exec(
   command: string,
+  args: string[],
   options: cp.ExecOptions = {}
 ): Promise<{ stdout: string; stderr: string, error?: cp.ExecException }> {
   return new Promise<{ stdout: string; stderr: string, error?: cp.ExecException }>((resolve, reject) => {
-    cp.exec(command, options, (error, stdout, stderr) => {
+    cp.execFile(command, args, options, (error, stdout, stderr) => {
       if (error) {
         reject({ error, stdout, stderr });
       } else {
