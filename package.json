@@ -43,6 +43,7 @@
     "onCommand:mesonbuild.configure",
     "onCommand:mesonbuild.build",
     "onCommand:mesonbuild.test",
+    "onCommand:mesonbuild.benchmark",
     "workspaceContains:meson.build"
   ],
   "main": "./out/src/extension",
@@ -67,6 +68,10 @@
       {
         "command": "mesonbuild.test",
         "title": "Meson: Run Unit Tests"
+      },
+      {
+        "command": "mesonbuild.benchmark",
+        "title": "Meson: Run Benchmarks"
       }
     ],
     "configuration": {

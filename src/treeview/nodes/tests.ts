@@ -5,8 +5,8 @@ import { Test } from "../../meson/types";
 import { extensionRelative } from "../../utils";
 
 export class TestNode extends BaseNode {
-  constructor(private readonly test: Test) {
-    super(test.name);
+  constructor(private readonly test: Test, private readonly isBenchmark) {
+    super(`${isBenchmark ? "benchmark-" : "test-"}${test.name}`);
   }
 
   getChildren() {
@@ -18,8 +18,8 @@ export class TestNode extends BaseNode {
     item.label = this.test.name;
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.command = {
-      title: "Run test",
-      command: "mesonbuild.test",
+      title: `Run ${this.isBenchmark ? "benchmark" : "test"}`,
+      command: `mesonbuild.${this.isBenchmark ? "benchmark" : "test"}`,
       arguments: [this.test.name]
     };
 
