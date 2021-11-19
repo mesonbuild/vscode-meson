@@ -24,34 +24,39 @@ export async function runMesonConfigure(source: string, build: string) {
           build
         )}...`
       });
+
+      const configureOpts = extensionConfiguration("configureOptions").join(" ");
+
       if (await checkMesonIsConfigured(build)) {
         progress.report({
           message: "Applying configure options...",
           increment: 30
         });
+
         await exec(
-          `meson configure ${extensionConfiguration("configureOptions").join(
-            " "
-          )} ${build}`,
+          "meson", ["configure", configureOpts, build],
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
+
         // Note "setup --reconfigure" needs to be run from the root.
-        await exec(`meson setup --reconfigure ${build}`, { cwd: source });
+        await exec("meson", ["setup", "--reconfigure", build],
+          { cwd: source });
       } else {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
         });
-        const configureOpts = extensionConfiguration("configureOptions").join(
-          " "
-        );
+
         const { stdout, stderr } = await exec(
-          `meson ${configureOpts} ${build}`,
-          { cwd: source }
-        );
+          "meson", ["setup", configureOpts, build],
+          { cwd: source });
+
         getOutputChannel().appendLine(stdout);
         getOutputChannel().appendLine(stderr);
-        if (stderr.length > 0) getOutputChannel().show(true);
+
+        if (stderr.length > 0) {
+          getOutputChannel().show(true);
+        }
       }
       progress.report({ message: "Done.", increment: 100 });
       return new Promise(res => setTimeout(res, 2000));
