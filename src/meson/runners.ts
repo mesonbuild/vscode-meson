@@ -117,17 +117,18 @@ export async function runMesonBuild(buildDir: string, name?: string) {
   );
 }
 
-export async function runMesonTests(build: string, name?: string) {
+export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {
   try {
-    const args = ["test"].concat(name ?? []);
+    const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
+    const args = ["test", ...benchmarkArgs].concat(name ?? []);
     return await execAsTask(
       "meson", args,
-      { cwd: build },
+      { cwd: buildDir },
       vscode.TaskRevealKind.Always
     );
   } catch (e) {
     if (e.stderr) {
-      vscode.window.showErrorMessage("Tests failed.");
+      vscode.window.showErrorMessage(`${isBenchmark ? "Benchmarks" : "Tests"} failed.`);
     }
   }
 }

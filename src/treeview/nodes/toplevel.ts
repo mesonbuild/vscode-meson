@@ -4,7 +4,7 @@ import { BaseNode } from "../basenode";
 import { ProjectInfo, Subproject, Tests, Targets } from "../../meson/types";
 import { extensionRelative, hash } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";
-import { getMesonTargets, getMesonTests } from "../../meson/introspection";
+import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
 import { TestNode } from "./tests";
 
 export class ProjectNode extends BaseNode {
@@ -27,7 +27,8 @@ export class ProjectNode extends BaseNode {
         ".",
         (await getMesonTargets(this.buildDir)).filter(t => !t.subproject)
       ),
-      new TestRootNode(await getMesonTests(this.buildDir))
+      new TestRootNode(await getMesonTests(this.buildDir), false),
+      new TestRootNode(await getMesonBenchmarks(this.buildDir), true)
     ];
   }
 }
@@ -75,20 +76,20 @@ export class TargetsRootNode extends BaseNode {
 }
 
 export class TestRootNode extends BaseNode {
-  constructor(private readonly tests: Tests) {
-    super(hash(tests.map(t => t.suite + t.name).join(";")));
+  constructor(private readonly tests: Tests, private readonly isBenchmark) {
+    super(hash(tests.map(t => t.suite + t.name).join(";") + `${isBenchmark ? "-benchmarks" : "-tests"}`));
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
-    item.label = "Tests";
+    item.label = this.isBenchmark ? "Benchmarks" : "Tests";
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     return item;
   }
 
   getChildren() {
-    return this.tests.map(t => new TestNode(t));
+    return this.tests.map(t => new TestNode(t, this.isBenchmark));
   }
 }
 
