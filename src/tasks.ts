@@ -138,7 +138,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           { type: "meson", mode: "benchmark", target: b.name },
           `Benchmark ${b.name}`,
           "Meson",
-          new vscode.ShellExecution(`meson benchmark ${b.name}`, {
+          new vscode.ShellExecution(`meson test --benchmark ${b.name}`, {
             env: b.env,
             cwd: buildDir
           })
