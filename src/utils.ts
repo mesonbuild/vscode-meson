@@ -107,16 +107,20 @@ export function workspaceRelative(filepath: string) {
   return path.join(vscode.workspace.rootPath, filepath);
 }
 
-export async function getTargetName(t: Target) {
+export async function getTargetName(target: Target) {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   const buildOptions = await getMesonBuildOptions(buildDir);
   const layoutOption = buildOptions.filter(o => o.name === "layout")[0];
-  if (layoutOption.value === "mirror")
-    return path.join(
-      path.relative(vscode.workspace.rootPath, path.dirname(t.defined_in)),
-      t.name
-    );
-  else return `meson-out/${t.name}`;
+
+  if (layoutOption.value === "mirror") {
+    const relativePath = path.relative(vscode.workspace.rootPath, path.dirname(target.defined_in));
+
+    // Meson requires the separator between path and target name to be '/'.
+    return path.posix.join(relativePath, target.name);
+  }
+  else {
+    return `meson-out/${target.name}`;
+  }
 }
 
 export function randomString(length = 4) {

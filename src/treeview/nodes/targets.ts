@@ -75,15 +75,19 @@ export class TargetNode extends BaseNode {
       ];
     }
   }
+  
   async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    item.label = await getTargetName(this.target);
+
+    const targetName = await getTargetName(this.target);
+
+    item.label = this.target.name;
     item.command = {
       title: `Build ${this.target.name}`,
       command: "mesonbuild.build",
-      arguments: [getTargetName(this.target)]
+      arguments: [targetName]
     };
     return item;
   }
