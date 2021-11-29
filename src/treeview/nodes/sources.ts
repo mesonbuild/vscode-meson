@@ -14,6 +14,7 @@ export class TargetSourcesNode extends BaseFileDirectoryNode {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.label = "Sources" + (this.allFiles.length === 0 ? " (no files)" : "");
     item.iconPath = extensionRelative("res/meson_32.svg");
+
     return item;
   }
 }
@@ -58,6 +59,10 @@ export class TargetSourceFileNode extends BaseNode {
       title: "Open file",
       arguments: [vscode.Uri.file(this.file)]
     };
+	
+    // No children currently, so don't display toggle.
+    item.collapsibleState = vscode.TreeItemCollapsibleState.None;
+	
     return item;
   }
 }
