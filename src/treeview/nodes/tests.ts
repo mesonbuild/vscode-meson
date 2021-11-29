@@ -9,10 +9,6 @@ export class TestNode extends BaseNode {
     super(`${isBenchmark ? "benchmark-" : "test-"}${test.name}`);
   }
 
-  getChildren() {
-    return [];
-  }
-
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.label = this.test.name;
@@ -22,6 +18,9 @@ export class TestNode extends BaseNode {
       command: `mesonbuild.${this.isBenchmark ? "benchmark" : "test"}`,
       arguments: [this.test.name]
     };
+
+    // No children currently, so don't display toggle.
+    item.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
     return item;
   }

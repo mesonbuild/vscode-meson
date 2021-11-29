@@ -67,6 +67,10 @@ export class TestRootNode extends BaseNode {
     item.label = this.isBenchmark ? "Benchmarks" : "Tests";
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    if (this.tests.length === 0) {
+      item.collapsibleState = vscode.TreeItemCollapsibleState.None;
+    }
+
     return item;
   }
 
@@ -87,6 +91,10 @@ export class SubprojectNode extends BaseNode {
     const item = super.getTreeItem() as vscode.TreeItem;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+
+    // No children currently, so don't display toggle.
+    item.collapsibleState = vscode.TreeItemCollapsibleState.None;
+
     return item;
   }
 
