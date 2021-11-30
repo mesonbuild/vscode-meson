@@ -9,7 +9,7 @@ class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
 
   static readonly commandName = "mesonbuild.view-refresh";
 
-  constructor(ctx: vscode.ExtensionContext, private readonly buildDir: string) {
+  constructor(ctx: vscode.ExtensionContext, private readonly projectDir, private readonly buildDir: string) {
     ctx.subscriptions.push(
       vscode.commands.registerCommand(MesonProjectDataProvider.commandName, () =>
         this.refresh()
@@ -31,15 +31,15 @@ class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
     }
 
     const projectInfo = await getMesonProjectInfo(this.buildDir);
-    return [new ProjectNode(projectInfo, this.buildDir)];
+    return [new ProjectNode(projectInfo, this.projectDir, this.buildDir)];
   }
 }
 
 export class MesonProjectExplorer {
   private readonly viewer: vscode.TreeView<BaseNode>;
 
-  constructor(ctx: vscode.ExtensionContext, buildDir: string) {
-    const treeDataProvider = new MesonProjectDataProvider(ctx, buildDir);
+  constructor(ctx: vscode.ExtensionContext, projectDir: string, buildDir: string) {
+    const treeDataProvider = new MesonProjectDataProvider(ctx, projectDir, buildDir);
     this.viewer = vscode.window.createTreeView("meson-project", {
       treeDataProvider
     });

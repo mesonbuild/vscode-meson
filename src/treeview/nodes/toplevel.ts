@@ -1,50 +1,58 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject, Tests, Targets } from "../../meson/types";
-import { extensionRelative, hash } from "../../utils";
+import { ProjectInfo, Subproject } from "../../meson/types";
+import { extensionRelative } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
-import { TestNode } from "./tests";
+import { TestRootNode } from "./tests";
 
 export class ProjectNode extends BaseNode {
   constructor(
     private readonly project: ProjectInfo,
+    projectDir: string,
     private readonly buildDir: string
   ) {
-    super(project.descriptive_name + " " + project.version);
+    // Unique id for the root node of this (root directory, project, build dir).
+    // All other nodes hang off this id so they are unique.
+    super(`project-${projectDir}-${project.descriptive_name}-${buildDir}`);
   }
+
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+
+    item.label = `${this.project.descriptive_name} ${this.project.version}`;
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+
     return item;
   }
+
   async getChildren() {
     return [
-      new SubprojectsRootNode(this.project.subprojects, this.buildDir),
-      new TargetDirectoryNode(
+      new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir),
+      new TargetDirectoryNode(`${this.id}-targets`,
         ".",
-        (await getMesonTargets(this.buildDir)).filter(t => !t.subproject)
+        (await getMesonTargets(this.buildDir)).filter((target) => !target.subproject)
       ),
-      new TestRootNode(await getMesonTests(this.buildDir), false),
-      new TestRootNode(await getMesonBenchmarks(this.buildDir), true)
+      new TestRootNode(this.id, await getMesonTests(this.buildDir), false),
+      new TestRootNode(this.id, await getMesonBenchmarks(this.buildDir), true)
     ];
   }
 }
 
-export class SubprojectsRootNode extends BaseNode {
+class SubprojectsRootNode extends BaseNode {
   constructor(
+    parentId: string,
     private readonly subprojects: Subproject[],
     private readonly buildDir: string
   ) {
-    super(
-      hash(subprojects.map(s => `${s.descriptive_name} ${s.version}`).join(";"))
-    );
+    super(`${parentId}-subprojects`);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+
     item.label = "Subprojects";
     item.iconPath = extensionRelative("res/icon-subprojects.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
@@ -53,42 +61,23 @@ export class SubprojectsRootNode extends BaseNode {
   }
 
   getChildren() {
-    return this.subprojects.map(s => new SubprojectNode(s, this.buildDir));
+    return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir));
   }
 }
 
-export class TestRootNode extends BaseNode {
-  constructor(private readonly tests: Tests, private readonly isBenchmark) {
-    super(hash(tests.map(t => t.suite + t.name).join(";") + `${isBenchmark ? "-benchmarks" : "-tests"}`));
-  }
-
-  getTreeItem() {
-    const item = super.getTreeItem() as vscode.TreeItem;
-    item.label = this.isBenchmark ? "Benchmarks" : "Tests";
-    item.iconPath = extensionRelative("res/meson_32.svg");
-    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-    if (this.tests.length === 0) {
-      item.collapsibleState = vscode.TreeItemCollapsibleState.None;
-    }
-
-    return item;
-  }
-
-  getChildren() {
-    return this.tests.map(t => new TestNode(t, this.isBenchmark));
-  }
-}
-
-export class SubprojectNode extends BaseNode {
+class SubprojectNode extends BaseNode {
   constructor(
+    parentId: string,
     private readonly subproject: Subproject,
     private readonly buildDir: string
   ) {
-    super(subproject.descriptive_name + " " + subproject.version);
+    super(`${parentId}-${subproject.descriptive_name}-${subproject.version}`);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+
+    item.label = `${this.subproject.descriptive_name} ${this.subproject.version}`;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
 
@@ -101,6 +90,6 @@ export class SubprojectNode extends BaseNode {
   async getChildren() {
     const targets = await getMesonTargets(this.buildDir);
 
-    return targets.filter(t => t.subproject === this.subproject.name).map(t => new TargetNode(t));
+    return targets.filter(t => t.subproject === this.subproject.name).map(t => new TargetNode(this.id, t));
   }
 }

@@ -1,68 +1,116 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { extensionRelative, randomString } from "../../utils";
+import { extensionRelative } from "../../utils";
 import { BaseNode } from "../basenode";
-import { BaseFileDirectoryNode } from "./base";
+import { BaseDirectoryNode } from "./base";
 
-export class TargetSourcesNode extends BaseFileDirectoryNode {
-  constructor(rootFolder: string, private readonly allFiles: string[]) {
-    super(rootFolder, allFiles);
+abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
+  async getChildren() {
+    const subfolders = await this.subfolders;
+
+    return Array.from(subfolders.entries())
+      .map(([folder, files]) => {
+        if (folder === ".") {
+          return files.map((file) => new TargetSourceFileNode(this.id, file));
+        } else {
+          return new TargetSourceDirectoryNode(this.id, folder, files);
+        }
+      })
+      .flat(1);
+  }
+
+  buildFileTree(fpaths: string[]) {
+    const folders = new Map<string, string[]>();
+    folders.set(".", new Array());
+
+    for (const f of fpaths) {
+      let folderName = path.relative(this.folder, f);
+      if (path.dirname(folderName) === ".") {
+        folders.get(".").push(f);
+        continue;
+      }
+
+      while (path.dirname(folderName) !== ".") {
+        folderName = path.dirname(folderName);
+      }
+
+      const absFolder = path.join(this.folder, folderName);
+      if (folders.has(absFolder)) {
+        folders.get(absFolder).push(f);
+      } else {
+        folders.set(absFolder, [f]);
+      }
+    }
+
+    return folders;
+  }
+}
+
+export class TargetSourcesRootNode extends BaseFileDirectoryNode {
+  constructor(parentId: string, rootFolder: string, private readonly allFiles: string[]) {
+    super(`${parentId}-sources`, rootFolder, allFiles);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
-    item.label = "Sources" + (this.allFiles.length === 0 ? " (no files)" : "");
+
+    item.label = `Sources${(this.allFiles.length === 0) ? " (no files)" : ""}`;
     item.iconPath = extensionRelative("res/meson_32.svg");
 
     return item;
   }
 }
 
-export class TargetGeneratedSourcesNode extends BaseFileDirectoryNode {
-  constructor(files: string[]) {
-    super(vscode.workspace.rootPath, files);
+export class TargetGeneratedSourcesRootNode extends BaseFileDirectoryNode {
+  constructor(parentId: string, files: string[]) {
+    super(`${parentId}-gensources`, vscode.workspace.rootPath, files);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+
     item.label = "Sources (generated)";
     item.iconPath = extensionRelative("res/meson_32.svg");
+
     return item;
   }
 }
 
-export class DirectoryNode extends BaseFileDirectoryNode {
-  constructor(folder: string, files: string[]) {
-    super(folder, files);
+export class TargetSourceDirectoryNode extends BaseFileDirectoryNode {
+  constructor(parentId: string, folder: string, files: string[]) {
+    super(`${parentId}-${path.basename(folder)}`, folder, files);
   }
 
   getTreeItem() {
     const item = super.getTreeItem();
+
     item.label = path.basename(this.folder);
     item.resourceUri = vscode.Uri.file(this.folder);
+
     return item;
   }
 }
 
 export class TargetSourceFileNode extends BaseNode {
-  constructor(private readonly file: string) {
-    super(file + randomString());
+  constructor(parentId: string, private readonly file: string) {
+    super(`${parentId}-${path.basename(file)}`);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
-    item.resourceUri = vscode.Uri.file(this.file);
+
     item.label = path.basename(this.file);
+    item.resourceUri = vscode.Uri.file(this.file);
     item.command = {
       command: "vscode.open",
       title: "Open file",
       arguments: [vscode.Uri.file(this.file)]
     };
-	
+
     // No children currently, so don't display toggle.
     item.collapsibleState = vscode.TreeItemCollapsibleState.None;
-	
+
     return item;
   }
 }

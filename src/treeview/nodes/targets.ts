@@ -3,11 +3,15 @@ import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
 import { Target, Targets } from "../../meson/types";
-import { TargetSourcesNode, TargetGeneratedSourcesNode } from "./sources";
+import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources";
 import { extensionRelative, getTargetName } from "../../utils";
 import { BaseDirectoryNode } from "./base";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
+  constructor(parentId, folder: string, targets: Targets) {
+    super(`${parentId}-${path.basename(folder)}`, folder, targets);
+  }
+
   getTreeItem() {
     const item = super.getTreeItem();
 
@@ -25,8 +29,11 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   async getChildren() {
     return Array.from((await this.subfolders).entries())
       .map(([folder, targets]) => {
-        if (folder === ".") return targets.map(tgt => new TargetNode(tgt));
-        return new TargetDirectoryNode(folder, targets);
+        if (folder === ".") {
+          return targets.map(tgt => new TargetNode(this.id, tgt));
+        } else {
+          return new TargetDirectoryNode(this.id, folder, targets);
+        }
       })
       .flat(1);
   }
@@ -34,32 +41,41 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   async buildFileTree(targets: Targets) {
     const folders = new Map<string, Targets>();
     folders.set(".", new Array());
-    for (const tgt of targets) {
-      let folderName = path.relative(this.folder, await getTargetName(tgt));
+
+    for (const target of targets) {
+      const targetName = await getTargetName(target);
+
+      let folderName = path.relative(this.folder, targetName);
       if (path.dirname(folderName) === ".") {
-        folders.get(".").push(tgt);
+        folders.get(".").push(target);
         continue;
       }
-      while (path.dirname(folderName) !== ".")
+
+      while (path.dirname(folderName) !== ".") {
         folderName = path.dirname(folderName);
+      }
+
       const absFolder = path.join(this.folder, folderName);
       if (folders.has(absFolder)) {
-        folders.get(absFolder).push(tgt);
+        folders.get(absFolder).push(target);
       } else {
-        folders.set(absFolder, [tgt]);
+        folders.set(absFolder, [target]);
       }
     }
+
     return folders;
   }
 }
 
 export class TargetNode extends BaseNode {
-  constructor(private readonly target: Target) {
-    super(target.id);
+  constructor(parentId: string, private readonly target: Target) {
+    super(`${parentId}-${target.id}`);
   }
 
   getChildren() {
-    if (!this.target.target_sources) return [];
+    if (!this.target.target_sources) {
+      return [];
+    }
     else {
       const sources = new Array<string>();
       const generated_sources = new Array<string>();
@@ -67,28 +83,27 @@ export class TargetNode extends BaseNode {
         sources.push(...s.sources);
         sources.push(...s.generated_sources);
       }
-      return [
-        new TargetSourcesNode(path.dirname(this.target.defined_in), sources),
-        generated_sources.length > 0
-          ? new TargetGeneratedSourcesNode(generated_sources)
-          : void 0
-      ];
+
+      const sourceNode = new TargetSourcesRootNode(this.id, path.dirname(this.target.defined_in), sources);
+      return (generated_sources.length === 0) ? [sourceNode] : [sourceNode, new TargetGeneratedSourcesRootNode(this.id, generated_sources)];
     }
   }
-  
+
   async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+
+    item.label = this.target.name;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 
     const targetName = await getTargetName(this.target);
 
-    item.label = this.target.name;
     item.command = {
       title: `Build ${this.target.name}`,
       command: "mesonbuild.build",
       arguments: [targetName]
     };
+
     return item;
   }
 
@@ -97,12 +112,15 @@ export class TargetNode extends BaseNode {
       case "executable":
       case "run":
         return "res/icon-executable.svg";
+
       case "jar":
         return "res/icon-run-java.svg";
+
       case "shared library":
       case "static library":
       case "shared module":
         return "res/icon-library.svg";
+
       default:
         return "res/meson_32.svg";
     }

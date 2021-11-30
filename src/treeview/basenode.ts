@@ -1,14 +1,20 @@
 import * as vscode from "vscode";
 
-export class BaseNode {
-  constructor(public readonly id: string) {}
+import { hash } from "../utils";
+
+export abstract class BaseNode {
+  constructor(protected readonly id: string) { }
+
   getChildren(): vscode.ProviderResult<BaseNode[]> {
     return [];
   }
+
   getTreeItem(): vscode.ProviderResult<vscode.TreeItem> {
-    const item = new vscode.TreeItem(this.id);
-    item.id = this.id;
-    item.label = this.id;
+    // All derived getTreeItem()s set an appropriate label.
+    const item = new vscode.TreeItem("");
+
+    item.id = hash(this.id);
+
     return item;
   }
 }
