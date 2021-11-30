@@ -28,7 +28,7 @@ export function activate(ctx: vscode.ExtensionContext): void {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   if (!root) return;
 
-  explorer = new MesonProjectExplorer(ctx, buildDir);
+  explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
