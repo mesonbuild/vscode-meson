@@ -10,15 +10,15 @@ import { BaseDirectoryNode } from "./base";
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   getTreeItem() {
     const item = super.getTreeItem();
+
     if (this.folder === ".") {
       item.label = "Targets";
       item.iconPath = extensionRelative("res/meson_32.svg");
     } else {
-      item.iconPath =
-        item.collapsibleState === vscode.TreeItemCollapsibleState.Expanded
-          ? extensionRelative("res/icon-folder-open.svg")
-          : extensionRelative("res/icon-folder.svg");
+      // With vscode-icons installed, this will do the right thing with expansion state.
+      item.iconPath = vscode.ThemeIcon.Folder;
     }
+
     return item;
   }
 
