@@ -29,8 +29,7 @@ export class ProjectNode extends BaseNode {
   }
 
   async getChildren() {
-    return [
-      new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir),
+    const children = [
       new TargetDirectoryNode(`${this.id}-targets`,
         ".",
         (await getMesonTargets(this.buildDir)).filter((target) => !target.subproject)
@@ -38,6 +37,8 @@ export class ProjectNode extends BaseNode {
       new TestRootNode(this.id, await getMesonTests(this.buildDir), false),
       new TestRootNode(this.id, await getMesonBenchmarks(this.buildDir), true)
     ];
+
+    return (this.project.subprojects.length === 0) ? children : [...children, new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir)];
   }
 }
 
@@ -55,7 +56,7 @@ class SubprojectsRootNode extends BaseNode {
 
     item.label = "Subprojects";
     item.iconPath = extensionRelative("res/icon-subprojects.svg");
-    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    item.collapsibleState = (this.subprojects.length === 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
 
     return item;
   }
@@ -79,7 +80,6 @@ class SubprojectNode extends BaseNode {
 
     item.label = `${this.subproject.descriptive_name} ${this.subproject.version}`;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
-    item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
 
     // No children currently, so don't display toggle.
     item.collapsibleState = vscode.TreeItemCollapsibleState.None;
