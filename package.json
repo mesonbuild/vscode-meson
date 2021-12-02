@@ -78,8 +78,16 @@
       "title": "Meson build configuration",
       "properties": {
         "mesonbuild.configureOnOpen": {
-          "type": "boolean",
-          "default": false,
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "default": "ask",
+          "enum": [
+            true,
+            false,
+            "ask"
+          ],
           "description": "Have VS Code run meson (re)configure on folder open."
         },
         "mesonbuild.buildFolder": {
