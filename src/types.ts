@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 export interface ExtensionConfiguration {
-  configureOnOpen: boolean;
+  configureOnOpen: boolean | "ask";
   configureOptions: string[];
   buildFolder: string;
 }

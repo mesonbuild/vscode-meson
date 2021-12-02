@@ -97,49 +97,51 @@ export function activate(ctx: vscode.ExtensionContext): void {
     })
   );
 
-  if (extensionConfiguration("configureOnOpen"))
-    vscode.commands
-      .executeCommand<boolean>("mesonbuild.configure")
-      .then(isFresh => {
-        explorer.refresh();
-      });
-  else {
-    vscode.window
-      .showInformationMessage(
-        "Meson project detected, would you like VS Code to configure it?",
-        "No",
-        "This workspace",
-        "Yes"
-      )
-      .then(response => {
-        switch (response) {
-          case "Yes":
-            extensionConfigurationSet(
-              "configureOnOpen",
-              true,
-              vscode.ConfigurationTarget.Global
-            );
-            break;
-          case "This workspace":
-            extensionConfigurationSet(
-              "configureOnOpen",
-              true,
-              vscode.ConfigurationTarget.Workspace
-            );
-            break;
-          default:
-            extensionConfigurationSet(
-              "configureOnOpen",
-              false,
-              vscode.ConfigurationTarget.Global
-            );
-        }
-        if (response !== "No") {
-          vscode.commands
-            .executeCommand("mesonbuild.configure")
-            .then(() => explorer.refresh());
-        }
-      });
+  switch (extensionConfiguration("configureOnOpen")) {
+    case false: {
+      break;
+    }
+    case true: {
+      vscode.commands
+        .executeCommand<boolean>("mesonbuild.configure")
+        .then((isFresh) => {
+          explorer.refresh();
+        });
+      break;
+    }
+    case "ask":
+    default: {
+      vscode.window
+        .showInformationMessage(
+          "Meson project detected, would you like VS Code to configure it?",
+          "Yes",
+          "No"
+        )
+        .then((response) => {
+          switch (response) {
+            case "Yes":
+              extensionConfigurationSet(
+                "configureOnOpen",
+                true,
+                vscode.ConfigurationTarget.Workspace
+              );
+              vscode.commands
+                .executeCommand("mesonbuild.configure")
+                .then(() => explorer.refresh());
+              break;
+            case "No":
+              extensionConfigurationSet(
+                "configureOnOpen",
+                false,
+                vscode.ConfigurationTarget.Workspace
+              );
+              break;
+            default:
+              break;
+          }
+        });
+      break;
+    }
   }
 
   async function pickBuildTarget() {
