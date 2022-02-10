@@ -70,8 +70,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   await updateHasProject()
 
-  controller.createRunProfile("Meson gen coverage", vscode.TestRunProfileKind.Coverage, async (request: vscode.TestRunRequest, token: vscode.CancellationToken) => {
-    vscode.window.showInformationMessage("Running tests in my coverage runner");
+  controller.createRunProfile("Meson gen coverage", vscode.TestRunProfileKind.Debug, async (request: vscode.TestRunRequest, token: vscode.CancellationToken) => {
     const run = controller.createTestRun(request, null, false);
     const queue: vscode.TestItem[] = [];
 
@@ -81,38 +80,30 @@ export async function activate(ctx: vscode.ExtensionContext) {
       controller.items.forEach(test => queue.push(test));
     }
 
-    queue.forEach(run.started);
-    var args = ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder"))]
-    queue.forEach(test => {
-      args.push(test.id);
-    });
-
-
-    await exec('meson', ['configure', '-Db_coverage', workspaceRelative(extensionConfiguration("buildFolder"))])
-
-    try {
-      await exec('meson', args)
-    } catch(e) {} finally {
-      const logs: TestLogs = await getMesonTestLogs(workspaceRelative(extensionConfiguration("buildFolder")));
-      logs.forEach(log => {
-        let split = log.name.split(' ').pop();
-        for (let test of queue) {
-          if (test.id == split) {
-            if (log.result == "OK") {
-              run.passed(test, log.duration * 1000);
-            } else {
-              run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
-            }
-          }
+    const tests: Tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")));
+    for (let test of queue) {
+      for (let config of tests) {
+        if (test.id == config.name) {
+          let args = [...config.cmd]
+          args.shift();
+          await vscode.debug.startDebugging(undefined, {
+            name: `meson-debug-${test.id}`,
+            type: "cppdbg",
+            request: "launch",
+            cwd: config.workdir || workspaceRelative(extensionConfiguration("buildFolder")),
+            env: config.env,
+            program: config.cmd[0],
+            args: args,
+          });
         }
-      });
-      run.end();
+      }
     }
+
+    run.end();
 
   }, true)
 
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, async (request: vscode.TestRunRequest, token: vscode.CancellationToken) => {
-    vscode.window.showInformationMessage("Running tests in my runner");
     const run = controller.createTestRun(request, null, false);
     const queue: vscode.TestItem[] = [];
 
