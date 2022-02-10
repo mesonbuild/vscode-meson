@@ -37,11 +37,11 @@ export async function testRunHandler(controller: vscode.TestController, request:
         let split = log.name.split(' ').pop();
         for (let test of queue) {
             if (test.id == split) {
-            if (log.result == "OK") {
-                run.passed(test, log.duration * 1000);
-            } else {
-                run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
-            }
+                if (log.result == "OK") {
+                    run.passed(test, log.duration * 1000);
+                } else {
+                    run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
+                }
             }
         }
         });
@@ -66,15 +66,15 @@ export async function testDebugHandler(controller: vscode.TestController, reques
             let args = [...config.cmd]
             args.shift();
             await vscode.debug.startDebugging(undefined, {
-            name: `meson-debug-${test.id}`,
-            type: "cppdbg",
-            request: "launch",
-            cwd: config.workdir || workspaceRelative(extensionConfiguration("buildFolder")),
-            env: config.env,
-            program: config.cmd[0],
-            args: args,
-            });
-        }
+                    name: `meson-debug-${test.id}`,
+                    type: "cppdbg",
+                    request: "launch",
+                    cwd: config.workdir || workspaceRelative(extensionConfiguration("buildFolder")),
+                    env: config.env,
+                    program: config.cmd[0],
+                    args: args,
+                });
+            }
         }
     }
 
