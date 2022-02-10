@@ -22,6 +22,7 @@ import {
 } from "./meson/introspection";
 
 let explorer: MesonProjectExplorer;
+let watcher: vscode.FileSystemWatcher;
 
 export function activate(ctx: vscode.ExtensionContext): void {
   const root = vscode.workspace.rootPath;
@@ -29,6 +30,9 @@ export function activate(ctx: vscode.ExtensionContext): void {
   if (!root) return;
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
+  watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
+
+  ctx.subscriptions.push(watcher);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
@@ -42,6 +46,14 @@ export function activate(ctx: vscode.ExtensionContext): void {
       }
     })
   );
+
+  watcher.onDidChange(() => {
+    explorer.refresh();
+  });
+
+  watcher.onDidCreate(() => {
+    explorer.refresh();
+  });
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {
