@@ -9,6 +9,7 @@ import {
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import {
+  exec,
   extensionConfiguration,
   execAsTask,
   workspaceRelative,
@@ -18,15 +19,21 @@ import {
 import {
   getMesonTargets,
   getMesonTests,
+  getMesonTestLogs,
   getMesonBenchmarks
 } from "./meson/introspection";
 import {DebugConfigurationProvider} from "./configprovider";
+import {
+  Tests,
+  TestLogs
+} from "./meson/types"
 
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
 let mesonWatcher: vscode.FileSystemWatcher;
+let controller: vscode.TestController;
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
@@ -41,6 +48,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
+  controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider('cppdbg',
@@ -50,6 +58,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(watcher);
   ctx.subscriptions.push(mesonWatcher);
+  ctx.subscriptions.push(controller);
 
   let updateHasProject = async () => {
     let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
@@ -60,6 +69,85 @@ export async function activate(ctx: vscode.ExtensionContext) {
   mesonWatcher.onDidDelete(updateHasProject)
 
   await updateHasProject()
+
+  controller.createRunProfile("Meson gen coverage", vscode.TestRunProfileKind.Coverage, async (request: vscode.TestRunRequest, token: vscode.CancellationToken) => {
+    vscode.window.showInformationMessage("Running tests in my coverage runner");
+    const run = controller.createTestRun(request, null, false);
+    const queue: vscode.TestItem[] = [];
+
+    if (request.include) {
+      request.include.forEach(test => queue.push(test));
+    } else {
+      controller.items.forEach(test => queue.push(test));
+    }
+
+    queue.forEach(run.started);
+    var args = ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder"))]
+    queue.forEach(test => {
+      args.push(test.id);
+    });
+
+
+    await exec('meson', ['configure', '-Db_coverage', workspaceRelative(extensionConfiguration("buildFolder"))])
+
+    try {
+      await exec('meson', args)
+    } catch(e) {} finally {
+      const logs: TestLogs = await getMesonTestLogs(workspaceRelative(extensionConfiguration("buildFolder")));
+      logs.forEach(log => {
+        let split = log.name.split(' ').pop();
+        for (let test of queue) {
+          if (test.id == split) {
+            if (log.result == "OK") {
+              run.passed(test, log.duration * 1000);
+            } else {
+              run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
+            }
+          }
+        }
+      });
+      run.end();
+    }
+
+  }, true)
+
+  controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, async (request: vscode.TestRunRequest, token: vscode.CancellationToken) => {
+    vscode.window.showInformationMessage("Running tests in my runner");
+    const run = controller.createTestRun(request, null, false);
+    const queue: vscode.TestItem[] = [];
+
+    if (request.include) {
+      request.include.forEach(test => queue.push(test));
+    } else {
+      controller.items.forEach(test => queue.push(test));
+    }
+
+    queue.forEach(run.started);
+    var args = ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder"))]
+    queue.forEach(test => {
+      args.push(test.id);
+    });
+
+    try {
+      await exec('meson', args)
+    } catch(e) {} finally {
+      const logs: TestLogs = await getMesonTestLogs(workspaceRelative(extensionConfiguration("buildFolder")));
+      logs.forEach(log => {
+        let split = log.name.split(' ').pop();
+        for (let test of queue) {
+          if (test.id == split) {
+            if (log.result == "OK") {
+              run.passed(test, log.duration * 1000);
+            } else {
+              run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
+            }
+          }
+        }
+      });
+      run.end();
+    }
+
+  }, true)
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
@@ -74,12 +162,26 @@ export async function activate(ctx: vscode.ExtensionContext) {
     })
   );
 
-  watcher.onDidChange(() => {
+  watcher.onDidChange(() =>  {
+    vscode.window.showInformationMessage("In async change handler");
     explorer.refresh();
+    
+    let tests = getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
+    for (let testDescr in tests) {
+      let testItem = controller.createTestItem(testDescr, testDescr)
+      controller.items.add(testItem)
+    }
   });
 
-  watcher.onDidCreate(() => {
+  watcher.onDidCreate(async () => {
+    await vscode.window.showInformationMessage("In async create handler");
     explorer.refresh();
+    
+    let tests: Tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
+    tests.forEach(testDescr => {
+      let testItem = controller.createTestItem(testDescr.name, testDescr.name)
+      controller.items.add(testItem)
+    });
   });
 
   ctx.subscriptions.push(

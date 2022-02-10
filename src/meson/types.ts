@@ -79,7 +79,20 @@ export interface Test {
   env: Dict<string>;
 }
 
+export interface TestLog {
+  name: string;
+  stdout: string;
+  result: string;
+  stattime: number;
+  duration: number;
+  returncode: number;
+  env: any;
+  command: string[];
+  stderr: string | null;
+}
+
 export type Targets = Target[];
 export type BuildOptions = BuildOption<any>[];
 export type Dependencies = Dependency[];
 export type Tests = Test[];
+export type TestLogs = TestLog[];
