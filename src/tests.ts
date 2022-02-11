@@ -23,9 +23,9 @@ export async function testRunHandler(controller: vscode.TestController, request:
         controller.items.forEach(test => queue.push(test));
     }
 
-    queue.forEach(run.started);
     var args = ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder"))]
     queue.forEach(test => {
+        run.started(test);
         args.push(test.id);
     });
 
