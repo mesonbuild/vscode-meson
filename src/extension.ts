@@ -9,7 +9,6 @@ import {
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import {
-  exec,
   extensionConfiguration,
   execAsTask,
   workspaceRelative,
@@ -22,9 +21,6 @@ import {
   getMesonBenchmarks
 } from "./meson/introspection";
 import {DebugConfigurationProvider} from "./configprovider";
-import {
-  Tests,
-} from "./meson/types";
 import {
   testDebugHandler,
   testRunHandler,
