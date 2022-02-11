@@ -39,41 +39,26 @@ export async function testRunHandler(controller: vscode.TestController, request:
         controller.items.forEach(test => queue.push(test));
     }
 
-    var args = ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder")), '--print-errorlog']
-    queue.forEach(test => {
+    for (let test of queue) {
         run.started(test);
-        args.push(test.id);
-    });
-
-    try {
-        await exec('meson', args);
-    } catch(e) {
-        if (e.error.code == 125) {
-            /* If desired, we could probably do this in a way that we fault every test in this error case.
-             * Might be better semantically but at the same time, those tests didn't fail. */
-            vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
-        }
-        run.appendOutput(e.stdout);
-    } finally {
-        const logs: TestLogs = await getMesonTestLogs(workspaceRelative(extensionConfiguration("buildFolder")));
-        logs.forEach(log => {
-            /* Not a fan of this, but the testlog output doesn't contain the actual input name.
-             * What it does contain is a mix of suite and name :/ */
-            /* If this ever becoes a real problem, we could match on command? I don't think we can do env... */
-            /* or we get the meson test tool to write the name proper as well, and if it's there match on that */
-            let split = log.name.split(' ').pop();
-            for (let test of queue) {
-                if (test.id == split) {
-                    if (log.result == "OK") {
-                        run.passed(test, log.duration * 1000);
-                    } else {
-                        run.failed(test, new vscode.TestMessage(log.stderr), log.duration);
-                    }
-                }
+        let starttime = Date.now();
+        try {
+            await exec('meson', ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder")), '--print-errorlog', test.id]);
+            let duration = Date.now() - starttime;
+            run.passed(test, duration);
+        } catch (e) {
+            run.appendOutput(e.stdout);
+            let duration = Date.now() - starttime;
+            if (e.error.code == 125) {
+                vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
+                run.errored(test, new vscode.TestMessage(e.stderr));
+            } else {
+                run.failed(test, new vscode.TestMessage(e.stderr), duration);
             }
-        });
-        run.end();
+        }
     }
+
+    run.end();
 }
 
 export async function testDebugHandler(controller: vscode.TestController, request: vscode.TestRunRequest, token: vscode.CancellationToken) {
