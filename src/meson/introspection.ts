@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import * as path from "path";
 import { exec, parseJSONFileIfExists } from "../utils";
 import {
@@ -56,13 +57,19 @@ export async function getMesonTests(buildDir: string) {
 }
 
 export async function getMesonTestLogs(buildDir: string) : Promise<TestLogs> {
+  /* We have to hand-roll things a bit here, since meson doesn't expose this. */
   let filename = path.join(buildDir, path.join("meson-logs", "testlog.json"));
 
   try {
     const data = await fs.promises.readFile(filename);
+    /* The handrolling gets annoying here. Because the file is not valid json.
+     * It's a concatenation of json objects, without a list wrapper.
+     * Luckily, the only newlines in the file are between the objects.
+     * The filter gets rid of an empty line at the end that breaks the json parser */
     return data.toString().split("\n").filter(x => x).map(v => JSON.parse(v) as TestLog)
   }
   catch (err) {
+    vscode.window.showErrorMessage("Failed to read test log. Results will not be updated")
     console.log(err);
     return [];
   }
