@@ -79,8 +79,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
     explorer.refresh();
     
     let tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
-    for (let testDescr in tests) {
-      let testItem = controller.createTestItem(testDescr, testDescr)
+
+    controller.items.forEach(item => {
+      if (!tests.some(test => item.id == test.name)) {
+        controller.items.delete(item.id);
+      }
+    });
+
+    for (let testDescr of tests) {
+      let testItem = controller.createTestItem(testDescr.name, testDescr.name)
       controller.items.add(testItem)
     }
   };
