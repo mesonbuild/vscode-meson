@@ -29,16 +29,28 @@ export class ProjectNode extends BaseNode {
   }
 
   async getChildren() {
-    const children = [
+    let children: BaseNode[] = [
       new TargetDirectoryNode(`${this.id}-targets`,
         ".",
         (await getMesonTargets(this.buildDir)).filter((target) => !target.subproject)
-      ),
-      new TestRootNode(this.id, await getMesonTests(this.buildDir), false),
-      new TestRootNode(this.id, await getMesonBenchmarks(this.buildDir), true)
+      )
     ];
 
-    return (this.project.subprojects.length === 0) ? children : [...children, new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir)];
+    const tests = await getMesonTests(this.buildDir);
+    if (tests.length > 0) {
+      children.push(new TestRootNode(this.id, tests, false));
+    }
+
+    const benchmarks = await getMesonBenchmarks(this.buildDir);
+    if (benchmarks.length > 0) {
+      children.push(new TestRootNode(this.id, benchmarks, true));
+    }
+
+    if (this.project.subprojects.length > 0) {
+      children.push(new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir));
+    }
+
+    return children;
   }
 }
 
