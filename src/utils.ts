@@ -87,7 +87,7 @@ export function extensionRelative(filepath: string) {
 }
 
 export function workspaceRelative(filepath: string) {
-  return path.join(vscode.workspace.rootPath, filepath);
+  return path.resolve(vscode.workspace.rootPath, filepath);
 }
 
 export async function getTargetName(target: Target) {
