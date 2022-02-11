@@ -21,6 +21,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         var ret: vscode.DebugConfiguration[] = [];
 
         for (let target of executables) {
+            if (!target.target_sources.some(source => ['cpp', 'c'].includes(source.language))) {
+                continue;
+            }
+
             let targetName = await getTargetName(target)
             ret.push({
                 type: 'cppdbg',
