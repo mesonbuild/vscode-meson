@@ -1,10 +1,8 @@
-"use strict";
-
 import * as fs from "fs";
 import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
-import { randomBytes, createHash, BinaryLike } from "crypto";
+import { createHash, BinaryLike } from "crypto";
 import { Target } from "./meson/types";
 import { ExtensionConfiguration } from "./types";
 import { getMesonBuildOptions } from "./meson/introspection";
@@ -84,9 +82,14 @@ export function getOutputChannel(): vscode.OutputChannel {
 }
 
 export function thisExtension() {
-  const ext = vscode.extensions.getExtension("mesonbuild.meson");
-  if (ext) return ext;
-  else throw new Error("Extension not found");
+  const ext = vscode.extensions.getExtension("mesonbuild.mesonbuild");
+
+  if (ext) {
+    return ext;
+  }
+  else {
+    throw new Error("Extension not found");
+  }
 }
 
 export function extensionRelative(filepath: string) {
