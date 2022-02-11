@@ -20,6 +20,8 @@ import {
   getMesonTests,
   getMesonBenchmarks
 } from "./meson/introspection";
+import {DebugConfigurationProvider} from "./configprovider";
+
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
@@ -36,6 +38,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
+
+  ctx.subscriptions.push(
+    vscode.debug.registerDebugConfigurationProvider('cppdbg',
+      new DebugConfigurationProvider(workspaceRelative(extensionConfiguration("buildFolder"))),
+      vscode.DebugConfigurationProviderTriggerKind.Dynamic)
+  );
 
   ctx.subscriptions.push(watcher);
 

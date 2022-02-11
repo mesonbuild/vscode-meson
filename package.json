@@ -44,7 +44,9 @@
     "onCommand:mesonbuild.build",
     "onCommand:mesonbuild.test",
     "onCommand:mesonbuild.benchmark",
-    "workspaceContains:meson.build"
+    "workspaceContains:meson.build",
+    "onDebugDynamicConfigurations",
+    "onDebugDynamicConfigurations:cppdbg"
   ],
   "main": "./out/src/extension",
   "contributes": {
