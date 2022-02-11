@@ -13,6 +13,21 @@ import {
     getMesonTestLogs
 } from "./meson/introspection"
 
+export async function rebuildTests(controller: vscode.TestController) {
+    let tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
+
+    controller.items.forEach(item => {
+      if (!tests.some(test => item.id == test.name)) {
+        controller.items.delete(item.id);
+      }
+    });
+
+    for (let testDescr of tests) {
+      let testItem = controller.createTestItem(testDescr.name, testDescr.name)
+      controller.items.add(testItem)
+    }
+  }
+
 export async function testRunHandler(controller: vscode.TestController, request: vscode.TestRunRequest, token: vscode.CancellationToken) {
     const run = controller.createTestRun(request, null, false);
     const queue: vscode.TestItem[] = [];

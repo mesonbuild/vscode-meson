@@ -27,7 +27,8 @@ import {
 } from "./meson/types";
 import {
   testDebugHandler,
-  testRunHandler
+  testRunHandler,
+  rebuildTests
 } from "./tests";
 
 
@@ -75,22 +76,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
 
-  let changeHandler = async () =>  {
-    explorer.refresh();
-    
-    let tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
-
-    controller.items.forEach(item => {
-      if (!tests.some(test => item.id == test.name)) {
-        controller.items.delete(item.id);
-      }
-    });
-
-    for (let testDescr of tests) {
-      let testItem = controller.createTestItem(testDescr.name, testDescr.name)
-      controller.items.add(testItem)
-    }
-  };
+  let changeHandler = async () => { explorer.refresh(), await rebuildTests(controller);};
 
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
