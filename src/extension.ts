@@ -76,7 +76,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
 
-  let changeHandler = async () => { explorer.refresh(), await rebuildTests(controller);};
+  let changeHandler = async () => { explorer.refresh(); await rebuildTests(controller);};
 
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
