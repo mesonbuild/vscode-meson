@@ -21,10 +21,13 @@ import {
   getMesonBenchmarks
 } from "./meson/introspection";
 
+export let extensionPath: string;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
 
 export async function activate(ctx: vscode.ExtensionContext) {
+  extensionPath = ctx.extensionPath;
+
   const root = vscode.workspace.rootPath;
   if (!root) {
     return

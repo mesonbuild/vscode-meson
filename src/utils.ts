@@ -6,6 +6,7 @@ import { createHash, BinaryLike } from "crypto";
 import { Target } from "./meson/types";
 import { ExtensionConfiguration } from "./types";
 import { getMesonBuildOptions } from "./meson/introspection";
+import { extensionPath } from "./extension";
 
 export async function exec(
   command: string,
@@ -81,19 +82,8 @@ export function getOutputChannel(): vscode.OutputChannel {
   return _channel;
 }
 
-export function thisExtension() {
-  const ext = vscode.extensions.getExtension("mesonbuild.mesonbuild");
-
-  if (ext) {
-    return ext;
-  }
-  else {
-    throw new Error("Extension not found");
-  }
-}
-
 export function extensionRelative(filepath: string) {
-  return path.join(thisExtension().extensionPath, filepath);
+  return path.join(extensionPath, filepath);
 }
 
 export function workspaceRelative(filepath: string) {
