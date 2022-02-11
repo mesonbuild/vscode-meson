@@ -17,15 +17,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let targets = await getMesonTargets(this.path);
 
-        let executables = targets.filter(target => target.type == "executable");
-        var ret: vscode.DebugConfiguration[] = [];
+        const executables = targets.filter(target => target.type == "executable");
+        let ret: vscode.DebugConfiguration[] = [];
 
-        for (let target of executables) {
+        for (const target of executables) {
             if (!target.target_sources.some(source => ['cpp', 'c'].includes(source.language))) {
                 continue;
             }
 
-            let targetName = await getTargetName(target)
+            const targetName = await getTargetName(target)
             ret.push({
                 type: 'cppdbg',
                 name: target.name,
