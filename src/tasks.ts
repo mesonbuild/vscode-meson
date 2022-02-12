@@ -1,5 +1,3 @@
-"use strict";
-
 import * as vscode from "vscode";
 import {
   getMesonTargets,
@@ -7,8 +5,6 @@ import {
   getMesonBenchmarks
 } from "./meson/introspection";
 import { getOutputChannel, getTargetName } from "./utils";
-
-import "array-flat-polyfill";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
