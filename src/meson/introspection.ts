@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import * as path from "path";
 import { exec, parseJSONFileIfExists } from "../utils";
 import {
@@ -8,7 +7,6 @@ import {
   Tests,
   ProjectInfo
 } from "./types";
-import * as fs from "fs";
 
 async function introspectMeson<T>(buildDir: string, filename: string, introspectSwitch: string) {
   const parsed = await parseJSONFileIfExists<T>(
