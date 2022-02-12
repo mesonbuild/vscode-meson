@@ -5,12 +5,10 @@ import {
   workspaceRelative,
 } from "./utils";
 import {
-    Tests,
-    TestLogs
+    Tests
 } from "./meson/types"
 import {
     getMesonTests,
-    getMesonTestLogs,
     getMesonTargets
 } from "./meson/introspection"
 
