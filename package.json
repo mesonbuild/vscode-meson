@@ -204,14 +204,20 @@
     }
   },
   "scripts": {
+    "postinstall": "husky install",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
     "@types/node": "^16.11.7",
-    "typescript": "^4.4.4",
-    "@types/vscode": "^1.1.59"
+    "@types/vscode": "^1.1.59",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.3",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "array-flat-polyfill": "^1.0.1"
