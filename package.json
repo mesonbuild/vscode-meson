@@ -196,7 +196,8 @@
       "meson-sidebar": [
         {
           "id": "meson-project",
-          "name": "Current project"
+          "name": "Current project",
+          "when": "mesonbuild.hasProject"
         }
       ]
     }

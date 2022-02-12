@@ -24,6 +24,7 @@ import {
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
+let mesonWatcher: vscode.FileSystemWatcher;
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
@@ -34,10 +35,23 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
+  mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
 
   ctx.subscriptions.push(watcher);
+  ctx.subscriptions.push(mesonWatcher);
+
+  let updateHasProject = async () => {
+    let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
+    vscode.commands.executeCommand("setContext", 'mesonbuild.hasProject', mesonFiles.length > 0);
+  }
+
+  mesonWatcher.onDidCreate(updateHasProject)
+  mesonWatcher.onDidDelete(updateHasProject)
+
+  await updateHasProject()
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
