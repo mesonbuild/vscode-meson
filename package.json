@@ -2,7 +2,7 @@
   "name": "mesonbuild",
   "displayName": "Meson",
   "description": "Meson language support for Visual Studio Code",
-  "icon": "graphics/icon.png",
+  "icon": "res/icon.png",
   "version": "1.5.0-devel",
   "license": "Apache-2.0",
   "publisher": "mesonbuild",
@@ -204,14 +204,24 @@
     }
   },
   "scripts": {
+    "postinstall": "husky install",
+    "package": "vsce package --yarn",
+    "release": "standard-version",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0",
     "@types/node": "^16.11.7",
+    "@types/vscode": "^1.1.59",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.3",
+    "prettier": "^2.5.1",
+    "standard-version": "^9.3.2",
     "typescript": "^4.4.4",
-    "@types/vscode": "^1.1.59"
+    "vsce": "^2.6.7"
   },
   "dependencies": {
     "array-flat-polyfill": "^1.0.1"
