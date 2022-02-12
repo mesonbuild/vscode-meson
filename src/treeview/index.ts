@@ -18,7 +18,7 @@ class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
   }
 
   refresh() {
-    this._onDataChangeEmitter.fire();
+    this._onDataChangeEmitter.fire(null);
   }
 
   getTreeItem(element: BaseNode) {
