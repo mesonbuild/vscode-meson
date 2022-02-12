@@ -5,8 +5,7 @@
     "outDir": "out",
     "lib": ["es6"],
     "sourceMap": true,
-    "rootDir": ".",
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "rootDir": "."
   },
   "exclude": ["node_modules", ".vscode-test"]
 }

@@ -210,10 +210,8 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
-    "typescript": "^4.4.4",
-    "@types/vscode": "^1.1.59"
+    "@types/vscode": "^1.1.59",
+    "typescript": "^4.4.4"
   },
-  "dependencies": {
-    "array-flat-polyfill": "^1.0.1"
-  }
+  "dependencies": {}
 }
