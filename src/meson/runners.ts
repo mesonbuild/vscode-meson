@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
+import * as cp from "child_process";
+
 import {
   exec,
   execAsTask,
   getOutputChannel,
-  extensionConfiguration,
-  execStream
+  extensionConfiguration
 } from "../utils";
 import { getTask } from "../tasks";
 import { relative } from "path";
@@ -20,7 +21,7 @@ async function isMesonConfigured(buildPath: string) {
   return false;
 }
 
-export async function runMesonConfigure(source: string, build: string) {
+export async function runMesonConfigure(source: string, buildPath: string) {
   return vscode.window.withProgress(
     {
       title: "Configuring",
@@ -28,34 +29,45 @@ export async function runMesonConfigure(source: string, build: string) {
       cancellable: false
     },
     async progress => {
-      progress.report({
-        message: `Checking if Meson is configured in ${relative(
-          source,
-          build
-        )}...`
-      });
+      const relBuildDir = relative(source, buildPath);
+      progress.report({ message: `Checking if Meson is configured in ${relBuildDir}...` });
 
       const configureOpts = extensionConfiguration("configureOptions");
       const setupOpts = extensionConfiguration("setupOptions");
+      let res: { stdout: string; stderr: string, error?: cp.ExecException };
 
-        if (await checkMesonIsConfigured(build)) {
-        progress.report({
-          message: `Configuring Meson into ${relative(source, build)}...`
-        });
+      try {
+        if (await isMesonConfigured(buildPath)) {
+          progress.report({ message: `Meson already configured in ${relBuildDir}`, increment: 100 });
+        } else {
+          progress.report({ message: `Configuring Meson into ${relBuildDir}...` });
+          res = await exec(extensionConfiguration("mesonPath"), ["setup", ...configureOpts, ...setupOpts, buildPath], { cwd: source });
+        }
+      }
+      catch (e) {
+        res = e;
+      }
 
-        const { stdout, stderr } = await exec(
-          extensionConfiguration("mesonPath"), ["setup", ...configureOpts, ...setupOpts, build],
-          { cwd: source });
+      let timeout = 2000;
 
-        getOutputChannel().appendLine(stdout);
-        getOutputChannel().appendLine(stderr);
+      if (res != null) {
+        if (res.error != null) {
+          progress.report({ message: res.error.message, increment: 100 });
+          getOutputChannel().appendLine(res.error.message);
+          timeout = 5000;
+        } else {
+          progress.report({ message: `Meson successfully configured into ${relBuildDir}`, increment: 100 });
+        }
 
-        if (stderr.length > 0) {
+        getOutputChannel().appendLine(res.stdout);
+        getOutputChannel().appendLine(res.stderr);
+
+        if ((res.stderr.length > 0) || (res.error != null)) {
           getOutputChannel().show(true);
         }
       }
-      progress.report({ message: "Done.", increment: 100 });
-      return new Promise(res => setTimeout(res, 2000));
+
+      return new Promise(res => setTimeout(res, timeout));
     }
   );
 }
