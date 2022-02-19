@@ -41,7 +41,7 @@ export async function testRunHandler(controller: vscode.TestController, request:
         run.started(test);
         let starttime = Date.now();
         try {
-            await exec('meson', ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder")), '--print-errorlog', test.id]);
+            await exec(extensionConfiguration("mesonPath"), ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder")), '--print-errorlog', test.id]);
             let duration = Date.now() - starttime;
             run.passed(test, duration);
         } catch (e) {
@@ -83,7 +83,7 @@ export async function testDebugHandler(controller: vscode.TestController, reques
     });
 
     try {
-        await exec('meson', args);
+        await exec(extensionConfiguration("mesonPath"), args);
     } catch(e) {
         vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
         run.end();
