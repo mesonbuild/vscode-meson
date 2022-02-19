@@ -34,13 +34,13 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         await exec(
-          "meson", ["configure", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["configure", configureOpts, build],
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
 
         // Note "setup --reconfigure" needs to be run from the root.
-        await exec("meson", ["setup", "--reconfigure", build],
+        await exec(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", build],
           { cwd: source });
       } else {
         progress.report({
@@ -48,7 +48,7 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         const { stdout, stderr } = await exec(
-          "meson", ["setup", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["setup", configureOpts, build],
           { cwd: source });
 
         getOutputChannel().appendLine(stdout);
@@ -80,7 +80,7 @@ export async function runMesonBuild(buildDir: string, name?: string) {
   getOutputChannel().append(`\n${title}\n`);
 
   const args = ["compile"].concat(name ?? []);
-  const stream = execStream("meson", args, { cwd: buildDir });
+  const stream = execStream(extensionConfiguration("mesonPath"), args, { cwd: buildDir });
 
   return vscode.window.withProgress(
     {
@@ -122,7 +122,7 @@ export async function runMesonTests(buildDir: string, isBenchmark: boolean, name
     const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
     const args = ["test", ...benchmarkArgs].concat(name ?? []);
     return await execAsTask(
-      "meson", args,
+      extensionConfiguration("mesonPath"), args,
       { cwd: buildDir },
       vscode.TaskRevealKind.Always
     );
