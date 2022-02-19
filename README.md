@@ -11,3 +11,8 @@ Icons from the [Material Design Icons](https://materialdesignicons.com/) project
 - Syntax Highlighting
 - Automatic Task Provider
 - Code Snippets
+
+# New extension ID
+
+If you come from a previous installation, please make sure you are on the **mesonbuild.mesonbuild** extension.
+There are 3 variants/versions of this extension on the store, and only that one is released from this repository.
