@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.4.0
+- Move to the mesonbuild project
+- syntax highlighting for dictionary literals, continue and break
+- Bugfix: tests and benchmarks with spaces in their names now work
+- Bugfix: Fix errors when a test and benchmark have the same name
+- Bugfix: ProjectExplorer refreshes correctly
+- Configure prompt can now be set to "always, never, or ask"
+- Bugfix: Various fixes for the treeview
+- Bugifx: Reload view on changes.
+
 ## 1.3.0
 - Remove layout=flat from default options
 - Change default build folder to builddir
