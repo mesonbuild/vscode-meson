@@ -108,6 +108,11 @@
             "--buildtype=debug"
           ],
           "description": "Specify the list of configuration options used for Meson configuration."
+        },
+        "mesonbuild.mesonPath": {
+          "type": "string",
+          "default": "meson",
+          "description": "Specify the meson executable to use"
         }
       }
     },

@@ -1,5 +1,5 @@
 import * as path from "path";
-import { exec, parseJSONFileIfExists } from "../utils";
+import { exec, extensionConfiguration, parseJSONFileIfExists } from "../utils";
 import {
   Targets,
   Dependencies,
@@ -12,12 +12,11 @@ async function introspectMeson<T>(buildDir: string, filename: string, introspect
   const parsed = await parseJSONFileIfExists<T>(
     path.join(buildDir, path.join("meson-info", filename))
   );
-
   if (parsed) {
     return parsed;
   }
 
-  const { stdout } = await exec("meson", ["introspect", introspectSwitch], {
+  const { stdout } = await exec(extensionConfiguration("mesonPath"), ["introspect", introspectSwitch], {
     cwd: buildDir
   });
 
@@ -59,7 +58,7 @@ export async function getMesonBenchmarks(buildDir: string) {
 export async function getMesonVersion(): Promise<[number, number, number]> {
   const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/g;
 
-  const { stdout } = await exec("meson", ["--version"]);
+  const { stdout } = await exec(extensionConfiguration("mesonPath"), ["--version"]);
   const match = stdout.trim().match(MESON_VERSION_REGEX);
   if (match) {
     return match.slice(1, 3).map(s => Number.parseInt(s)) as [

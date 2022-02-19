@@ -130,7 +130,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask("meson", ["compile", "--clean"], {
+      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], {
         cwd: workspaceRelative(extensionConfiguration("buildFolder"))
       });
     })
