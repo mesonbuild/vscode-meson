@@ -21,12 +21,18 @@ import {
   getMesonBenchmarks
 } from "./meson/introspection";
 import {DebugConfigurationProvider} from "./configprovider";
+import {
+  testDebugHandler,
+  testRunHandler,
+  rebuildTests
+} from "./tests";
 
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
 let mesonWatcher: vscode.FileSystemWatcher;
+let controller: vscode.TestController;
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
@@ -41,6 +47,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
+  controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider('cppdbg',
@@ -50,6 +57,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(watcher);
   ctx.subscriptions.push(mesonWatcher);
+  ctx.subscriptions.push(controller);
 
   let updateHasProject = async () => {
     let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
@@ -60,6 +68,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
   mesonWatcher.onDidDelete(updateHasProject)
 
   await updateHasProject()
+
+  controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
+  controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
+
+  let changeHandler = async () => { explorer.refresh(); await rebuildTests(controller);};
+
+  watcher.onDidChange(changeHandler);
+  watcher.onDidCreate(changeHandler);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
@@ -73,14 +89,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
       }
     })
   );
-
-  watcher.onDidChange(() => {
-    explorer.refresh();
-  });
-
-  watcher.onDidCreate(() => {
-    explorer.refresh();
-  });
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {

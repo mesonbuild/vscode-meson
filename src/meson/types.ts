@@ -77,6 +77,7 @@ export interface Test {
   is_parallel: boolean;
   cmd: string[];
   env: Dict<string>;
+  depends: string[];
 }
 
 export type Targets = Target[];
