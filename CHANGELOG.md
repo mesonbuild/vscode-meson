@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.5.0
+- Update to the new Meson icon
+- Initial support for the vscode native testing API
+- Add support for vscode debug API
+- Bugfix: auto-close curly braces
+- Bugfix: Handle absolute paths correctly
+- Hide the sidebar icon when it would be empty
+- Add option for setting meson to use
+- Update various dependencies
+- Update various deprecated vscode features and API usage
+
 ## 1.4.0
 - Move to the mesonbuild project
 - syntax highlighting for dictionary literals, continue and break
