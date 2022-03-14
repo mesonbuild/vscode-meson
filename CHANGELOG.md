@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.5.1
+- Add highlighting for the new `structured_sources` function
+
 ## 1.5.0
 - Update to the new Meson icon
 - Initial support for the vscode native testing API
