@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.2
+- Fix highlighting for `structured_sources()`
+- Add highlighting for `install_symlink()`
+
 ## 1.5.1
 - Add highlighting for the new `structured_sources` function
 
