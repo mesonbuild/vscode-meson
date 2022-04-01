@@ -3,9 +3,10 @@
 ## 1.5.2
 - Fix highlighting for `structured_sources()`
 - Add highlighting for `install_symlink()`
+- Add highlighting for `debug()`
 - Remove highlighting for obsolete `getext()` and `find_library()`. These have been deprecated for some time and will result in an error if used.
 - Add highlighting for `unset_variable()`, `install_emptydir()`, and `range()`
-- Functions this PR removes: {'gettext', 'find_library', 'option'}
+
 
 ## 1.5.1
 - Add highlighting for the new `structured_sources` function

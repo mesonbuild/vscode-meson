@@ -64,7 +64,7 @@
 			"name": "keyword.operator.arithmetic.meson"
 		},
 		{
-			"match": "(?x)\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_link_arguments|add_test_setup|alias_target|assert|benchmark|both_libraries|build_target|configuration_data|configure_file|custom_target|declare_dependency|dependency|disabler|environment|error|executable|files|find_program|generator|get_option|get_variable|import|include_directories|install_data|install_emptydir|install_headers|install_man|install_subdir|install_symlink|is_disabler|is_variable|jar|join_paths|library|message|project|range|run_command|run_target|set_variable|shared_library|shared_module|static_library|structured_sources|subdir|subdir_done|subproject|summary|test|unset_variable|vcs_tag|warning\n)\\b\\s*(?=\\()",
+			"match": "(?x)\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_link_arguments|add_test_setup|alias_target|assert|benchmark|both_libraries|build_target|configuration_data|configure_file|custom_target|debug|declare_dependency|dependency|disabler|environment|error|executable|files|find_program|generator|get_option|get_variable|import|include_directories|install_data|install_emptydir|install_headers|install_man|install_subdir|install_symlink|is_disabler|is_variable|jar|join_paths|library|message|project|range|run_command|run_target|set_variable|shared_library|shared_module|static_library|structured_sources|subdir|subdir_done|subproject|summary|test|unset_variable|vcs_tag|warning\n)\\b\\s*(?=\\()",
 			"name": "support.function.builtin.meson"
 		}
 	],
