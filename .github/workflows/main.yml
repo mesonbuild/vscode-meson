@@ -20,3 +20,7 @@ jobs:
       run: yarn install
     - name: tsc
       run: tsc --noEmit --noErrorTruncation --pretty false
+    - name: Check Meson API
+        run: |
+          git clone https://github.com/mesonbuild/meson
+          ./ci/check-meson-api.py
