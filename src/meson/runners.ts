@@ -25,7 +25,7 @@ export async function runMesonConfigure(source: string, build: string) {
         )}...`
       });
 
-      const configureOpts = extensionConfiguration("configureOptions").join(" ");
+      const configureOpts = extensionConfiguration("configureOptions");
 
       if (await checkMesonIsConfigured(build)) {
         progress.report({
@@ -34,7 +34,7 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         await exec(
-          extensionConfiguration("mesonPath"), ["configure", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["configure", ...configureOpts, build],
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
@@ -48,7 +48,7 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         const { stdout, stderr } = await exec(
-          extensionConfiguration("mesonPath"), ["setup", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["setup", ...configureOpts, build],
           { cwd: source });
 
         getOutputChannel().appendLine(stdout);
