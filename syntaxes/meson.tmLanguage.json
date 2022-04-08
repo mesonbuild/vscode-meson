@@ -20,7 +20,7 @@
 			"name": "keyword.control.flow.meson"
 		},
 		{
-			"match": "\\b(and|not|or)\\b",
+			"match": "\\b(and|not|or|in)\\b",
 			"name": "keyword.operator.logical.meson"
 		},
 		{
