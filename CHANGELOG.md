@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.3
+- Add gcc compiler errors to problem view
+
+
 ## 1.5.2
 - Fix highlighting for `structured_sources()`
 - Add highlighting for `install_symlink()`
