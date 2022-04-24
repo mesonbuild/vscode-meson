@@ -21,4 +21,5 @@ export interface ExtensionConfiguration {
     provider: "muon",
     muonConfig: string | null,
   };
+  debugOptions: object;
 }

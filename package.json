@@ -144,6 +144,19 @@
           "type": "string",
           "default": null,
           "description": "Path to muon formatter config.ini"
+        },
+        "mesonbuild.debugOptions": {
+          "type": "object",
+          "default": {
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ]
+          },
+          "description": "Give an object that's merged into the debug configuration provider"
         }
       }
     },
