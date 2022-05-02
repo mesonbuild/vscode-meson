@@ -26,6 +26,9 @@ import {
   testRunHandler,
   rebuildTests
 } from "./tests";
+import {
+  activateLinters
+} from "./linters"
 
 
 export let extensionPath: string;
@@ -43,6 +46,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+
+  activateLinters(root, ctx);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);

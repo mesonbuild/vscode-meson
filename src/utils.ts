@@ -46,6 +46,22 @@ export function execStream(
   };
 }
 
+export async function execFeed(
+  command: string,
+  args: string[],
+  options: cp.ExecOptions = {},
+  stdin: string
+): Promise<{ stdout: string; stderr: string, error?: cp.ExecFileException }> {
+  return new Promise<{ stdout: string; stderr: string, error?: cp.ExecFileException }>(resolve => {
+    let p = cp.execFile(command, args, options, (error, stdout, stderr) => {
+      resolve({ stdout, stderr, error: error ? error : undefined });
+    });
+
+    p.stdin?.write(stdin);
+    p.stdin?.end();
+  });
+}
+
 export function execAsTask(
   command: string,
   args: string[],
