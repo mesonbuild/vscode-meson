@@ -16,4 +16,9 @@ export interface ExtensionConfiguration {
   linter: {
     muon: LinterConfiguration
   };
+  formatting: {
+    enabled: boolean,
+    provider: "muon",
+    muonConfig: string | null,
+  };
 }
