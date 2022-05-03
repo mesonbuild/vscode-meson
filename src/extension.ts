@@ -29,7 +29,9 @@ import {
 import {
   activateLinters
 } from "./linters"
-
+import {
+  activateFormatters
+} from "./formatters"
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
@@ -48,6 +50,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
 
   activateLinters(root, ctx);
+  activateFormatters(ctx);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);

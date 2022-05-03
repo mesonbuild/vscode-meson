@@ -53,6 +53,35 @@ export async function lint(
   diagnosticCollection.set(document.uri, diagnostics);
 }
 
+export async function format(
+  muon_path: string,
+  document: vscode.TextDocument
+): Promise<vscode.TextEdit[]> {
+  const originalDocumentText = document.getText();
+
+  let args = ["fmt_unstable"]
+
+  const config_path = extensionConfiguration("formatting").muonConfig
+  if (config_path) {
+    args.push("-c", config_path)
+  }
+  args.push("-")
+
+  const { stdout, stderr, error } = await execFeed(muon_path, args, {}, originalDocumentText);
+  if (error) {
+    getOutputChannel().appendLine(`Failed to format document with muon: ${stderr}`)
+    getOutputChannel().show(true);
+    return [];
+  }
+
+  const documentRange = new vscode.Range(
+    document.lineAt(0).range.start,
+    document.lineAt(document.lineCount - 1).rangeIncludingLineBreak.end,
+  );
+
+  return [new vscode.TextEdit(documentRange, stdout)];
+}
+
 export async function check(): Promise<string> {
   const muon_path = extensionConfiguration("muonPath");
 
