@@ -10,11 +10,8 @@ import {
 export async function lint(
   muon_path: string,
   root: string,
-  diagnosticCollection: vscode.DiagnosticCollection,
   document: vscode.TextDocument
-) {
-  diagnosticCollection.clear();
-
+): Promise<vscode.Diagnostic[]> {
   const { error, stdout, stderr } = await execFeed(
     muon_path,
     ["analyze", "-l", "-O", document.uri.fsPath],
@@ -51,7 +48,7 @@ export async function lint(
     diagnostics.push(diagnostic);
   });
 
-  diagnosticCollection.set(document.uri, diagnostics);
+  return diagnostics;
 }
 
 export async function format(

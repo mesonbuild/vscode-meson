@@ -12,9 +12,8 @@ import * as muon from "./tools/muon";
 type LinterFunc = (
   linter_path: string,
   sourceRoot: string,
-  diagnosticCollection: vscode.DiagnosticCollection,
   document: vscode.TextDocument
-) => void
+) => Promise<vscode.Diagnostic[]>
 
 type LinterDefinition = {
   lint: LinterFunc,
@@ -28,7 +27,7 @@ const linters: Record<string, LinterDefinition> = {
   }
 }
 
-async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
+async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContext, diagnostics: vscode.DiagnosticCollection): Promise<vscode.Disposable[]> {
   let disposables = [];
 
   if (!extensionConfiguration("linting").enabled) {
@@ -49,16 +48,13 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       continue;
     }
 
-    const diagnosticCollection = vscode.languages.createDiagnosticCollection(`mesonbuild.linters.${name}`);
-
-    const linter = (document: vscode.TextDocument) => {
-      props.lint(linter_path, sourceRoot, diagnosticCollection, document)
+    const linter = async (document: vscode.TextDocument) => {
+      diagnostics.set(document.uri, await props.lint(path, sourceRoot, document));
     }
 
     const subscriptions = [
       vscode.workspace.onDidChangeTextDocument(c => linter(c.document)),
       vscode.window.onDidChangeActiveTextEditor(e => { if (e) { linter(e.document) } }),
-      diagnosticCollection
     ]
 
     for (const sub of subscriptions) {
@@ -71,7 +67,9 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
 }
 
 export async function activateLinters(sourceRoot: string, context: vscode.ExtensionContext) {
-  let subscriptions: vscode.Disposable[] = await reloadLinters(sourceRoot, context);
+  const diagnostics = vscode.languages.createDiagnosticCollection('meson');
+
+  let subscriptions: vscode.Disposable[] = await reloadLinters(sourceRoot, context, diagnostics);
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(async () => {
@@ -79,7 +77,8 @@ export async function activateLinters(sourceRoot: string, context: vscode.Extens
         handler.dispose();
       }
 
-      subscriptions = await reloadLinters(sourceRoot, context);
+      diagnostics.clear();
+      subscriptions = await reloadLinters(sourceRoot, context, diagnostics);
     })
   );
 }
