@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import {
   exec,
   execFeed,
@@ -82,24 +83,29 @@ export async function format(
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<string> {
+export async function check(): Promise<{ path: string, error: string }> {
   const muon_path = extensionConfiguration("muonPath");
 
-  const {stdout, stderr, error} = await exec(muon_path, ["version"])
-  if (error) {
-    return undefined;
+  let stdout: string, stderr: string;
+
+  try {
+    ({ stdout, stderr } = await exec(muon_path, ["version"]))
+  } catch (exception) {
+    const {error, stdout, stderr}: {error: cp.ExecException, stdout: string, stderr: string} = exception;
+    return { path: undefined, error: error.message };
   }
 
   const line1 = stdout.split("\n")[0].split(" ")
   if (line1.length !== 2) {
-    return undefined;
+    return { path: undefined, error: `Invalid version string: ${line1}` };
   }
 
   const ver = line1[1].split("-")[0]
-  // TODO: when muon its first release, use a real version comparison function
-  if (ver !== "v0.0.1") {
-      return undefined;
+  // TODO: when muon has a release, use a real version comparison function
+  const expected = "v0.0.1";
+  if (ver !== expected) {
+      return { path: undefined, error: `Muon version mismatch: ${ver} != ${expected}` };
   }
 
-  return muon_path;
+  return { path: muon_path, error: undefined };
 }

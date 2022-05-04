@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {
-  extensionConfiguration
+  extensionConfiguration,
+  getOutputChannel,
 } from "./utils";
 import {
   LinterConfiguration,
@@ -41,9 +42,11 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       continue;
     }
 
-    const linter_path = await props.check();
-    if (!linter_path) {
-        continue;
+    const { path, error } = await props.check();
+    if (error) {
+      getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`)
+      getOutputChannel().show(true);
+      continue;
     }
 
     const diagnosticCollection = vscode.languages.createDiagnosticCollection(`mesonbuild.linters.${name}`);
