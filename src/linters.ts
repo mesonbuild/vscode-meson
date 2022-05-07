@@ -34,6 +34,8 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
     return disposables;
   }
 
+  let enabled_linters: ((document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>)[] = [];
+
   for (const [name, props] of Object.entries(linters)) {
     const config: LinterConfiguration = extensionConfiguration("linter")[name];
 
@@ -48,19 +50,24 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => {
-      diagnostics.set(document.uri, await props.lint(path, sourceRoot, document));
-    }
+    const linter = async (document: vscode.TextDocument) => await props.lint(path, sourceRoot, document)
+    enabled_linters.push(linter);
+  }
 
-    const subscriptions = [
-      vscode.workspace.onDidChangeTextDocument(c => linter(c.document)),
-      vscode.window.onDidChangeActiveTextEditor(e => { if (e) { linter(e.document) } }),
-    ]
+  const lintAll = (document: vscode.TextDocument) => {
+    Promise.all(enabled_linters.map(l => l(document))).then(values => {
+      diagnostics.set(document.uri, values.flat());
+    })
+  }
 
-    for (const sub of subscriptions) {
-      context.subscriptions.push(sub);
-      disposables.push(sub);
-    }
+  const subscriptions = [
+    vscode.workspace.onDidChangeTextDocument(c => lintAll(c.document)),
+    vscode.window.onDidChangeActiveTextEditor(e => { if (e) { lintAll(e.document) } }),
+  ]
+
+  for (const sub of subscriptions) {
+    context.subscriptions.push(sub);
+    disposables.push(sub);
   }
 
   return disposables;
