@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.6.0
 - Add highlighting for `add_project_dependencies()`
 - Add a meson DSL linter framework
