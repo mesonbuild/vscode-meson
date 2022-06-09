@@ -1,7 +1,12 @@
 # Change Log
 
 ## 1.5.3
+- Add highlighting for `add_project_dependencies()`
+- Add a meson DSL linter framework
+- Add a meson DSL formatter framework
+- Add [muon](https://muon.build) as a linting and formatting provider
 - Add `in` operator
+
 
 ## 1.5.2
 - Fix highlighting for `structured_sources()`
