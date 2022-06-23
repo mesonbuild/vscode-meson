@@ -14,7 +14,7 @@ Icons from the [Material Design Icons](https://materialdesignicons.com/) project
 - Linting\*
 - Formatting\*
 
-\* - requires a supported provider be installed
+\* - requires an installation of [muon](https://muon.build).
 
 # New extension ID
 
