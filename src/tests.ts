@@ -90,12 +90,15 @@ export async function testDebugHandler(controller: vscode.TestController, reques
         return;
     }
 
+    let configDebugOptions = extensionConfiguration("debugOptions")
+
     /* We already figured out which tests we want to run.
      * We don't use the actual test either way, as we don't get the result here... */
     for (let test of relevantTests) {
         let args = [...test.cmd]
         args.shift();
-        await vscode.debug.startDebugging(undefined, {
+
+        let debugConfiguration = {
                 name: `meson-debug-${test.name}`,
                 type: "cppdbg",
                 request: "launch",
@@ -103,7 +106,8 @@ export async function testDebugHandler(controller: vscode.TestController, reques
                 env: test.env,
                 program: test.cmd[0],
                 args: args,
-            });
+            };
+        await vscode.debug.startDebugging(undefined, {...debugConfiguration, ...configDebugOptions});
     }
 
     run.end();

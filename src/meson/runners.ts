@@ -25,7 +25,7 @@ export async function runMesonConfigure(source: string, build: string) {
         )}...`
       });
 
-      const configureOpts = extensionConfiguration("configureOptions").join(" ");
+      const configureOpts = extensionConfiguration("configureOptions");
 
       if (await checkMesonIsConfigured(build)) {
         progress.report({
@@ -34,7 +34,7 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         await exec(
-          extensionConfiguration("mesonPath"), ["configure", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["configure", ...configureOpts, build],
           { cwd: source }
         );
         progress.report({ message: "Reconfiguring build...", increment: 60 });
@@ -48,7 +48,7 @@ export async function runMesonConfigure(source: string, build: string) {
         });
 
         const { stdout, stderr } = await exec(
-          extensionConfiguration("mesonPath"), ["setup", configureOpts, build],
+          extensionConfiguration("mesonPath"), ["setup", ...configureOpts, build],
           { cwd: source });
 
         getOutputChannel().appendLine(stdout);
@@ -68,7 +68,7 @@ export async function runMesonReconfigure() {
   try {
     await vscode.tasks.executeTask(await getTask("reconfigure"));
   } catch (e) {
-    vscode.window.showErrorMessage("Couldn't reconfigure project.");
+    vscode.window.showErrorMessage("Could not reconfigure project.");
     getOutputChannel().appendLine("Reconfiguring Meson:");
     getOutputChannel().appendLine(e);
     getOutputChannel().show(true);
@@ -76,45 +76,17 @@ export async function runMesonReconfigure() {
 }
 
 export async function runMesonBuild(buildDir: string, name?: string) {
-  const title = name ? `Building target ${name}` : "Building project";
-  getOutputChannel().append(`\n${title}\n`);
 
-  const args = ["compile"].concat(name ?? []);
-  const stream = execStream(extensionConfiguration("mesonPath"), args, { cwd: buildDir });
+  try {
+    await vscode.tasks.executeTask(await getTask("build", name));
+  } catch (e) {
+    vscode.window.showErrorMessage(`Could not build ${name}`);
+    getOutputChannel().appendLine(`Building target ${name}:`);
+    getOutputChannel().appendLine(e);
+    getOutputChannel().show(true);
+  }
 
-  return vscode.window.withProgress(
-    {
-      title,
-      location: vscode.ProgressLocation.Notification,
-      cancellable: true
-    },
-    async (progress, token) => {
-      token.onCancellationRequested(() => stream.kill());
-      let oldPercentage = 0;
-      stream.onLine((msg, isError) => {
-        const match = /^\[(\d+)\/(\d+)\] (.*)/g.exec(msg);
-        if (match) {
-          const percentage = (100 * parseInt(match[1])) / parseInt(match[2]);
-          const increment = percentage - oldPercentage;
-          oldPercentage = percentage;
-          if (increment > 0) progress.report({ increment, message: match[3] });
-        }
-        getOutputChannel().append(msg);
-        if (isError) getOutputChannel().show(true);
-      });
-
-      const code = await stream.finishP();
-      if (code !== 0) {
-        throw new Error(
-          "Build failed. See Meson Build output for more details."
-        );
-      }
-
-      getOutputChannel().append(`${title} finished.\n`);
-      progress.report({ message: "finished.", increment: 100 });
-      await new Promise(res => setTimeout(res, 5000));
-    }
-  );
+  return;
 }
 
 export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {

@@ -3,7 +3,7 @@
   "displayName": "Meson",
   "description": "Meson language support for Visual Studio Code",
   "icon": "graphics/icon.png",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "license": "Apache-2.0",
   "publisher": "mesonbuild",
   "author": {
@@ -113,6 +113,50 @@
           "type": "string",
           "default": "meson",
           "description": "Specify the meson executable to use"
+        },
+        "mesonbuild.muonPath": {
+          "type": "string",
+          "default": "muon",
+          "description": "Specify the muon executable to use"
+        },
+        "mesonbuild.linting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Globally enable/disable linting"
+        },
+        "mesonbuild.linter.muon.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable muon linter"
+        },
+        "mesonbuild.formatting.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Globally enable/disable formatting"
+        },
+        "mesonbuild.formatting.provider": {
+          "type": "string",
+          "default": "muon",
+          "enum": ["muon"],
+          "description": "Select which formatting provider to use"
+        },
+        "mesonbuild.formatting.muonConfig": {
+          "type": "string",
+          "default": null,
+          "description": "Path to muon formatter config.ini"
+        },
+        "mesonbuild.debugOptions": {
+          "type": "object",
+          "default": {
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ]
+          },
+          "description": "Give an object that's merged into the debug configuration provider"
         }
       }
     },

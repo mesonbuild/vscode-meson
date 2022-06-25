@@ -11,6 +11,10 @@ Icons from the [Material Design Icons](https://materialdesignicons.com/) project
 - Syntax Highlighting
 - Automatic Task Provider
 - Code Snippets
+- Linting\*
+- Formatting\*
+
+\* - requires an installation of [muon](https://muon.build).
 
 # New extension ID
 

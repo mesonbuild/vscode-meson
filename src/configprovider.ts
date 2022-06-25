@@ -4,6 +4,7 @@ import {
     getMesonTargets
 } from "./meson/introspection"
 import {
+    extensionConfiguration,
     getTargetName
 } from "./utils"
 
@@ -17,6 +18,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
         let targets = await getMesonTargets(this.path);
 
+        let configDebugOptions = extensionConfiguration("debugOptions");
+
         const executables = targets.filter(target => target.type == "executable");
         let ret: vscode.DebugConfiguration[] = [];
 
@@ -26,14 +29,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             const targetName = await getTargetName(target)
-            ret.push({
+            let debugConfiguration = {
                 type: 'cppdbg',
                 name: target.name,
                 request: "launch",
                 cwd: this.path,
                 program: target.filename[0],
                 preLaunchTask: `Meson: Build ${targetName}`
-            })
+            };
+            ret.push({...configDebugOptions, ...debugConfiguration})
         }
 
         return ret;
