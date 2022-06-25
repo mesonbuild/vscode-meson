@@ -3,6 +3,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: "read"
+
 name: Deploy Extension
 jobs:
   deploy:
