@@ -251,7 +251,26 @@
           "when": "mesonbuild.hasProject"
         }
       ]
-    }
+    },
+    "problemMatchers": [
+      {
+        "name": "meson-gcc",
+        "source": "gcc",
+        "owner": "meson",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/${config:mesonbuild.buildFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

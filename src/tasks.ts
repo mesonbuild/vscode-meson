@@ -24,7 +24,8 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       { type: "meson", mode: "build" },
       "Build all targets",
       "Meson",
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile"], { cwd: buildDir })
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile", "-C", buildDir]),
+      "$meson-gcc"
     );
     const defaultTestTask = new vscode.Task(
       { type: "meson", mode: "test" },
@@ -79,7 +80,8 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
             "Meson",
             new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile", targetName], {
               cwd: buildDir
-            })
+            }),
+            "$meson-gcc"
           );
           buildTask.group = vscode.TaskGroup.Build;
           if (t.type == "executable") {
