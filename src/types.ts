@@ -9,6 +9,7 @@ export type LinterConfiguration = {
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
   configureOptions: string[];
+  setupOptions: string[];
   buildFolder: string;
   mesonPath: string;
   muonPath: string;
