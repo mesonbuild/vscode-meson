@@ -119,6 +119,11 @@
           ],
           "description": "Specify the list of configuration options used for Meson configuration."
         },
+        "mesonbuild.setupOptions": {
+          "type": "array",
+          "default": [],
+          "description": "Specify the list of setup options used for Meson setup. Can be used to specify a cross file (use --cross-file=FILE)."
+        },
         "mesonbuild.mesonPath": {
           "type": "string",
           "default": "meson",
