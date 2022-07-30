@@ -59,7 +59,11 @@
       },
       {
         "command": "mesonbuild.configure",
-        "title": "Meson: Configure"
+        "title": "Meson: Configure",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
       },
       {
         "command": "mesonbuild.reconfigure",
@@ -264,6 +268,13 @@
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
           "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "mesonbuild.configure",
+          "when": "view == meson-project",
+          "group": "navigation"
         }
       ]
     },
