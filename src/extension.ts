@@ -8,6 +8,7 @@ import {
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
+import { TargetNode } from "./treeview/nodes/targets"
 import {
   extensionConfiguration,
   execAsTask,
@@ -97,6 +98,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
       }
     })
   );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
+      let file = node.getTarget().defined_in;
+      let uri  = vscode.Uri.file(file)
+      await vscode.commands.executeCommand('vscode.open', uri);
+      })
+  );
+
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {
