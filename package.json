@@ -52,6 +52,12 @@
   "contributes": {
     "commands": [
       {
+        "command": "mesonbuild.openBuildFile",
+        "title": "Open",
+        "icon": "$(preferences-open-settings)",
+        "when": "false"
+      },
+      {
         "command": "mesonbuild.configure",
         "title": "Meson: Configure"
       },
@@ -249,6 +255,15 @@
           "id": "meson-project",
           "name": "Current project",
           "when": "mesonbuild.hasProject"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "inline"
         }
       ]
     },

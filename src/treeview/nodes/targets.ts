@@ -72,6 +72,10 @@ export class TargetNode extends BaseNode {
     super(`${parentId}-${target.id}`);
   }
 
+  getTarget() {
+    return this.target;
+  }
+
   getChildren() {
     if (!this.target.target_sources) {
       return [];
@@ -95,6 +99,7 @@ export class TargetNode extends BaseNode {
     item.label = this.target.name;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    item.contextValue = "meson-target";
 
     const targetName = await getTargetName(this.target);
 
