@@ -5,12 +5,13 @@ import {
   getOutputChannel
 } from './utils';
 import {
-  ToolCheckFunc
+  ToolCheckFunc,
+  Tool
 } from './types'
 import * as muon from "./tools/muon";
 
 type FormatterFunc = (
-  formatter_path: string,
+  tool: Tool,
   document: vscode.TextDocument
 ) => Promise<vscode.TextEdit[]>
 
@@ -36,7 +37,7 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
   const name = extensionConfiguration("formatting").provider;
   const props = formatters[name];
 
-  const { path, error } = await props.check();
+  const { tool, error } = await props.check();
   if (error) {
     getOutputChannel().appendLine(`Failed to enable formatter ${name}: ${error}`)
     getOutputChannel().show(true);
@@ -45,7 +46,7 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
 
   const sub = vscode.languages.registerDocumentFormattingEditProvider('meson', {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-      return await props.format(path, document);
+      return await props.format(tool, document);
     }
   })
 

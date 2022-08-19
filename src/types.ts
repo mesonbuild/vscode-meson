@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
-export type ToolCheckFunc = () => Promise<{ path: string, error: string }>
+export type Tool = { path: string, version: [number, number, number] }
+export type ToolCheckFunc = () => Promise<{ tool: Tool, error: string }>
 
 export type LinterConfiguration = {
   enabled: boolean,

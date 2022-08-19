@@ -6,14 +6,17 @@ import {
   extensionConfiguration,
   getOutputChannel
 } from "../utils"
+import {
+  Tool
+} from "../types"
 
 export async function lint(
-  muon_path: string,
+  muon: Tool,
   root: string,
   document: vscode.TextDocument
 ): Promise<vscode.Diagnostic[]> {
   const { error, stdout, stderr } = await execFeed(
-    muon_path,
+    muon.path,
     ["analyze", "-l", "-O", document.uri.fsPath],
     { cwd: root },
     document.getText()
@@ -52,12 +55,16 @@ export async function lint(
 }
 
 export async function format(
-  muon_path: string,
+  muon: Tool,
   document: vscode.TextDocument
 ): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
 
-  let args = ["fmt_unstable"]
+  let args = ["fmt"]
+
+  if (muon.version[0] == 0 && muon.version[1] == 0) {
+    args = ["fmt_unstable"]
+  }
 
   const config_path = extensionConfiguration("formatting").muonConfig
   if (config_path) {
@@ -65,7 +72,7 @@ export async function format(
   }
   args.push("-")
 
-  const { stdout, stderr, error } = await execFeed(muon_path, args, {}, originalDocumentText);
+  const { stdout, stderr, error } = await execFeed(muon.path, args, {}, originalDocumentText);
   if (error) {
     getOutputChannel().appendLine(`Failed to format document with muon: ${stderr}`)
     getOutputChannel().show(true);
@@ -80,8 +87,10 @@ export async function format(
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<{ path: string, error: string }> {
+export async function check(): Promise<{ tool: Tool, error: string }> {
   const muon_path = extensionConfiguration("muonPath");
+
+  const undef_muon = { path: undefined, version: undefined };
 
   let stdout: string, stderr: string;
 
@@ -89,20 +98,22 @@ export async function check(): Promise<{ path: string, error: string }> {
     ({ stdout, stderr } = await exec(muon_path, ["version"]))
   } catch (exception) {
     const {error, stdout, stderr}: {error: cp.ExecException, stdout: string, stderr: string} = exception;
-    return { path: undefined, error: error.message };
+    console.log(error);
+    return { tool: undef_muon, error: error.message };
   }
 
   const line1 = stdout.split("\n")[0].split(" ")
   if (line1.length !== 2) {
-    return { path: undefined, error: `Invalid version string: ${line1}` };
+    return { tool: undef_muon, error: `Invalid version string: ${line1}` };
   }
 
-  const ver = line1[1].split("-")[0]
-  // TODO: when muon has a release, use a real version comparison function
-  const expected = "v0.0.1";
-  if (ver !== expected) {
-      return { path: undefined, error: `Muon version mismatch: ${ver} != ${expected}` };
-  }
+  const ver = line1[1].split("-")[0].split('.').map((s) => {
+    if (s[0] == 'v') {
+      s = s.slice(1)
+    }
 
-  return { path: muon_path, error: undefined };
+    return Number.parseInt(s)
+  }) as [number, number, number];
+
+  return { tool: { path: muon_path, version: ver }, error: undefined };
 }

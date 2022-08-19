@@ -5,12 +5,13 @@ import {
 } from "./utils";
 import {
   LinterConfiguration,
-  ToolCheckFunc
+  ToolCheckFunc,
+  Tool
 } from "./types"
 import * as muon from "./tools/muon";
 
 type LinterFunc = (
-  linter_path: string,
+  tool: Tool,
   sourceRoot: string,
   document: vscode.TextDocument
 ) => Promise<vscode.Diagnostic[]>
@@ -43,14 +44,14 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       continue;
     }
 
-    const { path, error } = await props.check();
+    const { tool, error } = await props.check();
     if (error) {
       getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`)
       getOutputChannel().show(true);
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => await props.lint(path, sourceRoot, document)
+    const linter = async (document: vscode.TextDocument) => await props.lint(tool, sourceRoot, document)
     enabled_linters.push(linter);
   }
 
