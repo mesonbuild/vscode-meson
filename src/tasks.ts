@@ -31,7 +31,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       { type: "meson", mode: "test" },
       "Run tests",
       "Meson",
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test"], { cwd: buildDir })
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--verbose"], { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },
@@ -130,7 +130,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           { type: "meson", mode: "test", target: t.name },
           `Test ${t.name}`,
           "Meson",
-          new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", t.name], {
+          new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", t.name, "--verbose"], {
             env: t.env,
             cwd: buildDir
           })

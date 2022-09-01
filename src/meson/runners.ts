@@ -110,8 +110,8 @@ export async function runMesonBuild(buildDir: string, name?: string) {
 
 export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {
   try {
-    const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
-    const args = ["test", ...benchmarkArgs].concat(name ?? []);
+    const benchmarkArgs = isBenchmark ? ["--benchmark"] : [];
+    const args = ["test", "--verbose", ...benchmarkArgs].concat(name ?? []);
     return await execAsTask(
       extensionConfiguration("mesonPath"), args,
       { cwd: buildDir },
