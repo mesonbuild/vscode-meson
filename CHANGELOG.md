@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.9.0
 
 - Automatically configure Intellisense to use compile_commands.json generated
