@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.8.1
 
 - Drop vscode-nls dependency, which was unused and is no longer provided by default
