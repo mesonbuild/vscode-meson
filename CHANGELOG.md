@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.7.1
 
 - Track the version of linting tools, so that features of new versions may be used
