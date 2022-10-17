@@ -2,6 +2,7 @@
 
 ## next
 
+- Track the version of linting tools, so that features of new versions may be used
 
 ## 1.7.0
 
