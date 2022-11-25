@@ -82,6 +82,10 @@
         "title": "Meson: Run Unit Tests"
       },
       {
+        "command": "mesonbuild.install",
+        "title": "Meson: Install"
+      },
+      {
         "command": "mesonbuild.benchmark",
         "title": "Meson: Run Benchmarks"
       }
@@ -214,7 +218,8 @@
               "run",
               "test",
               "reconfigure",
-              "clean"
+              "clean",
+              "install"
             ],
             "default": "build"
           }

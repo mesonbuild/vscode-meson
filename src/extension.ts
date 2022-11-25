@@ -4,7 +4,8 @@ import {
   runMesonConfigure,
   runMesonBuild,
   runMesonTests,
-  runMesonReconfigure
+  runMesonReconfigure,
+  runMesonInstall
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
@@ -21,7 +22,7 @@ import {
   getMesonTests,
   getMesonBenchmarks
 } from "./meson/introspection";
-import {DebugConfigurationProvider} from "./configprovider";
+import { DebugConfigurationProvider } from "./configprovider";
 import {
   testDebugHandler,
   testRunHandler,
@@ -81,7 +82,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
 
-  let changeHandler = async () => { explorer.refresh(); await rebuildTests(controller);};
+  let changeHandler = async () => { explorer.refresh(); await rebuildTests(controller); };
 
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
@@ -102,9 +103,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
       let file = node.getTarget().defined_in;
-      let uri  = vscode.Uri.file(file)
+      let uri = vscode.Uri.file(file)
       await vscode.commands.executeCommand('vscode.open', uri);
-      })
+    })
   );
 
 
@@ -139,6 +140,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
         explorer.refresh();
       }
     ));
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.install", async () => {
+      await runMesonInstall();
+      explorer.refresh();
+    })
+  );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand(

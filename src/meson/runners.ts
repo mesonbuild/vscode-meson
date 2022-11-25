@@ -76,6 +76,17 @@ export async function runMesonReconfigure() {
   }
 }
 
+export async function runMesonInstall() {
+  try {
+    await vscode.tasks.executeTask(await getTask("install"));
+  } catch (e) {
+    vscode.window.showErrorMessage("Could not install project.");
+    getOutputChannel().appendLine("Installing:");
+    getOutputChannel().appendLine(e);
+    getOutputChannel().show(true);
+  }
+}
+
 export async function runMesonBuild(buildDir: string, name?: string) {
 
   try {

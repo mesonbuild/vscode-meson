@@ -9,7 +9,7 @@ import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
   target?: string;
-  mode?: "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure";
+  mode?: "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure" | "install";
   filename?: string;
 }
 
@@ -47,6 +47,12 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", buildDir],
         { cwd: vscode.workspace.rootPath })
     );
+    const defaultInstallTask = new vscode.Task(
+      { type: "meson", mode: "install" },
+      "Run install",
+      "Meson",
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["install"], { cwd: buildDir })
+    );
     const defaultCleanTask = new vscode.Task(
       { type: "meson", mode: "clean" },
       "Clean",
@@ -63,7 +69,8 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       defaultTestTask,
       defaultBenchmarkTask,
       defaultReconfigureTask,
-      defaultCleanTask
+      defaultCleanTask,
+      defaultInstallTask
     ];
     tasks.push(
       ...(await Promise.all(
