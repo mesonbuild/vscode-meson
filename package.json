@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/mesonbuild/vscode-meson/blob/master/README.md",
   "engines": {
-    "vscode": "^1.59.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Programming Languages"
@@ -318,12 +318,15 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "package": "vsce package",
+    "watch": "tsc -watch -p ./",
+    "upgrade-all": "yarn upgrade --latest -W"
   },
   "devDependencies": {
-    "@types/node": "^16.11.7",
-    "@types/vscode": "^1.1.59",
-    "typescript": "^4.4.4"
+    "@types/node": "^18.11.17",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4",
+    "vsce": "^2.15.0"
   },
   "dependencies": {}
 }
