@@ -20,3 +20,11 @@ Icons from the [Material Design Icons](https://materialdesignicons.com/) project
 
 If you come from a previous installation, please make sure you are on the **mesonbuild.mesonbuild** extension.
 There are 3 variants/versions of this extension on the store, and only that one is released from this repository.
+
+# Building
+
+1. `npm install -g vsce`
+1. Maybe bump the version in `package.json`
+1. `vsce package`
+1. Should generate a `.vsix` in the root.
+1. F1 -> Extensions Install from VSIX
