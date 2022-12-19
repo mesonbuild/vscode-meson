@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-
 export type Tool = { path: string, version: [number, number, number] }
 export type ToolCheckFunc = () => Promise<{ tool: Tool, error: string }>
 

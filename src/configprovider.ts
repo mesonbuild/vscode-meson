@@ -16,7 +16,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     this.path = path
   }
 
-  async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
+  async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken) {
     let targets = await getMesonTargets(this.path);
 
     let configDebugOptions = extensionConfiguration("debugOptions");

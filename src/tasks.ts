@@ -166,10 +166,12 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
 
 export async function getTask(mode: string, name?: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
-  const filtered = tasks.filter(
-    t => t.definition.mode === mode && (!name || t.definition.target === name)
+  const filteredTasks = tasks.filter(
+    (task) => task.definition.mode === mode && (!name || (task.definition.target === name))
   );
-  if (filtered.length === 0)
+
+  if (filteredTasks.length === 0)
     throw new Error(`Cannot find ${mode} target ${name}.`);
-  return filtered[0];
+
+  return filteredTasks[0];
 }
