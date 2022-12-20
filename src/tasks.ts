@@ -75,7 +75,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     tasks.push(
       ...(await Promise.all(
         targets.map(async t => {
-          const targetName = await getTargetName(t);
+          const targetName = await getTargetName(buildDir, t);
           const def: MesonTaskDefinition = {
             type: "meson",
             target: targetName,

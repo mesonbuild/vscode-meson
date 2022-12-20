@@ -1,11 +1,34 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { extensionRelative } from "../../utils";
-import { BaseNode } from "../basenode";
-import { BaseDirectoryNode } from "./base";
+import { extensionRelative, isThenable } from "../../utils";
+import { BaseNode } from "./base";
 
-abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
+abstract class BaseFileDirectoryNode extends BaseNode {
+  subfolders: Thenable<Map<string, string[]>>;
+
+  constructor(id: string, protected readonly workspaceFolder: vscode.WorkspaceFolder, protected readonly folder: string, filePaths: string[])
+  {
+    super(id);
+
+    const subfolders = this.buildFileTree(filePaths);
+    if (isThenable(subfolders)) {
+      this.subfolders = subfolders;
+    } else {
+      this.subfolders = Promise.resolve(subfolders);
+    }
+  }
+
+  getTreeItem() {
+    const item = super.getTreeItem() as vscode.TreeItem;
+
+    item.label = path.basename(this.folder);
+    // item.resourceUri = vscode.Uri.file(this.folder);
+    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+
+    return item;
+  }
+
   async getChildren() {
     const subfolders = await this.subfolders;
 
@@ -14,17 +37,17 @@ abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
         if (folder === ".") {
           return files.map((file) => new TargetSourceFileNode(this.id, file));
         } else {
-          return new TargetSourceDirectoryNode(this.id, folder, files);
+          return new TargetSourceDirectoryNode(this.id, this.workspaceFolder, folder, files);
         }
       })
       .flat(1);
   }
 
-  buildFileTree(fpaths: string[]) {
+  private async buildFileTree(filePaths: string[]): Promise<Map<string, string[]>> {
     const folders = new Map<string, string[]>();
     folders.set(".", new Array());
 
-    for (const f of fpaths) {
+    for (const f of filePaths) {
       let folderName = path.relative(this.folder, f);
       if (path.dirname(folderName) === ".") {
         folders.get(".").push(f);
@@ -48,8 +71,8 @@ abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
 }
 
 export class TargetSourcesRootNode extends BaseFileDirectoryNode {
-  constructor(parentId: string, rootFolder: string, private readonly allFiles: string[]) {
-    super(`${parentId}-sources`, rootFolder, allFiles);
+  constructor(parentId: string, workspaceFolder: vscode.WorkspaceFolder, rootFolder: string, private readonly allFiles: string[]) {
+    super(`${parentId}-sources`, workspaceFolder, rootFolder, allFiles);
   }
 
   getTreeItem() {
@@ -63,8 +86,8 @@ export class TargetSourcesRootNode extends BaseFileDirectoryNode {
 }
 
 export class TargetGeneratedSourcesRootNode extends BaseFileDirectoryNode {
-  constructor(parentId: string, files: string[]) {
-    super(`${parentId}-gensources`, vscode.workspace.rootPath, files);
+  constructor(parentId: string, workspaceFolder: vscode.WorkspaceFolder, files: string[]) {
+    super(`${parentId}-gensources`, workspaceFolder, workspaceFolder.uri.fsPath, files);
   }
 
   getTreeItem() {
@@ -78,8 +101,8 @@ export class TargetGeneratedSourcesRootNode extends BaseFileDirectoryNode {
 }
 
 export class TargetSourceDirectoryNode extends BaseFileDirectoryNode {
-  constructor(parentId: string, folder: string, files: string[]) {
-    super(`${parentId}-${path.basename(folder)}`, folder, files);
+  constructor(parentId: string, workspaceFolder: vscode.WorkspaceFolder, folder: string, files: string[]) {
+    super(`${parentId}-${path.basename(folder)}`, workspaceFolder, folder, files);
   }
 
   getTreeItem() {

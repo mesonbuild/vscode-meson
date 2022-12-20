@@ -1,6 +1,7 @@
 type Dict<T> = { [x: string]: T };
 
 export type LanguageID = string;
+
 export type TargetType =
   | "executable"
   | "static library"
@@ -9,7 +10,9 @@ export type TargetType =
   | "custom"
   | "run"
   | "jar";
+
 export type OptionType = "string" | "boolean" | "combo" | "integer" | "array";
+
 export interface OptionTypeMap {
   string: string;
   boolean: boolean;
@@ -17,6 +20,7 @@ export interface OptionTypeMap {
   integer: number;
   array: string[];
 }
+
 export type SectionType =
   | "core"
   | "backend"
@@ -25,6 +29,9 @@ export type SectionType =
   | "directory"
   | "user"
   | "test";
+
+// TODO maybe extend these where appropriate with workspaceFolder and buildDir. Could save passing a lot of that state around.
+
 export interface TargetSource {
   language: LanguageID;
   compiler: string[];
@@ -32,6 +39,7 @@ export interface TargetSource {
   sources: string[];
   generated_sources: string[];
 }
+
 export interface Target {
   name: string;
   id: string;
@@ -50,6 +58,7 @@ export interface Subproject {
   version: string;
   descriptive_name: string;
 }
+
 export interface ProjectInfo {
   version: string;
   descriptive_name: string;
@@ -63,12 +72,14 @@ export interface BuildOption<T extends OptionType> {
   type: T;
   value: OptionTypeMap[T];
 }
+
 export interface Dependency {
   name: string;
   required: boolean;
   conditional: boolean;
   has_fallback: boolean;
 }
+
 export interface Test {
   name: string;
   workdir: string | null;

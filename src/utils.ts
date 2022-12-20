@@ -66,13 +66,15 @@ export function execAsTask(
   command: string,
   args: string[],
   options: vscode.ProcessExecutionOptions,
-  revealMode = vscode.TaskRevealKind.Silent
+  revealMode,
+  problemMatcher?: string
 ) {
   const task = new vscode.Task(
     { type: "temp" },
     command,
     "Meson",
-    new vscode.ProcessExecution(command, args, options)
+    new vscode.ProcessExecution(command, args, options),
+    problemMatcher
   );
   task.presentationOptions.echo = false;
   task.presentationOptions.focus = false;
@@ -102,17 +104,28 @@ export function extensionRelative(filepath: string) {
   return path.join(extensionPath, filepath);
 }
 
+// TODO remove all uses.
+/** @deprecated */
 export function workspaceRelative(filepath: string) {
   return path.resolve(vscode.workspace.rootPath, filepath);
 }
 
-export async function getTargetName(target: Target) {
-  const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+export function workspaceRelative2(workspaceFolder: vscode.WorkspaceFolder, filepath: string) {
+  return path.resolve(workspaceFolder.uri.fsPath, filepath);
+}
+
+// TODO remove all uses.
+/** @deprecated */
+export async function getTargetName(buildDir: string, target: Target) {
+  return getTargetName2(vscode.workspace.workspaceFolders[0], buildDir, target);
+}
+
+export async function getTargetName2(workspaceFolder: vscode.WorkspaceFolder, buildDir: string, target: Target) {
   const buildOptions = await getMesonBuildOptions(buildDir);
-  const layoutOption = buildOptions.filter(o => o.name === "layout")[0];
+  const layoutOption = buildOptions.filter((option) => option.name === "layout")[0];
 
   if (layoutOption.value === "mirror") {
-    const relativePath = path.relative(vscode.workspace.rootPath, path.dirname(target.defined_in));
+    const relativePath = path.relative(workspaceFolder.uri.fsPath, path.dirname(target.defined_in));
 
     // Meson requires the separator between path and target name to be '/'.
     return path.posix.join(relativePath, target.name);
@@ -154,4 +167,13 @@ export function arrayIncludes<T>(array: T[], value: T) {
 
 export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
   return arrayIncludes(Object.getOwnPropertyNames(x), "then");
+}
+
+/** @deprecated */
+export function getBuildFolder() {
+  return extensionConfiguration("buildFolder");
+}
+
+export async function fileExists(path: string) {
+  return fs.promises.access(path, fs.constants.F_OK).then(() => true).catch(() => false);
 }

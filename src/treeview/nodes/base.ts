@@ -1,31 +1,35 @@
-import * as path from "path";
 import * as vscode from "vscode";
-import { isThenable } from "../../utils";
-import { BaseNode } from "../basenode";
 
-export abstract class BaseDirectoryNode<T> extends BaseNode {
-  subfolders: Thenable<Map<string, T[]>>;
+import { hash } from "../../utils";
 
-  constructor(id: string, protected readonly folder: string, protected readonly filepaths: T[]) {
-    super(id);
+export abstract class BaseNode {
+  constructor(protected readonly id: string) { }
 
-    const subs = this.buildFileTree(filepaths);
-    if (isThenable(subs)) {
-      this.subfolders = subs;
-    } else {
-      this.subfolders = Promise.resolve(subs);
-    }
+  getChildren(): vscode.ProviderResult<BaseNode[]> {
+    return [];
   }
 
-  getTreeItem() {
-    const item = super.getTreeItem() as vscode.TreeItem;
+  getTreeItem(): vscode.ProviderResult<vscode.TreeItem> {
+    // All derived getTreeItem()s set an appropriate label.
+    const item = new vscode.TreeItem("");
 
-    item.label = path.basename(this.folder);
-    // item.resourceUri = vscode.Uri.file(this.folder);
-    item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+    item.id = hash(this.id);
 
     return item;
   }
+}
 
-  abstract buildFileTree(fpaths: T[]): vscode.ProviderResult<Map<string, T[]>>;
+// A node in the meson tree view that can be built.
+export interface IBuildableNode {
+  build(): Promise<any>;
+}
+
+// A node in the meson tree view that can be debugged.
+export interface IDebuggableNode {
+  debug(): Promise<any>;
+}
+
+// A node in the meson tree view that can be run.
+export interface IRunnableNode {
+  run(): Thenable<any>;
 }

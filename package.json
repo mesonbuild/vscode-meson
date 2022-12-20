@@ -46,7 +46,8 @@
     "onCommand:mesonbuild.benchmark",
     "workspaceContains:meson.build",
     "onDebugDynamicConfigurations",
-    "onDebugDynamicConfigurations:cppdbg"
+    "onDebugDynamicConfigurations:cppdbg",
+    "onStartupFinished"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -65,8 +66,12 @@
         }
       },
       {
-        "command": "mesonbuild.reconfigure",
-        "title": "Meson: Reconfigure"
+        "command": "mesonbuild.builddir.reconfigure",
+        "title": "Reconfigure"
+      },
+      {
+        "command": "mesonbuild.builddir.clean",
+        "title": "Clean"
       },
       {
         "command": "mesonbuild.clean",
@@ -75,6 +80,18 @@
       {
         "command": "mesonbuild.build",
         "title": "Meson: Build"
+      },
+      {
+        "command": "mesonbuild.node.build",
+        "title": "Build"
+      },
+      {
+        "command": "mesonbuild.node.debug",
+        "title": "Debug"
+      },
+      {
+        "command": "mesonbuild.node.run",
+        "title": "Run"
       },
       {
         "command": "mesonbuild.test",
@@ -268,30 +285,73 @@
       "meson-sidebar": [
         {
           "id": "meson-project",
-          "name": "Current project",
+          "name": "",
           "when": "mesonbuild.hasProject"
         }
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.debug",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.builddir.reconfigure",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.builddir.clean",
+          "when": "false"
+        }
+      ],
       "view/item/context": [
         {
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
           "group": "inline"
-        }
-      ],
-      "view/title": [
+        },
         {
           "command": "mesonbuild.configure",
-          "when": "view == meson-project",
-          "group": "navigation"
-        }
-      ],
-      "commandPalette": [
+          "when": "view == meson-project && viewItem == meson-projectroot || view == meson-project && viewItem == meson-workspaceroot",
+          "group": "inline"
+        },
         {
-          "command": "mesonbuild.openBuildFile",
-          "when": "false"
+          "command": "mesonbuild.builddir.reconfigure",
+          "group": "build",
+          "when": "view == meson-project && viewItem == builddir"
+        },
+        {
+          "command": "mesonbuild.builddir.clean",
+          "when": "view == meson-project && viewItem == builddir",
+          "group": "build"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-target || view == meson-project && viewItem == builddir",
+          "group": "build"
+        },
+        {
+          "command": "mesonbuild.node.debug",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "debug"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "view == meson-project && viewItem == test",
+          "group": "run"
         }
       ]
     },

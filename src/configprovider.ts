@@ -5,7 +5,8 @@ import {
 } from "./meson/introspection"
 import {
   extensionConfiguration,
-  getTargetName
+    getBuildFolder,
+    getTargetName2
 } from "./utils"
 
 export class DebugConfigurationProvider implements vscode.DebugConfigurationProvider {
@@ -28,7 +29,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         continue;
       }
 
-      const targetName = await getTargetName(target)
+      // TODO buildDir support.
+      const targetName = await getTargetName2(folder, getBuildFolder(), target)
       let debugConfiguration = {
         type: 'cppdbg',
         name: target.name,
@@ -37,6 +39,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         program: target.filename[0],
         preLaunchTask: `Meson: Build ${targetName}`
       };
+
       ret.push({ ...configDebugOptions, ...debugConfiguration })
     }
 

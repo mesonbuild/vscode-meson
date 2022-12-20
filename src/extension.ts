@@ -1,21 +1,18 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import {
-  runMesonConfigure,
   runMesonBuild,
   runMesonTests,
-  runMesonReconfigure,
   runMesonInstall
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
-import { TargetNode } from "./treeview/nodes/targets"
 import {
   extensionConfiguration,
   execAsTask,
   workspaceRelative,
   extensionConfigurationSet,
-  getTargetName
+  getBuildFolder
 } from "./utils";
 import {
   getMesonTargets,
@@ -28,9 +25,11 @@ import {
   testRunHandler,
   rebuildTests
 } from "./tests";
-import {
-  activateLinters
-} from "./linters"
+
+import { BuildDirectoryNode } from "./treeview/nodes/builddirectory";
+import { IBuildableNode, IDebuggableNode, IRunnableNode } from "./treeview/nodes/base";
+import { TargetNode } from "./treeview/nodes/targets";
+
 import {
   activateFormatters
 } from "./formatters"
@@ -42,56 +41,45 @@ let mesonWatcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
 export async function activate(ctx: vscode.ExtensionContext) {
-  extensionPath = ctx.extensionPath;
-
   if (!vscode.workspace.workspaceFolders) {
     return;
   }
 
-  const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+  extensionPath = ctx.extensionPath;
+  explorer = new MesonProjectExplorer(ctx);
 
-  activateLinters(root, ctx);
   activateFormatters(ctx);
 
-  explorer = new MesonProjectExplorer(ctx, root, buildDir);
-  watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
+  watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(getBuildFolder())}/build.ninja`, false, false, true);
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
   controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider('cppdbg',
-      new DebugConfigurationProvider(workspaceRelative(extensionConfiguration("buildFolder"))),
+      new DebugConfigurationProvider(workspaceRelative(getBuildFolder())),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic)
   );
-
   ctx.subscriptions.push(watcher);
   ctx.subscriptions.push(mesonWatcher);
   ctx.subscriptions.push(controller);
 
-  let updateHasProject = async () => {
-    let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
-    vscode.commands.executeCommand("setContext", 'mesonbuild.hasProject', mesonFiles.length > 0);
-  }
-
-  mesonWatcher.onDidCreate(updateHasProject)
-  mesonWatcher.onDidDelete(updateHasProject)
-
-  await updateHasProject()
+  mesonWatcher.onDidCreate(() => MesonProjectExplorer.refresh());
+  mesonWatcher.onDidDelete(() => MesonProjectExplorer.refresh());
 
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
 
-  let changeHandler = async () => { explorer.refresh(); await rebuildTests(controller); };
+  let changeHandler = async () => { MesonProjectExplorer.refresh(); await rebuildTests(controller);};
 
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
 
+  // TODO this needs root/build support in some way.
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
       provideTasks(token) {
         return getMesonTasks(
-          workspaceRelative(extensionConfiguration("buildFolder"))
+          workspaceRelative(getBuildFolder())
         );
       },
       resolveTask() {
@@ -103,70 +91,117 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
       let file = node.getTarget().defined_in;
-      let uri = vscode.Uri.file(file)
+      let uri  = vscode.Uri.file(file)
       await vscode.commands.executeCommand('vscode.open', uri);
-    })
-  );
-
-
-  ctx.subscriptions.push(
-    vscode.commands.registerCommand("mesonbuild.configure", async () => {
-      await runMesonConfigure(
-        root,
-        workspaceRelative(extensionConfiguration("buildFolder"))
-      );
-      explorer.refresh();
-    })
-  );
-
-  ctx.subscriptions.push(
-    vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
-      await runMesonReconfigure();
-      explorer.refresh();
-    })
+      })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand(
       "mesonbuild.build",
-      async (name?: string) => {
+      async (buildDir?: string, name?: string) => {
         try {
-          name ??= await pickBuildTarget();
-          runMesonBuild(buildDir, name);
+          const [actualBuildDir, actualName] = await pickBuildTarget(buildDir, name);
+          runMesonBuild(actualBuildDir, actualName);
         } catch (err) {
           // Pick cancelled.
         }
 
-        explorer.refresh();
+        MesonProjectExplorer.refresh();
       }
-    ));
+    )
+  );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
       await runMesonInstall();
-      explorer.refresh();
+      MesonProjectExplorer.refresh();
     })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand(
+      "mesonbuild.node.build",
+      async (node?: IBuildableNode) => {
+        if (node != null) {
+          node.build();
+        }
+
+        // MesonProjectExplorer.refresh();
+      }
+    )
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
+      "mesonbuild.node.debug",
+      async (node?: IDebuggableNode) => {
+        if (node != null) {
+          node.debug();
+        }
+
+        // MesonProjectExplorer.refresh();
+      }
+    )
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
+      "mesonbuild.node.run",
+      async (node?: IRunnableNode) => {
+        if (node != null) {
+          node.run();
+        }
+
+        // MesonProjectExplorer.refresh();
+      }
+    )
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
+      "mesonbuild.builddir.reconfigure",
+      async (buildDirectoryNode?: BuildDirectoryNode) => {
+        if (buildDirectoryNode != null) {
+          buildDirectoryNode.reconfigure();
+        }
+
+        // MesonProjectExplorer.refresh();
+      }
+    )
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
+      "mesonbuild.builddir.clean",
+      async (buildDirectoryNode?: BuildDirectoryNode) => {
+        if (buildDirectoryNode != null) {
+          buildDirectoryNode.clean();
+        }
+
+        // MesonProjectExplorer.refresh();
+      }
+    )
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand(
       "mesonbuild.test",
-      async (name?: string) => runTestsOrBenchmarks(false, name)
+      async (buildDir?: string, name?: string) => runTestsOrBenchmarks(false, buildDir, name)
     )
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand(
       "mesonbuild.benchmark",
-      async (name?: string) => runTestsOrBenchmarks(true, name)
+      async (buildDir?: string, name?: string) => runTestsOrBenchmarks(true, buildDir, name)
     )
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], {
-        cwd: workspaceRelative(extensionConfiguration("buildFolder"))
-      });
+      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: workspaceRelative(getBuildFolder()) },
+        vscode.TaskRevealKind.Silent);
     })
   );
 
@@ -206,10 +241,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   if (configureOnOpen === true) {
     await vscode.commands.executeCommand("mesonbuild.configure");
-    explorer.refresh();
+    MesonProjectExplorer.refresh();
   }
 
-  async function pickBuildTarget() {
+  async function pickBuildTarget(actualBuildDir?: string, name?: string) {
+    if (actualBuildDir && name) {
+      return [actualBuildDir, name];
+    }
+
+    const buildDir = getBuildFolder();
     const picker = vscode.window.createQuickPick();
     picker.busy = true;
     picker.placeholder = "Select target to build. Defaults to all targets";
@@ -228,22 +268,23 @@ export async function activate(ctx: vscode.ExtensionContext) {
       ...targets.map((target) => {
         return {
           label: target.name,
-          detail: path.relative(root, path.dirname(target.defined_in)),
+          // TODO remove root
+          detail: path.relative(vscode.workspace.workspaceFolders[0].uri.fsPath, path.dirname(target.defined_in)),
           description: target.type,
           picked: false
         }
       })
     ];
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<[string, string]>((resolve, reject) => {
       picker.onDidAccept(() => {
         const selection = picker.activeItems[0];
 
         if (selection.label === "all") {
-          resolve(null);
+          resolve([workspaceRelative(buildDir), null]);
         } else {
           const target = targets.find((target) => target.name === selection.label);
-          resolve(getTargetName(target));
+          resolve([workspaceRelative(buildDir), target.name]);
         }
 
         picker.dispose();
@@ -254,6 +295,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   }
 
   async function pickTestOrBenchmark(isBenchmark: boolean) {
+    const buildDir = getBuildFolder();
     const tests = isBenchmark ? await getMesonBenchmarks(buildDir) : await getMesonTests(buildDir)
 
     const items = [
@@ -276,20 +318,24 @@ export async function activate(ctx: vscode.ExtensionContext) {
     if (result === undefined) {
       throw result;
     } else if (result.label === "all") {
-      return null;
+      return [buildDir, null];
     } else {
-      return result.label;
+      return [buildDir, result.label];
     }
   }
 
-  async function runTestsOrBenchmarks(isBenchmark: boolean, name?: string) {
+  async function runTestsOrBenchmarks(isBenchmark: boolean, buildDir?: string, name?: string) {
     try {
-      name ??= await pickTestOrBenchmark(isBenchmark);
+      if ((name == null) && (buildDir == null)) {
+        [buildDir, name] = await pickTestOrBenchmark(isBenchmark);
+      }
+
       await runMesonTests(buildDir, isBenchmark, name);
-    } catch (err) {
+    }
+    catch (err) {
       // Pick cancelled.
     }
 
-    explorer.refresh();
+    MesonProjectExplorer.refresh();
   }
 }

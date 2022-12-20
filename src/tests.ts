@@ -3,6 +3,7 @@ import {
   exec,
   extensionConfiguration,
   workspaceRelative,
+  getBuildFolder
 } from "./utils";
 import {
   Tests
@@ -13,7 +14,7 @@ import {
 } from "./meson/introspection"
 
 export async function rebuildTests(controller: vscode.TestController) {
-  let tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
+  let tests = await getMesonTests(workspaceRelative(getBuildFolder()))
 
   controller.items.forEach(item => {
     if (!tests.some(test => item.id == test.name)) {
@@ -41,7 +42,7 @@ export async function testRunHandler(controller: vscode.TestController, request:
     run.started(test);
     let starttime = Date.now();
     try {
-      await exec(extensionConfiguration("mesonPath"), ['test', '-C', workspaceRelative(extensionConfiguration("buildFolder")), '--print-errorlog', test.id]);
+      await exec(extensionConfiguration("mesonPath"), ['test', '-C', workspaceRelative(getBuildFolder()), '--print-errorlog', test.id]);
       let duration = Date.now() - starttime;
       run.passed(test, duration);
     } catch (e) {
@@ -69,15 +70,15 @@ export async function testDebugHandler(controller: vscode.TestController, reques
     controller.items.forEach(test => queue.push(test));
   }
 
-  const tests: Tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")));
-  const targets = await getMesonTargets(workspaceRelative(extensionConfiguration("buildFolder")));
+  const tests: Tests = await getMesonTests(workspaceRelative(getBuildFolder()));
+  const targets = await getMesonTargets(workspaceRelative(getBuildFolder()));
 
   /* while meson has the --gdb arg to test, but IMO we should go the actual debugger route.
    * We still want stuff to be built though... Without going through weird dances */
   const relevantTests = tests.filter(test => queue.some(candidate => candidate.id == test.name));
   const requiredTargets = targets.filter(target => relevantTests.some(test => test.depends.some(dep => dep == target.id)));
 
-  var args = ['compile', '-C', workspaceRelative(extensionConfiguration("buildFolder"))]
+  var args = ['compile', '-C', workspaceRelative(getBuildFolder())]
   requiredTargets.forEach(target => {
     args.push(target.name);
   });
@@ -102,7 +103,7 @@ export async function testDebugHandler(controller: vscode.TestController, reques
       name: `meson-debug-${test.name}`,
       type: "cppdbg",
       request: "launch",
-      cwd: test.workdir || workspaceRelative(extensionConfiguration("buildFolder")),
+      cwd: test.workdir || workspaceRelative(getBuildFolder()),
       env: test.env,
       program: test.cmd[0],
       args: args,
