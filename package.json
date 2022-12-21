@@ -53,9 +53,8 @@
     "commands": [
       {
         "command": "mesonbuild.openBuildFile",
-        "title": "Open",
-        "icon": "$(preferences-open-settings)",
-        "when": "false"
+        "title": "Open meson.build",
+        "icon": "$(preferences-open-settings)"
       },
       {
         "command": "mesonbuild.configure",
@@ -156,7 +155,9 @@
         "mesonbuild.formatting.provider": {
           "type": "string",
           "default": "muon",
-          "enum": ["muon"],
+          "enum": [
+            "muon"
+          ],
           "description": "Select which formatting provider to use"
         },
         "mesonbuild.formatting.muonConfig": {
@@ -285,6 +286,12 @@
           "command": "mesonbuild.configure",
           "when": "view == meson-project",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "false"
         }
       ]
     },
