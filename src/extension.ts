@@ -74,6 +74,23 @@ export async function activate(ctx: vscode.ExtensionContext) {
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
 
+  async function pickWorkspaceRootAndBuildDir() {
+    let workspaceFolder: vscode.WorkspaceFolder;
+
+    // Pick root if there are multiple.
+    if (vscode.workspace.workspaceFolders.length > 1) {
+      workspaceFolder = await vscode.window.showWorkspaceFolderPick();
+    } else {
+      workspaceFolder = vscode.workspace.workspaceFolders[0];
+    }
+
+    // Pick build directory.
+    // TODO if this is rewritten to go through the known state of roots & builddirs, can avoid the dialog when there's only 1 build folder.
+    const buildDir = await vscode.window.showInputBox({ value: extensionConfiguration("buildFolder") });
+
+    return { workspaceFolder, buildDir };
+  }
+
   // TODO this needs root/build support in some way.
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
@@ -200,7 +217,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: workspaceRelative(getBuildFolder()) },
+      const { workspaceFolder, buildDir } = await pickWorkspaceRootAndBuildDir();
+
+      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: path.join(workspaceFolder.uri.fsPath, buildDir) },
         vscode.TaskRevealKind.Silent);
     })
   );
@@ -249,13 +268,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
       return [actualBuildDir, name];
     }
 
-    const buildDir = getBuildFolder();
+    const { workspaceFolder, buildDir } = await pickWorkspaceRootAndBuildDir();
     const picker = vscode.window.createQuickPick();
     picker.busy = true;
     picker.placeholder = "Select target to build. Defaults to all targets";
     picker.show();
 
-    const targets = await getMesonTargets(buildDir);
+    const targets = await getMesonTargets(path.join(workspaceFolder.uri.fsPath, buildDir));
 
     picker.busy = false;
     picker.items = [
@@ -268,8 +287,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
       ...targets.map((target) => {
         return {
           label: target.name,
-          // TODO remove root
-          detail: path.relative(vscode.workspace.workspaceFolders[0].uri.fsPath, path.dirname(target.defined_in)),
+          detail: path.relative(workspaceFolder.uri.fsPath, path.dirname(target.defined_in)),
           description: target.type,
           picked: false
         }
@@ -281,10 +299,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
         const selection = picker.activeItems[0];
 
         if (selection.label === "all") {
-          resolve([workspaceRelative(buildDir), null]);
+          resolve([buildDir, null]);
         } else {
           const target = targets.find((target) => target.name === selection.label);
-          resolve([workspaceRelative(buildDir), target.name]);
+          resolve([buildDir, target.name]);
         }
 
         picker.dispose();
@@ -295,8 +313,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
   }
 
   async function pickTestOrBenchmark(isBenchmark: boolean) {
-    const buildDir = getBuildFolder();
-    const tests = isBenchmark ? await getMesonBenchmarks(buildDir) : await getMesonTests(buildDir)
+    const { workspaceFolder, buildDir } = await pickWorkspaceRootAndBuildDir();
+    const buildPath = path.join(workspaceFolder.uri.fsPath, buildDir);
+
+    const tests = isBenchmark ? await getMesonBenchmarks(buildPath) : await getMesonTests(buildPath)
 
     const items = [
       {
@@ -318,9 +338,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     if (result === undefined) {
       throw result;
     } else if (result.label === "all") {
-      return [buildDir, null];
+      return [buildPath, null];
     } else {
-      return [buildDir, result.label];
+      return [buildPath, result.label];
     }
   }
 
