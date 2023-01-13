@@ -28,22 +28,7 @@ export async function runMesonConfigure(source: string, build: string) {
       const configureOpts = extensionConfiguration("configureOptions");
       const setupOpts = extensionConfiguration("setupOptions");
 
-      if (await checkMesonIsConfigured(build)) {
-        progress.report({
-          message: "Applying configure options...",
-          increment: 30
-        });
-
-        await exec(
-          extensionConfiguration("mesonPath"), ["configure", ...configureOpts, build],
-          { cwd: source }
-        );
-        progress.report({ message: "Reconfiguring build...", increment: 60 });
-
-        // Note "setup --reconfigure" needs to be run from the root.
-        await exec(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", ...setupOpts, build],
-          { cwd: source });
-      } else {
+      if (!await checkMesonIsConfigured(build)) {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
         });
