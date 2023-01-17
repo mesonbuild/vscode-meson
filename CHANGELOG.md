@@ -2,6 +2,10 @@
 
 ## next
 
+- Generate `<builddir>/meson-vscode.env` to be used in `launch.json`'s `envFile`
+  to run programs using Meson's developper environment.
+  See https://mesonbuild.com/Commands.html#devenv
+
 ## 1.7.1
 
 - Track the version of linting tools, so that features of new versions may be used

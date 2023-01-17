@@ -9,6 +9,7 @@ import {
 import { getTask } from "../tasks";
 import { relative } from "path";
 import { checkMesonIsConfigured } from "./utils";
+import { genEnvFile } from "../utils";
 
 export async function runMesonConfigure(source: string, build: string) {
   return vscode.window.withProgress(
@@ -59,6 +60,9 @@ export async function runMesonConfigure(source: string, build: string) {
           getOutputChannel().show(true);
         }
       }
+
+      await genEnvFile(build);
+
       progress.report({ message: "Done.", increment: 100 });
       return new Promise(res => setTimeout(res, 2000));
     }

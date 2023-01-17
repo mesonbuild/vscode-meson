@@ -155,3 +155,13 @@ export function arrayIncludes<T>(array: T[], value: T) {
 export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
   return arrayIncludes(Object.getOwnPropertyNames(x), "then");
 }
+
+export async function genEnvFile(buildDir: string) {
+  const envfile = path.join(buildDir, "meson-vscode.env")
+  try {
+    await exec(
+      extensionConfiguration("mesonPath"), ["devenv", "-C", buildDir, "--dump", envfile, "--dump-format", "vscode"]);
+  } catch {
+    // Ignore errors, Meson could be too old to support --dump-format.
+  }
+}
