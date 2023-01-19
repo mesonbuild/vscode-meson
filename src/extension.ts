@@ -177,7 +177,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
       no = "Not this time",
       never = "Never",
       yes = "Yes, this time",
-      always = "Always"
+      automatic = "Automatic"
     };
 
     const response = await vscode.window.showInformationMessage(
@@ -197,7 +197,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
         configureOnOpen = true;
         break;
 
-      case Options.always:
+      case Options.automatic:
         extensionConfigurationSet(configureOnOpenKey, true, vscode.ConfigurationTarget.Workspace);
         configureOnOpen = true;
         break;
