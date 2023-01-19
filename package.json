@@ -105,11 +105,11 @@
             "ask"
           ],
           "enumDescriptions": [
-            "Always configure on open",
+            "Automatically configure on open",
             "Never configure on open",
             "Ask every time"
           ],
-          "description": "Have VS Code run Meson (re)configure on opening a folder."
+          "description": "Have VS Code run Meson configure on opening a folder."
         },
         "mesonbuild.buildFolder": {
           "type": "string",
