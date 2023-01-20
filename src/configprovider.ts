@@ -1,18 +1,66 @@
 import * as vscode from "vscode";
-
+import * as nls from 'vscode-nls';
+import * as path from 'path';
 import {
   getMesonTargets
 } from "./meson/introspection"
 import {
+  Target
+} from "./meson/types"
+import {
   extensionConfiguration,
   getTargetName
 } from "./utils"
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+export enum MIModes {
+  lldb = 'lldb',
+  gdb = 'gdb',
+}
 
 export class DebugConfigurationProvider implements vscode.DebugConfigurationProvider {
   private path: string;
 
   constructor(path: string) {
     this.path = path
+  }
+
+  async createBaseDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
+    const targetName = await getTargetName(target);
+    return {
+      type: 'cppdbg',
+      name: `Debug ${target.name}`,
+      request: 'launch',
+      cwd: path.dirname(this.path),
+      program: target.filename[0],
+      args: [],
+      preLaunchTask: `Meson: Build ${targetName}`
+    };
+  }
+
+  async createGDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
+    let debugConfig = await this.createBaseDebugConfiguration(target);
+    debugConfig.MIMode = MIModes.gdb;
+    debugConfig.setupCommands = [{
+      description: localize('enable.pretty.printing', 'Enable pretty-printing for gdb'),
+      text: '-enable-pretty-printing',
+      ignoreFailures: true
+    }];
+    return debugConfig;
+  }
+
+  async createLLDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
+    let debugConfig = await this.createBaseDebugConfiguration(target);
+    debugConfig.MIMode = MIModes.lldb;
+    return debugConfig;
+  }
+
+  async createMSVCDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
+    let debugConfig = await this.createBaseDebugConfiguration(target);
+    debugConfig.type = 'cppvsdbg';
+    return debugConfig;
   }
 
   async provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
@@ -28,15 +76,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         continue;
       }
 
-      const targetName = await getTargetName(target)
-      let debugConfiguration = {
-        type: 'cppdbg',
-        name: target.name,
-        request: "launch",
-        cwd: this.path,
-        program: target.filename[0],
-        preLaunchTask: `Meson: Build ${targetName}`
-      };
+      let debugConfiguration = null;
+      if (target.target_sources.some(source => ['cl'].includes(source.compiler[0]))) {
+        debugConfiguration = await this.createMSVCDebugConfiguration(target);
+      } else if (target.target_sources.some(source => ['cc', 'clang'].includes(source.compiler[0]))) {
+        debugConfiguration = await this.createLLDBDebugConfiguration(target);
+      } else {
+        debugConfiguration = await this.createGDBDebugConfiguration(target);
+      }
+
       ret.push({ ...configDebugOptions, ...debugConfiguration })
     }
 
