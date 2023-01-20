@@ -10,8 +10,8 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceRoot}",
         "--disable-extensions"
-      ]
-      // "preLaunchTask": "compile"
+      ],
+      "preLaunchTask": "compile"
     }
   ]
 }
