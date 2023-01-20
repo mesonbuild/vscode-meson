@@ -97,7 +97,7 @@ export async function check(): Promise<{ tool: Tool, error: string }> {
   try {
     ({ stdout, stderr } = await exec(muon_path, ["version"]))
   } catch (exception) {
-    const {error, stdout, stderr}: {error: cp.ExecException, stdout: string, stderr: string} = exception;
+    const { error, stdout, stderr }: { error: cp.ExecException, stdout: string, stderr: string } = exception;
     console.log(error);
     return { tool: undef_muon, error: error.message };
   }
