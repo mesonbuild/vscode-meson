@@ -294,7 +294,7 @@
         "source": "gcc",
         "owner": "meson",
         "fileLocation": [
-          "relative",
+          "autodetect",
           "${workspaceFolder}/${config:mesonbuild.buildFolder}"
         ],
         "pattern": {
