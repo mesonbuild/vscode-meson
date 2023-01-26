@@ -10,7 +10,7 @@ import { MesonProjectExplorer } from "../index";
 import { ProjectInfo } from "../../meson/types";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
 import { execAsTask, extensionConfiguration, extensionRelative } from "../../utils";
-import { runMesonBuild2 } from "../../meson/runners";
+import { makeTaskTitle, runMesonBuild } from "../../meson/runners";
 
 export class BuildDirectoryNode extends BaseNode implements IBuildableNode {
 	private watcher;
@@ -49,15 +49,24 @@ export class BuildDirectoryNode extends BaseNode implements IBuildableNode {
 
 	async reconfigure() {
         // Note "setup --reconfigure" needs to be run from the root.
-        return execAsTask(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", this.buildDir], { cwd: this.workspaceFolder.uri.fsPath }, vscode.TaskRevealKind.Always);
+		const title = makeTaskTitle("reconfigure", this.buildDir, this.getName());
+
+        return execAsTask(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", this.buildDir], { cwd: this.workspaceFolder.uri.fsPath },
+			vscode.TaskRevealKind.Always, null, title);
 	}
 
 	async clean() {
-		return execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: this.buildDir }, vscode.TaskRevealKind.Silent);
+		const title = makeTaskTitle("clean", this.buildDir, this.getName());
+
+		return execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: this.buildDir }, vscode.TaskRevealKind.Silent, null, title);
 	}
 
 	async build() {
-		runMesonBuild2(this.buildDir);
+		runMesonBuild(this.buildDir, this.getName(), null);
+	}
+
+	getName() {
+		return this.projectInfo.descriptive_name;
 	}
 
 	async getChildren() {

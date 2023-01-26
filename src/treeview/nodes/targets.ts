@@ -125,24 +125,24 @@ export class TargetNode extends BaseNode implements IBuildableNode, IDebuggableN
     return item;
   }
 
+  getName() {
+    return this.target.name;
+  }
+
   async build() {
     // meson doesn't seem to require path/to/target now. Name is sufficient.
-	// TODO check that, what version?
-	// Was: await getTargetName(this.target)
-    return runMesonBuild(this.buildDir, this.target.name);
+    // TODO check that, what version?
+    // Was: await getTargetName(this.target)
+    return runMesonBuild(this.buildDir, this.getName(), this.getName());
   }
 
   async debug() {
     // Note this is not specifying "preLaunchTask".
-    // Run the build explicitly to get the correct build directory to avoid requiring a task per { build dir, target }.
+	// Maybe a better approach is to register a task for building each target, rather than the on-demand temp thing.
+	// Then preLaunchTask as below will work.
     // TODO how to actually wait for build to finish?
-    //const buildRes = await this.build();
-
-  //  const task = await getTask("debug", this.target.name);
-
-    const launchConfigs = vscode.workspace.getConfiguration("launch", this.workspaceFolder);
-
-    // TODO filter through launchConfig finding something similar and copy it.
+    // TODO filter through launchConfig finding something similar and copy it?
+    // const launchConfigs = vscode.workspace.getConfiguration("launch", this.workspaceFolder);
 
     const debugConfig: vscode.DebugConfiguration = {
       type: 'cppdbg',
@@ -150,7 +150,7 @@ export class TargetNode extends BaseNode implements IBuildableNode, IDebuggableN
       request: "launch",
       cwd: this.workspaceFolder.uri.fsPath,
       program: this.target.filename[0],
-      //preLaunchTask: `Meson: Build ${this.target.name}`
+      // preLaunchTask: makeTaskTitle("build", this.buildDir, this.getName())
     };
 
     vscode.debug.startDebugging(this.workspaceFolder, debugConfig);

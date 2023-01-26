@@ -22,6 +22,8 @@ export abstract class BaseNode {
 // A node in the meson tree view that can be built.
 export interface IBuildableNode {
   build(): Promise<any>;
+
+  getName(): string;
 }
 
 // A node in the meson tree view that can be debugged.

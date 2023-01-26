@@ -3,7 +3,8 @@ import * as vscode from "vscode";
 import {
   runMesonBuild,
   runMesonTests,
-  runMesonInstall
+  runMesonInstall,
+  makeTaskTitle
 } from "./meson/runners";
 import { getMesonTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
@@ -17,7 +18,8 @@ import {
 import {
   getMesonTargets,
   getMesonTests,
-  getMesonBenchmarks
+  getMesonBenchmarks,
+  getMesonProjectInfo
 } from "./meson/introspection";
 import { DebugConfigurationProvider } from "./configprovider";
 import {
@@ -84,9 +86,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
       workspaceFolder = vscode.workspace.workspaceFolders[0];
     }
 
+    if (!workspaceFolder) {
+      throw new Error(`No workspace selected`);
+    }
+
     // Pick build directory.
     // TODO if this is rewritten to go through the known state of roots & builddirs, can avoid the dialog when there's only 1 build folder.
     const buildDir = await vscode.window.showInputBox({ value: extensionConfiguration("buildFolder") });
+
+    if (!buildDir) {
+      throw new Error(`No build directory selected`);
+    }
 
     return { workspaceFolder, buildDir };
   }
@@ -118,8 +128,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
       "mesonbuild.build",
       async (buildDir?: string, name?: string) => {
         try {
-          const [actualBuildDir, actualName] = await pickBuildTarget(buildDir, name);
-          runMesonBuild(actualBuildDir, actualName);
+          const [actualBuildDir, projectName, targetName] = await pickBuildTarget(buildDir, name);
+          runMesonBuild(actualBuildDir, projectName, targetName);
         } catch (err) {
           // Pick cancelled.
         }
@@ -219,8 +229,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
       const { workspaceFolder, buildDir } = await pickWorkspaceRootAndBuildDir();
 
+      // TODO factor out with BuildDirectoryNode.clean
+
+      const title = makeTaskTitle("clean", this.buildDir);
+
       await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: path.join(workspaceFolder.uri.fsPath, buildDir) },
-        vscode.TaskRevealKind.Silent);
+        vscode.TaskRevealKind.Silent, null, title);
     })
   );
 
@@ -265,51 +279,69 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   async function pickBuildTarget(actualBuildDir?: string, name?: string) {
     if (actualBuildDir && name) {
-      return [actualBuildDir, name];
+      const projectInfo = await getMesonProjectInfo(actualBuildDir);
+
+      if (!projectInfo) {
+        throw new Error(`Couldn't get project info for ${actualBuildDir}`);
+      }
+
+      return [actualBuildDir, projectInfo.descriptive_name, name];
     }
 
     const { workspaceFolder, buildDir } = await pickWorkspaceRootAndBuildDir();
+    const buildPath = path.join(workspaceFolder.uri.fsPath, buildDir);
+
     const picker = vscode.window.createQuickPick();
     picker.busy = true;
-    picker.placeholder = "Select target to build. Defaults to all targets";
+    picker.placeholder = "Select target to build";
     picker.show();
 
-    const targets = await getMesonTargets(path.join(workspaceFolder.uri.fsPath, buildDir));
+    try {
+      const projectInfo = await getMesonProjectInfo(buildPath);
+      const targets = await getMesonTargets(buildPath);
 
-    picker.busy = false;
-    picker.items = [
-      {
-        label: "all",
-        detail: "Build all targets",
-        description: "(meta-target)",
-        picked: true
-      },
-      ...targets.map((target) => {
-        return {
-          label: target.name,
-          detail: path.relative(workspaceFolder.uri.fsPath, path.dirname(target.defined_in)),
-          description: target.type,
-          picked: false
-        }
-      })
-    ];
+      if (targets.length === 0) {
+        throw new Error(`${buildDir} has no targets`);
+      }
 
-    return new Promise<[string, string]>((resolve, reject) => {
-      picker.onDidAccept(() => {
-        const selection = picker.activeItems[0];
+      picker.busy = false;
+      picker.items = [
+        {
+          label: "all",
+          detail: "Build all targets",
+          description: "(meta-target)",
+          picked: true
+        },
+        ...targets.map((target) => {
+          return {
+            label: target.name,
+            detail: path.relative(workspaceFolder.uri.fsPath, path.dirname(target.defined_in)),
+            description: target.type,
+            picked: false
+          }
+        })
+      ];
 
-        if (selection.label === "all") {
-          resolve([buildDir, null]);
-        } else {
-          const target = targets.find((target) => target.name === selection.label);
-          resolve([buildDir, target.name]);
-        }
+      return new Promise<[string, string, string | null]>((resolve, reject) => {
+        picker.onDidAccept(() => {
+          const selection = picker.activeItems[0];
 
-        picker.dispose();
+          if (selection.label === "all") {
+            resolve([buildPath, projectInfo.descriptive_name, null]);
+          } else {
+            const target = targets.find((target) => target.name === selection.label);
+            resolve([buildPath, projectInfo.descriptive_name, target.name]);
+          }
+
+          picker.dispose();
+        });
+
+        picker.onDidHide(() => reject());
       });
-
-      picker.onDidHide(() => reject());
-    });
+    }
+    catch (error) {
+      picker.dispose();
+    }
   }
 
   async function pickTestOrBenchmark(isBenchmark: boolean) {

@@ -6,10 +6,12 @@ import {
 } from "./meson/introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
 
+// TODO figure out what of these are actually used.
+export type MesonTaskMode = "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure" | "install";
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
   target?: string;
-  mode?: "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure" | "install";
+  mode?: MesonTaskMode;
   filename?: string;
 }
 

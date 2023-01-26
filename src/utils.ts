@@ -67,11 +67,14 @@ export function execAsTask(
   args: string[],
   options: vscode.ProcessExecutionOptions,
   revealMode,
-  problemMatcher?: string
+  problemMatcher?: string,
+  taskName?: string
 ) {
   const task = new vscode.Task(
-    { type: "temp" },
-    command,
+    // Unique type seems to allow multiple tasks to run, so use taskName if defined.
+    { type: taskName ?? "temp" },
+    // TODO workspaceFolder here.
+    taskName ?? command,
     "Meson",
     new vscode.ProcessExecution(command, args, options),
     problemMatcher

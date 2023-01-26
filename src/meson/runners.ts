@@ -7,9 +7,10 @@ import {
   getOutputChannel,
   extensionConfiguration
 } from "../utils";
-import { getTask } from "../tasks";
+import { getTask, MesonTaskMode } from "../tasks";
 import { relative } from "path";
 import { getMesonProjectInfo } from "./introspection";
+import * as path from "path";
 
 async function isMesonConfigured(buildPath: string) {
   try {
@@ -93,40 +94,19 @@ export async function runMesonInstall() {
   }
 }
 
-export async function runMesonBuild(buildDir: string, name?: string) {
-  const title = `Building ${name ? `target ${name}` : "project"} in ${buildDir}`;
-  let taskExecution: Thenable<vscode.TaskExecution> | null = null;
+export function makeTaskTitle(taskMode: MesonTaskMode, buildDir: string, name?: string) {
+  const mode = taskMode[0].toUpperCase() + taskMode.slice(1)
 
+  return `${mode} ${name ? `${name}` : "project"} in ${path.basename(buildDir)}`;
+}
+
+export async function runMesonBuild(buildDir: string, name: string, targetName: string | null) {
+  const title = makeTaskTitle("build", buildDir, targetName ?? name);
   getOutputChannel().append(`\n${title}\n`);
 
-  // If there's a task defined for this target and its cwd matches this build dir, use it. This is the only way to get problem matchers to work currently:
-  // "$gcc" is insufficient as "fileLocation" is required for sane behaviour.
-
-  try {
-    const task = await getTask("build", name);
-
-    if ((task.execution as vscode.ProcessExecution)?.options?.cwd == buildDir) {
-      // Note hacking in task.execution.options.cwd doesn't work; it still uses the original directory.
-      // task.execution = new ProcessExecution "works" but the problem matcher doesn't.
-
-      task.presentationOptions.reveal = vscode.TaskRevealKind.Always;
-      taskExecution = vscode.tasks.executeTask(task);
-    }
-  }
-  catch (err) {
-  }
-
-  if (taskExecution == null) {
-    // Otherwise the best we can do is just invoke meson with a default problem matcher. It may not be able to resolve files very well.
-
-    // TODO not quite sure when this would be the case. Tasks are built up from available targets,
-    // and this function is only called on those targets (or build all).
-    // TODO $gcc $msBuild (or whatever it is) should figure out from the builddir's compiler.
-    const args = ["compile"].concat(name ?? []);
-    taskExecution = execAsTask(extensionConfiguration("mesonPath"), args, { cwd: buildDir }, vscode.TaskRevealKind.Always, "$gcc");
-  }
-
-  const res = await taskExecution;
+  // TODO $gcc $msBuild (or whatever it is) should figure out from the builddir's compiler.
+  const args = ["compile"].concat(targetName ?? []);
+  const res = await execAsTask(extensionConfiguration("mesonPath"), args, { cwd: buildDir }, vscode.TaskRevealKind.Always, "$meson-gcc", title);
 
   // TODO this is wrong: haven't really waited for the task!!
   getOutputChannel().append(`${title} finished.\n`);
@@ -134,46 +114,18 @@ export async function runMesonBuild(buildDir: string, name?: string) {
   return res;
 }
 
-export async function runMesonBuild2(buildDir: string, name?: string) {
-  const title = `Building ${name ? `target ${name}` : "project"} in ${buildDir}`;
-
-  getOutputChannel().append(`\n${title}\n`);
-
-  const command = extensionConfiguration("mesonPath");
-  const args = ["compile"].concat(name ?? []);
-
-  const task = new vscode.Task(
-    { type: "temp" },
-    command,
-    "Meson",
-    new vscode.ProcessExecution(command, args, { cwd: buildDir }),
-    "$gcc"
-  );
-
-  // TODO bah. Can only give the name, not the full detail with path, like this:
-  let problemMatcher = {
-    base: "$gcc",
-    fileLocation: ["autodetect", buildDir]
-  };
-
-  task.presentationOptions.echo = true;
-  task.presentationOptions.focus = true;
-  task.presentationOptions.reveal = vscode.TaskRevealKind.Always;
-
-  await vscode.tasks.executeTask(task);
-
-  getOutputChannel().append(`${title} finished.\n`);
-}
-
 export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {
   try {
     const benchmarkArgs = isBenchmark ? ["--benchmark"] : [];
     const args = ["test", "--verbose", ...benchmarkArgs].concat(name ?? []);
+    const title = makeTaskTitle(isBenchmark ? "benchmark" : "test", buildDir, name);
+
+    // Running test might build, so specify problemMatcher.
     return await execAsTask(
       extensionConfiguration("mesonPath"), args,
       { cwd: buildDir },
-      vscode.TaskRevealKind.Always
-    );
+      vscode.TaskRevealKind.Always,
+      "$meson-gcc", title);
   } catch (e) {
     if (e.stderr) {
       vscode.window.showErrorMessage(`${isBenchmark ? "Benchmarks" : "Tests"} failed.`);
