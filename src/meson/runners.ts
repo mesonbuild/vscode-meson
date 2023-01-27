@@ -8,7 +8,17 @@ import {
 } from "../utils";
 import { getTask } from "../tasks";
 import { relative } from "path";
-import { checkMesonIsConfigured } from "./utils";
+import { getMesonProjectInfo } from "./introspection";
+
+async function isMesonConfigured(buildPath: string) {
+  try {
+    return await getMesonProjectInfo(buildPath) != null;
+  }
+  catch (e) {
+  }
+
+  return false;
+}
 
 export async function runMesonConfigure(source: string, build: string) {
   return vscode.window.withProgress(
@@ -28,7 +38,7 @@ export async function runMesonConfigure(source: string, build: string) {
       const configureOpts = extensionConfiguration("configureOptions");
       const setupOpts = extensionConfiguration("setupOptions");
 
-      if (!await checkMesonIsConfigured(build)) {
+        if (await checkMesonIsConfigured(build)) {
         progress.report({
           message: `Configuring Meson into ${relative(source, build)}...`
         });
