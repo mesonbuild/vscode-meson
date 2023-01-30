@@ -38,7 +38,6 @@ import {
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
-let watcher: vscode.FileSystemWatcher;
 let mesonWatcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
@@ -52,7 +51,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   activateFormatters(ctx);
 
-  watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(getBuildFolder())}/build.ninja`, false, false, true);
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
   controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
@@ -61,7 +59,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
       new DebugConfigurationProvider(workspaceRelative(getBuildFolder())),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic)
   );
-  ctx.subscriptions.push(watcher);
   ctx.subscriptions.push(mesonWatcher);
   ctx.subscriptions.push(controller);
 
@@ -70,11 +67,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
-
-  let changeHandler = async () => { MesonProjectExplorer.refresh(); await rebuildTests(controller);};
-
-  watcher.onDidChange(changeHandler);
-  watcher.onDidCreate(changeHandler);
 
   async function pickWorkspaceRootAndBuildDir() {
     let workspaceFolder: vscode.WorkspaceFolder;

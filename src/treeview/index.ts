@@ -96,7 +96,6 @@ class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
     }
 
     await Promise.all(this.workspaceRootNodes.map((node) => node.readdir()));
-
     const hasMesonProject = this.workspaceRootNodes.some((workspaceRootNode) => workspaceRootNode.hasMesonProject);
     vscode.commands.executeCommand("setContext", "mesonbuild.hasProject", hasMesonProject);
   }
