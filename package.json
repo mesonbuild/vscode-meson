@@ -90,8 +90,14 @@
         "title": "Debug"
       },
       {
+        "command": "mesonbuild.node.runAll",
+        "title": "Run all",
+        "icon": "$(testing-run-all-icon)"
+      },
+      {
         "command": "mesonbuild.node.run",
-        "title": "Run"
+        "title": "Run",
+        "icon": "$(testing-run-icon)"
       },
       {
         "command": "mesonbuild.test",
@@ -309,6 +315,10 @@
           "when": "false"
         },
         {
+          "command": "mesonbuild.node.runAll",
+          "when": "false"
+        },
+        {
           "command": "mesonbuild.builddir.reconfigure",
           "when": "false"
         },
@@ -349,9 +359,14 @@
           "group": "debug"
         },
         {
+          "command": "mesonbuild.node.runAll",
+          "when": "view == meson-project && viewItem == test-root",
+          "group": "inline"
+        },
+        {
           "command": "mesonbuild.node.run",
           "when": "view == meson-project && viewItem == test",
-          "group": "run"
+          "group": "inline"
         }
       ]
     },

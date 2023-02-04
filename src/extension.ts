@@ -134,74 +134,21 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
       await runMesonInstall();
+      // Why refresh?
       MesonProjectExplorer.refresh();
     })
   );
 
-  ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.node.build",
-      async (node?: IBuildableNode) => {
-        if (node != null) {
-          node.build();
-        }
-
-        // MesonProjectExplorer.refresh();
-      }
-    )
-  );
+  ctx.subscriptions.push(vscode.commands.registerCommand("mesonbuild.node.build",async (node?: IBuildableNode) => node?.build()));
+  ctx.subscriptions.push(vscode.commands.registerCommand("mesonbuild.node.debug", (node?: IDebuggableNode) => node?.debug()));
+  ctx.subscriptions.push(vscode.commands.registerCommand("mesonbuild.node.runAll", (node?: IRunnableNode) => node?.run()));
+  ctx.subscriptions.push(vscode.commands.registerCommand("mesonbuild.node.run", (node?: IRunnableNode) => node?.run()));
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.node.debug",
-      async (node?: IDebuggableNode) => {
-        if (node != null) {
-          node.debug();
-        }
-
-        // MesonProjectExplorer.refresh();
-      }
-    )
-  );
+    vscode.commands.registerCommand("mesonbuild.builddir.reconfigure", (buildDirectoryNode?: BuildDirectoryNode) => buildDirectoryNode?.reconfigure()));
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.node.run",
-      async (node?: IRunnableNode) => {
-        if (node != null) {
-          node.run();
-        }
-
-        // MesonProjectExplorer.refresh();
-      }
-    )
-  );
-
-  ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.builddir.reconfigure",
-      async (buildDirectoryNode?: BuildDirectoryNode) => {
-        if (buildDirectoryNode != null) {
-          buildDirectoryNode.reconfigure();
-        }
-
-        // MesonProjectExplorer.refresh();
-      }
-    )
-  );
-
-  ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.builddir.clean",
-      async (buildDirectoryNode?: BuildDirectoryNode) => {
-        if (buildDirectoryNode != null) {
-          buildDirectoryNode.clean();
-        }
-
-        // MesonProjectExplorer.refresh();
-      }
-    )
-  );
+    vscode.commands.registerCommand("mesonbuild.builddir.clean", (buildDirectoryNode?: BuildDirectoryNode) => buildDirectoryNode?.clean()));
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand(

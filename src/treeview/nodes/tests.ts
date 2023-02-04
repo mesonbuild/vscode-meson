@@ -16,8 +16,8 @@ export class TestRootNode extends BaseNode implements IRunnableNode {
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = (this.tests.length === 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
 
-    // To key in to "when": "view == meson-project && viewItem == test" in package.json.
-    item.contextValue = "test";
+    // To key in to "when": "view == meson-project && viewItem == test-root" in package.json.
+    item.contextValue = "test-root";
 
     return item;
   }
