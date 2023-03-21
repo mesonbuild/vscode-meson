@@ -1,10 +1,13 @@
 # Change Log
 
-## next
+## 1.8.0
 
 - Generate `<builddir>/meson-vscode.env` to be used in `launch.json`'s `envFile`
   to run programs using Meson's developper environment.
   See https://mesonbuild.com/Commands.html#devenv
+- New meson install task
+- Do not configure on vscode startup if already configured
+- Fix gdb, lldb and vs debuggers configuration
 
 ## 1.7.1
 
