@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.8.0
 
 - Generate `<builddir>/meson-vscode.env` to be used in `launch.json`'s `envFile`
   to run programs using Meson's developper environment.
