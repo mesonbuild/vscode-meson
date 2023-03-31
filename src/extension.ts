@@ -88,9 +88,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     await rebuildTests(controller);
     await genEnvFile(buildDir);
   };
-
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
+  await genEnvFile(buildDir);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
