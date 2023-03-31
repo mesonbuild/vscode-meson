@@ -166,3 +166,32 @@ export async function genEnvFile(buildDir: string) {
     // Ignore errors, Meson could be too old to support --dump-format.
   }
 }
+
+export async function patchCompileCommands(buildDir: string) {
+  const filePath = path.join(buildDir, "compile_commands.json");
+  let db = await parseJSONFileIfExists(filePath);
+  if (!db)
+    return;
+
+  // Remove ccache from compile commands because they confuse Intellisense:
+  // https://github.com/microsoft/vscode-cpptools/issues/7616
+  Object.values(db).forEach((entry) => {
+    // FIXME: This should use proper shlex.split() and shlex.join()
+    let cmd = entry["command"].split(" ");
+    if (cmd[0].endsWith("ccache")) {
+      cmd.shift();
+      entry["command"] = cmd.join(" ");
+    }
+  });
+  const vsCodeFilePath = path.join(buildDir, "vscode_compile_commands.json")
+  fs.writeFileSync(vsCodeFilePath, JSON.stringify(db, null, "  "));
+
+  // Since we have compile_commands.json, make sure we use it.
+  try {
+    const relFilePath = path.relative(vscode.workspace.rootPath, vsCodeFilePath);
+    const conf = vscode.workspace.getConfiguration("C_Cpp");
+    conf.update("default.compileCommands", relFilePath, vscode.ConfigurationTarget.Workspace);
+  } catch {
+      // Ignore, C/C++ extension might not be installed
+  }
+}

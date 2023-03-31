@@ -16,7 +16,8 @@ import {
   workspaceRelative,
   extensionConfigurationSet,
   getTargetName,
-  genEnvFile
+  genEnvFile,
+  patchCompileCommands
 } from "./utils";
 import {
   getMesonTargets,
@@ -39,6 +40,7 @@ import {
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
+let compileCommandsWatcher: vscode.FileSystemWatcher;
 let mesonWatcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
@@ -57,6 +59,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
   watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
+  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/compile_commands.json`, false, false, true);
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
   controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
@@ -67,6 +70,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   ctx.subscriptions.push(watcher);
+  ctx.subscriptions.push(compileCommandsWatcher);
   ctx.subscriptions.push(mesonWatcher);
   ctx.subscriptions.push(controller);
 
@@ -91,6 +95,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
   await genEnvFile(buildDir);
+
+  let compileCommandsHandler = async () => {
+    await patchCompileCommands(buildDir);
+  };
+  compileCommandsWatcher.onDidChange(compileCommandsHandler);
+  compileCommandsWatcher.onDidCreate(compileCommandsHandler);
+  await patchCompileCommands(buildDir);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {

@@ -2,6 +2,9 @@
 
 ## next
 
+- Automatically configure Intellisense to use compile_commands.json generated
+  by Meson.
+
 ## 1.8.1
 
 - Drop vscode-nls dependency, which was unused and is no longer provided by default
