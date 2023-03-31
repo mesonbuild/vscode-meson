@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as nls from 'vscode-nls';
 import * as path from 'path';
 import {
   getMesonTargets
@@ -11,9 +10,6 @@ import {
   extensionConfiguration,
   getTargetName
 } from "./utils"
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum MIModes {
   lldb = 'lldb',
@@ -44,7 +40,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     let debugConfig = await this.createBaseDebugConfiguration(target);
     debugConfig.MIMode = MIModes.gdb;
     debugConfig.setupCommands = [{
-      description: localize('enable.pretty.printing', 'Enable pretty-printing for gdb'),
+      description: 'Enable pretty-printing for gdb',
       text: '-enable-pretty-printing',
       ignoreFailures: true
     }];
