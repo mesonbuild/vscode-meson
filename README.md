@@ -13,6 +13,9 @@ Icons from the [Material Design Icons](https://materialdesignicons.com/) project
 - Code Snippets
 - Linting\*
 - Formatting\*
+- Generate environment file to be used in launch.json:
+  `"envFile": "${workspaceFolder}/${config:mesonbuild.buildFolder}/vscode.env"`
+  See [Meson devenv](https://mesonbuild.com/Commands.html#devenv)
 
 \* - requires an installation of [muon](https://muon.build).
 

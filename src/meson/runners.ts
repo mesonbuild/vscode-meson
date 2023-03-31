@@ -46,8 +46,6 @@ export async function runMesonConfigure(source: string, build: string) {
         }
       }
 
-      await genEnvFile(build);
-
       progress.report({ message: "Done.", increment: 100 });
       return new Promise(res => setTimeout(res, 2000));
     }
