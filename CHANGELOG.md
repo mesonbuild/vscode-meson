@@ -2,6 +2,8 @@
 
 ## next
 
+- Drop vscode-nls dependency, which was unused and is no longer provided by default
+
 ## 1.8.0
 
 - Generate `<builddir>/meson-vscode.env` to be used in `launch.json`'s `envFile`
