@@ -58,57 +58,52 @@ export async function activate(ctx: vscode.ExtensionContext) {
   activateFormatters(ctx);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
-  watcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/build.ninja`, false, false, true);
-  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${workspaceRelative(extensionConfiguration("buildFolder"))}/compile_commands.json`, false, false, true);
-  mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
-  controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider('cppdbg',
-      new DebugConfigurationProvider(workspaceRelative(extensionConfiguration("buildFolder"))),
+      new DebugConfigurationProvider(buildDir),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic)
   );
-
-  ctx.subscriptions.push(watcher);
-  ctx.subscriptions.push(compileCommandsWatcher);
-  ctx.subscriptions.push(mesonWatcher);
-  ctx.subscriptions.push(controller);
 
   let updateHasProject = async () => {
     let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
     vscode.commands.executeCommand("setContext", 'mesonbuild.hasProject', mesonFiles.length > 0);
   }
-
+  mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
   mesonWatcher.onDidCreate(updateHasProject)
   mesonWatcher.onDidDelete(updateHasProject)
-
+  ctx.subscriptions.push(mesonWatcher);
   await updateHasProject()
 
+  controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
   controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
+  ctx.subscriptions.push(controller);
 
   let changeHandler = async () => {
     explorer.refresh();
     await rebuildTests(controller);
     await genEnvFile(buildDir);
   };
+  watcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/build.ninja`, false, false, true);
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
+  ctx.subscriptions.push(watcher);
   await genEnvFile(buildDir);
 
   let compileCommandsHandler = async () => {
     await patchCompileCommands(buildDir);
   };
+  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/compile_commands.json`, false, false, true);
   compileCommandsWatcher.onDidChange(compileCommandsHandler);
   compileCommandsWatcher.onDidCreate(compileCommandsHandler);
+  ctx.subscriptions.push(compileCommandsWatcher);
   await patchCompileCommands(buildDir);
 
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
       provideTasks(token) {
-        return getMesonTasks(
-          workspaceRelative(extensionConfiguration("buildFolder"))
-        );
+        return getMesonTasks(buildDir);
       },
       resolveTask() {
         return undefined;
@@ -124,13 +119,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     })
   );
 
-
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {
-      await runMesonConfigure(
-        root,
-        workspaceRelative(extensionConfiguration("buildFolder"))
-      );
+      await runMesonConfigure(root, buildDir);
       explorer.refresh();
     })
   );
@@ -143,19 +134,16 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.build",
-      async (name?: string) => {
-        try {
-          name ??= await pickBuildTarget();
-          runMesonBuild(buildDir, name);
-        } catch (err) {
-          // Pick cancelled.
-        }
-
-        explorer.refresh();
+    vscode.commands.registerCommand("mesonbuild.build", async (name?: string) => {
+      try {
+        name ??= await pickBuildTarget();
+        runMesonBuild(buildDir, name);
+      } catch (err) {
+        // Pick cancelled.
       }
-    ));
+      explorer.refresh();
+    })
+  );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
@@ -165,24 +153,20 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.test",
-      async (name?: string) => runTestsOrBenchmarks(false, name)
-    )
+    vscode.commands.registerCommand("mesonbuild.test", async (name?: string) => {
+      runTestsOrBenchmarks(false, name)
+    })
   );
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand(
-      "mesonbuild.benchmark",
-      async (name?: string) => runTestsOrBenchmarks(true, name)
-    )
+    vscode.commands.registerCommand("mesonbuild.benchmark", async (name?: string) => {
+      runTestsOrBenchmarks(true, name)
+    })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean"], {
-        cwd: workspaceRelative(extensionConfiguration("buildFolder"))
-      });
+      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean", "-C", buildDir], {});
     })
   );
 
