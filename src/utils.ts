@@ -116,7 +116,9 @@ export async function getTargetName(target: Target) {
 
     // Meson requires the separator between path and target name to be '/'.
     relativePath = path.join(relativePath, target.name);
-    return relativePath.split(path.sep).join(path.posix.sep);
+    const p = relativePath.split(path.sep).join(path.posix.sep);
+    return `${p}:${target.type.replace(" ", "_")}`
+
   }
   else {
     return `meson-out/${target.name}`;

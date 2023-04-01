@@ -96,7 +96,7 @@ export class TargetNode extends BaseNode {
   async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
-    item.label = this.target.name;
+    item.label = `${this.target.name} ${this.target.type}`;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.contextValue = "meson-target";
