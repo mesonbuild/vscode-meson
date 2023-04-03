@@ -1,5 +1,5 @@
 import * as path from "path";
-import { exec, extensionConfiguration, parseJSONFileIfExists } from "../utils";
+import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "../utils";
 import {
   Targets,
   Dependencies,
@@ -9,6 +9,7 @@ import {
 } from "./types";
 
 async function introspectMeson<T>(buildDir: string, filename: string, introspectSwitch: string) {
+  getOutputChannel().appendLine(`Read introspection file ${filename}`)
   const parsed = await parseJSONFileIfExists<T>(
     path.join(buildDir, path.join("meson-info", filename))
   );
