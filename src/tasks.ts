@@ -5,12 +5,32 @@ import {
   getMesonBenchmarks
 } from "./meson/introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
+import { Test } from "./meson/types";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
   target?: string;
   mode?: "build" | "run" | "test" | "benchmark" | "clean" | "reconfigure" | "install";
   filename?: string;
+}
+
+function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
+  const project = t.suite[0].split(":")[0]
+  const name = `${project}:${t.name}`;
+  const mode = isBenchmark ? "benchmark" : 'test'
+  const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
+  const args = ["test", ...benchmarkArgs].concat(name);
+  const testTask = new vscode.Task(
+    { type: "meson", mode: mode, target: name },
+    `Test ${name}`,
+    "Meson",
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, {
+      env: t.env,
+      cwd: buildDir
+    })
+  );
+  testTask.group = vscode.TaskGroup.Test;
+  return testTask;
 }
 
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
@@ -125,32 +145,8 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
           return buildTask;
         })
       )).flat(1),
-      ...tests.map(t => {
-        const testTask = new vscode.Task(
-          { type: "meson", mode: "test", target: t.name },
-          `Test ${t.name}`,
-          "Meson",
-          new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", t.name], {
-            env: t.env,
-            cwd: buildDir
-          })
-        );
-        testTask.group = vscode.TaskGroup.Test;
-        return testTask;
-      }),
-      ...benchmarks.map(b => {
-        const benchmarkTask = new vscode.Task(
-          { type: "meson", mode: "benchmark", target: b.name },
-          `Benchmark ${b.name}`,
-          "Meson",
-          new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", "--verbose", b.name], {
-            env: b.env,
-            cwd: buildDir
-          })
-        );
-        benchmarkTask.group = vscode.TaskGroup.Test;
-        return benchmarkTask;
-      })
+      ...tests.map(t => createTestTask(t, buildDir, false)),
+      ...benchmarks.map(b => createTestTask(b, buildDir, true))
     );
     return tasks;
   } catch (e) {

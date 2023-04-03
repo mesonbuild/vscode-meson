@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject, Targets } from "../../meson/types";
+import { ProjectInfo, Subproject, Targets, Tests } from "../../meson/types";
 import { extensionRelative } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
@@ -38,18 +38,20 @@ export class ProjectNode extends BaseNode {
       )
     ];
 
-    const tests = await getMesonTests(this.buildDir);
+    const all_tests = await getMesonTests(this.buildDir);
+    const tests = all_tests.filter(t => t.suite[0].split(":")[0] === this.project.descriptive_name);
     if (tests.length > 0) {
       children.push(new TestRootNode(this.id, tests, false));
     }
 
-    const benchmarks = await getMesonBenchmarks(this.buildDir);
+    const all_benchmarks = await getMesonBenchmarks(this.buildDir);
+    const benchmarks = all_benchmarks.filter(t => t.suite[0].split(":")[0] === this.project.descriptive_name);
     if (benchmarks.length > 0) {
       children.push(new TestRootNode(this.id, benchmarks, true));
     }
 
     if (this.project.subprojects.length > 0) {
-      children.push(new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir, targets));
+      children.push(new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir, targets, all_tests, all_benchmarks));
     }
 
     return children;
@@ -62,6 +64,8 @@ class SubprojectsRootNode extends BaseNode {
     private readonly subprojects: Subproject[],
     private readonly buildDir: string,
     private readonly targets: Targets,
+    private readonly tests: Tests,
+    private readonly benchmarks: Tests,
   ) {
     super(`${parentId}-subprojects`);
   }
@@ -77,37 +81,52 @@ class SubprojectsRootNode extends BaseNode {
   }
 
   getChildren() {
-    return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir, this.targets));
+    return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir, this.targets, this.tests, this.benchmarks));
   }
 }
 
 class SubprojectNode extends BaseNode {
   readonly targets: Targets;
+  readonly tests: Tests;
+  readonly benchmarks: Tests;
 
   constructor(
     parentId: string,
     private readonly subproject: Subproject,
     private readonly buildDir: string,
     targets: Targets,
+    tests: Tests,
+    benchmarks: Tests,
 
     ) {
     super(`${parentId}-${subproject.descriptive_name}-${subproject.version}`);
     this.targets = targets.filter(t => t.subproject === this.subproject.name);
+    this.tests = tests.filter(t => t.suite[0].split(":")[0] === this.subproject.name);
+    this.benchmarks = benchmarks.filter(t => t.suite[0].split(":")[0] === this.subproject.name);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+    const has_children = this.targets.length > 0 || this.tests.length > 0 || this.benchmarks.length > 0
 
     item.label = `${this.subproject.descriptive_name} ${this.subproject.version}`;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
-    item.collapsibleState = (this.targets.length === 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
+    item.collapsibleState = has_children ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
 
     return item;
   }
 
   async getChildren() {
-    return [
-      new TargetDirectoryNode(`${this.id}-targets`, ".", this.targets)
-    ]
+    let children: BaseNode[] = [];
+    if (this.targets.length > 0) {
+      children.push(new TargetDirectoryNode(`${this.id}-targets`, ".", this.targets))
+    }
+    if (this.tests.length > 0) {
+      children.push(new TestRootNode(this.id, this.tests, false));
+    }
+    if (this.benchmarks.length > 0) {
+      children.push(new TestRootNode(this.id, this.benchmarks, true));
+    }
+    return children;
   }
 }

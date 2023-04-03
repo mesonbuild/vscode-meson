@@ -157,13 +157,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.test", async (name?: string) => {
-      runTestsOrBenchmarks(false, name)
+      await runTestsOrBenchmarks(false, name)
     })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.benchmark", async (name?: string) => {
-      runTestsOrBenchmarks(true, name)
+      await runTestsOrBenchmarks(true, name)
     })
   );
 
