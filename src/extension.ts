@@ -127,14 +127,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.configure", async () => {
       await runMesonConfigure(root, buildDir);
-      explorer.refresh();
     })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
       await runMesonReconfigure();
-      explorer.refresh();
     })
   );
 
@@ -146,14 +144,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
       } catch (err) {
         // Pick cancelled.
       }
-      explorer.refresh();
     })
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
       await runMesonInstall();
-      explorer.refresh();
     })
   );
 
@@ -211,7 +207,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   if (configureOnOpen === true) {
     await vscode.commands.executeCommand("mesonbuild.configure");
-    explorer.refresh();
   }
 
   async function pickBuildTarget() {
@@ -294,7 +289,5 @@ export async function activate(ctx: vscode.ExtensionContext) {
     } catch (err) {
       // Pick cancelled.
     }
-
-    explorer.refresh();
   }
 }
