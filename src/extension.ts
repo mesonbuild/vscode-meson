@@ -17,7 +17,8 @@ import {
   extensionConfigurationSet,
   getTargetName,
   genEnvFile,
-  patchCompileCommands
+  patchCompileCommands,
+  clearCache
 } from "./utils";
 import {
   getMesonTargets,
@@ -97,9 +98,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   let changeHandler = async () => {
     mesonTasks = undefined;
-    explorer.refresh();
+    clearCache();
     await rebuildTests(controller);
     await genEnvFile(buildDir);
+    explorer.refresh();
   };
   watcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/build.ninja`, false, false, true);
   watcher.onDidChange(changeHandler);

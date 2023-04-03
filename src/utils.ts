@@ -106,12 +106,25 @@ export function workspaceRelative(filepath: string) {
   return path.resolve(vscode.workspace.rootPath, filepath);
 }
 
-export async function getTargetName(target: Target) {
+let _layout_promise: Promise<string> | undefined = undefined;;
+
+async function getLayout() {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   const buildOptions = await getMesonBuildOptions(buildDir);
-  const layoutOption = buildOptions.filter(o => o.name === "layout")[0];
+  return buildOptions.filter(o => o.name === "layout")[0].value;
+}
 
-  if (layoutOption.value === "mirror") {
+export function clearCache() {
+  _layout_promise = undefined
+}
+
+export async function getTargetName(target: Target) {
+  if (!_layout_promise) {
+    _layout_promise = getLayout();
+  }
+  const layout = await _layout_promise;
+
+  if (layout === "mirror") {
     let relativePath = path.relative(vscode.workspace.rootPath, path.dirname(target.defined_in));
 
     // Meson requires the separator between path and target name to be '/'.
