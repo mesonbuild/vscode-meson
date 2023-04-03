@@ -80,7 +80,23 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
   ctx.subscriptions.push(controller);
 
+  let mesonTasks: Thenable<vscode.Task[]> | undefined = undefined;
+  ctx.subscriptions.push(
+    vscode.tasks.registerTaskProvider("meson", {
+      provideTasks() {
+        if (!mesonTasks) {
+          mesonTasks = getMesonTasks(buildDir);
+        }
+        return mesonTasks;
+      },
+      resolveTask() {
+        return undefined;
+      }
+    })
+  );
+
   let changeHandler = async () => {
+    mesonTasks = undefined;
     explorer.refresh();
     await rebuildTests(controller);
     await genEnvFile(buildDir);
@@ -99,17 +115,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
   compileCommandsWatcher.onDidCreate(compileCommandsHandler);
   ctx.subscriptions.push(compileCommandsWatcher);
   await patchCompileCommands(buildDir);
-
-  ctx.subscriptions.push(
-    vscode.tasks.registerTaskProvider("meson", {
-      provideTasks(token) {
-        return getMesonTasks(buildDir);
-      },
-      resolveTask() {
-        return undefined;
-      }
-    })
-  );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
