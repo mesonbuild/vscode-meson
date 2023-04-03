@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject } from "../../meson/types";
+import { ProjectInfo, Subproject, Targets } from "../../meson/types";
 import { extensionRelative } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
@@ -29,10 +29,12 @@ export class ProjectNode extends BaseNode {
   }
 
   async getChildren() {
+    const targets = await getMesonTargets(this.buildDir);
+
     let children: BaseNode[] = [
       new TargetDirectoryNode(`${this.id}-targets`,
         ".",
-        (await getMesonTargets(this.buildDir)).filter((target) => !target.subproject)
+        targets.filter((target) => !target.subproject)
       )
     ];
 
@@ -47,7 +49,7 @@ export class ProjectNode extends BaseNode {
     }
 
     if (this.project.subprojects.length > 0) {
-      children.push(new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir));
+      children.push(new SubprojectsRootNode(this.id, this.project.subprojects, this.buildDir, targets));
     }
 
     return children;
@@ -58,7 +60,8 @@ class SubprojectsRootNode extends BaseNode {
   constructor(
     parentId: string,
     private readonly subprojects: Subproject[],
-    private readonly buildDir: string
+    private readonly buildDir: string,
+    private readonly targets: Targets,
   ) {
     super(`${parentId}-subprojects`);
   }
@@ -74,17 +77,22 @@ class SubprojectsRootNode extends BaseNode {
   }
 
   getChildren() {
-    return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir));
+    return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir, this.targets));
   }
 }
 
 class SubprojectNode extends BaseNode {
+  readonly targets: Targets;
+
   constructor(
     parentId: string,
     private readonly subproject: Subproject,
-    private readonly buildDir: string
-  ) {
+    private readonly buildDir: string,
+    targets: Targets,
+
+    ) {
     super(`${parentId}-${subproject.descriptive_name}-${subproject.version}`);
+    this.targets = targets.filter(t => t.subproject === this.subproject.name);
   }
 
   getTreeItem() {
@@ -92,16 +100,14 @@ class SubprojectNode extends BaseNode {
 
     item.label = `${this.subproject.descriptive_name} ${this.subproject.version}`;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
-
-    // No children currently, so don't display toggle.
-    item.collapsibleState = vscode.TreeItemCollapsibleState.None;
+    item.collapsibleState = (this.targets.length === 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
 
     return item;
   }
 
   async getChildren() {
-    const targets = await getMesonTargets(this.buildDir);
-
-    return targets.filter(t => t.subproject === this.subproject.name).map(t => new TargetNode(this.id, t));
+    return [
+      new TargetDirectoryNode(`${this.id}-targets`, ".", this.targets)
+    ]
   }
 }

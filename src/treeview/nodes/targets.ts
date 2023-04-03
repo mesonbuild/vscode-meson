@@ -43,7 +43,14 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
     folders.set(".", new Array());
 
     for (const target of targets) {
-      const targetName = await getTargetName(target);
+      let targetName = await getTargetName(target);
+      if (target.subproject) {
+        // Remove "subprojects/foo/" prefix. getTargetName() always return
+        // posix path.
+        let parts = targetName.split(path.posix.sep);
+        parts.splice(0, 2);
+        targetName = parts.join(path.posix.sep);
+      }
 
       let folderName = path.relative(this.folder, targetName);
       if (path.dirname(folderName) === ".") {
