@@ -26,18 +26,20 @@ export class TestRootNode extends BaseNode {
 
 class TestNode extends BaseNode {
   constructor(parentId: string, private readonly test: Test, private readonly isBenchmark) {
-    super(`${parentId}-${test.name}`);
+    super(`${parentId}-${test.suite[0]}-${test.name}`);
   }
 
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
+    const project = this.test.suite[0].split(":")[0]
+    const name = `${project}:${this.test.name}`;
 
     item.label = this.test.name;
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.command = {
       title: `Run ${this.isBenchmark ? "benchmark" : "test"}`,
       command: `mesonbuild.${this.isBenchmark ? "benchmark" : "test"}`,
-      arguments: [this.test.name]
+      arguments: [name]
     };
 
     // No children currently, so don't display toggle.

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import {
   exec,
-  execAsTask,
   getOutputChannel,
   extensionConfiguration,
   execStream
@@ -90,13 +89,8 @@ export async function runMesonBuild(buildDir: string, name?: string) {
 
 export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {
   try {
-    const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
-    const args = ["test", ...benchmarkArgs].concat(name ?? []);
-    return await execAsTask(
-      extensionConfiguration("mesonPath"), args,
-      { cwd: buildDir },
-      vscode.TaskRevealKind.Always
-    );
+    const mode = isBenchmark ? "benchmark" : 'test'
+    await vscode.tasks.executeTask(await getTask(mode, name));
   } catch (e) {
     if (e.stderr) {
       vscode.window.showErrorMessage(`${isBenchmark ? "Benchmarks" : "Tests"} failed.`);
