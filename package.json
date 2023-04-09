@@ -237,9 +237,14 @@
         ],
         "filenames": [
           "meson.build",
-          "meson_options.txt"
+          "meson_options.txt",
+          "meson.options"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
       }
     ],
     "grammars": [
