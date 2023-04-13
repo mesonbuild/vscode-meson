@@ -4,8 +4,8 @@ import {
   getMesonTests,
   getMesonBenchmarks
 } from "./meson/introspection";
-import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
-import { Test } from "./meson/types";
+import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
+import { Test, Target } from "./meson/types";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
@@ -31,6 +31,26 @@ function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
   );
   testTask.group = vscode.TaskGroup.Test;
   return testTask;
+}
+
+function createRunTask(t: Target, targetName: string) {
+  const targetDisplayName = targetName.split(":")[0];
+  let runTask = new vscode.Task(
+    {
+      type: "meson",
+      target: targetName,
+      filename: t.filename[0],
+      mode: "run"
+    },
+    `Run ${targetDisplayName}`,
+    "Meson",
+    new vscode.ProcessExecution(t.filename[0], {
+      cwd: vscode.workspace.rootPath,
+      env: getEnvDict(),
+    })
+  );
+  runTask.group = vscode.TaskGroup.Test;
+  return runTask;
 }
 
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
@@ -111,36 +131,10 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
             "$meson-gcc"
           );
           buildTask.group = vscode.TaskGroup.Build;
-          if (t.type == "executable") {
-            if (t.filename.length == 1) {
-              const runTask = new vscode.Task(
-                { type: "meson", target: targetName, mode: "run" },
-                `Run ${targetName}`,
-                "Meson",
-                new vscode.ProcessExecution(t.filename[0])
-              );
-              runTask.group = vscode.TaskGroup.Test;
-              return [buildTask, runTask];
-            } else {
-              const runTasks = t.filename.map(f => {
-                const runTask = new vscode.Task(
-                  {
-                    type: "meson",
-                    target: targetName,
-                    filename: f,
-                    mode: "run"
-                  },
-                  `Run ${targetName}: ${f}`,
-                  "Meson",
-                  new vscode.ProcessExecution(f, {
-                    cwd: vscode.workspace.rootPath
-                  })
-                );
-                runTask.group = vscode.TaskGroup.Test;
-                return runTask;
-              });
-              return [buildTask, ...runTasks];
-            }
+          // FIXME: We should only include executable installed in bindir,
+          // but install_dir is missing from intro data.
+          if (t.type == "executable" && t.installed) {
+            return [buildTask, createRunTask(t, targetName)];
           }
           return buildTask;
         })
