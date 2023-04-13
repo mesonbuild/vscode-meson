@@ -81,6 +81,10 @@
         "title": "Meson: Run Unit Tests"
       },
       {
+        "command": "mesonbuild.run",
+        "title": "Meson: Run Executable"
+      },
+      {
         "command": "mesonbuild.install",
         "title": "Meson: Install"
       },
