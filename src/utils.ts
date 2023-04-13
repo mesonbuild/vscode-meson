@@ -172,6 +172,8 @@ export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
   return arrayIncludes(Object.getOwnPropertyNames(x), "then");
 }
 
+let _envDict: { [key: string]: string } | undefined = undefined;
+
 export async function genEnvFile(buildDir: string) {
   const envfile = path.join(buildDir, "meson-vscode.env")
   try {
@@ -179,7 +181,24 @@ export async function genEnvFile(buildDir: string) {
       extensionConfiguration("mesonPath"), ["devenv", "-C", buildDir, "--dump", envfile, "--dump-format", "vscode"]);
   } catch {
     // Ignore errors, Meson could be too old to support --dump-format.
+    return;
   }
+
+  // Load into a dict because vscode.ProcessExecution() does not support envFile.
+  _envDict = {}
+  const data = await fs.promises.readFile(envfile);
+  for (const i of data.toString().split("\n")) {
+    // Poor man's i.split("=", 1), JS won't return part after first equal sign.
+    // Value is quoted, remove first and last " char.
+    const index = i.indexOf('=');
+    const key = i.substring(0, index);
+    const value = i.slice(index + 2, -1);
+    _envDict[key] = value;
+  }
+}
+
+export function getEnvDict() {
+  return _envDict;
 }
 
 export async function patchCompileCommands(buildDir: string) {
