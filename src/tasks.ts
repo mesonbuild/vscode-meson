@@ -163,3 +163,10 @@ export async function getTask(mode: string, name?: string) {
     throw new Error(`Cannot find ${mode} target ${name}.`);
   return filtered[0];
 }
+
+export async function getTasks(mode: string) {
+  const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
+  return tasks.filter(
+    t => t.definition.mode === mode
+  );
+}

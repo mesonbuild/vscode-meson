@@ -7,7 +7,7 @@ import {
   runMesonReconfigure,
   runMesonInstall
 } from "./meson/runners";
-import { getMesonTasks } from "./tasks";
+import { getMesonTasks, getTask, getTasks } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets"
 import {
@@ -37,6 +37,7 @@ import {
 import {
   activateFormatters
 } from "./formatters"
+import { TaskQuickPickItem } from "./types";
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
@@ -173,6 +174,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
     })
   );
 
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.run", async () => {
+      runExecutable();
+    })
+  );
+
   const configureOnOpenKey = "configureOnOpen";
   let configureOnOpen = extensionConfiguration(configureOnOpenKey);
   if (configureOnOpen === "ask") {
@@ -291,5 +298,47 @@ export async function activate(ctx: vscode.ExtensionContext) {
     } catch (err) {
       // Pick cancelled.
     }
+  }
+
+  async function pickExecutable() {
+    const picker = vscode.window.createQuickPick<TaskQuickPickItem>();
+    picker.busy = true;
+    picker.placeholder = "Select target to run.";
+    picker.show();
+
+    const runnableTasks = await getTasks('run');
+
+    picker.busy = false;
+    picker.items = runnableTasks.map(task => {
+      return {
+        label: task.definition.target,
+        detail: task.name,
+        description: "executable",
+        picked: false,
+        task: task,
+      }
+    });
+
+    return new Promise<TaskQuickPickItem>((resolve, reject) => {
+      picker.onDidAccept(() => {
+        const selection = picker.activeItems[0];
+        resolve(selection);
+        picker.dispose();
+      });
+      picker.onDidHide(() => reject());
+    });
+  }
+
+  async function runExecutable() {
+    let taskItem;
+    try {
+      taskItem = await pickExecutable();
+    } catch (err) {
+      // Pick cancelled.
+    }
+    if (taskItem != null) {
+      await vscode.tasks.executeTask(taskItem.task);
+    }
+    explorer.refresh();
   }
 }

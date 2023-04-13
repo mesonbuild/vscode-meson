@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Target } from "./meson/types";
 
 export type Tool = { path: string, version: [number, number, number] }
 export type ToolCheckFunc = () => Promise<{ tool: Tool, error: string }>
@@ -24,4 +25,8 @@ export interface ExtensionConfiguration {
     muonConfig: string | null,
   };
   debugOptions: object;
+}
+
+export interface TaskQuickPickItem extends vscode.QuickPickItem {
+  task: vscode.Task;
 }
