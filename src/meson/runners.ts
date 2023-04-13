@@ -73,27 +73,13 @@ export async function runMesonInstall() {
   }
 }
 
-export async function runMesonBuild(buildDir: string, name?: string) {
-
+export async function runTask(task: vscode.Task) {
   try {
-    await vscode.tasks.executeTask(await getTask("build", name));
+    await vscode.tasks.executeTask(task);
   } catch (e) {
-    vscode.window.showErrorMessage(`Could not build ${name}`);
-    getOutputChannel().appendLine(`Building target ${name}:`);
+    vscode.window.showErrorMessage(`Could not ${task.definition.mode} ${task.name}`);
+    getOutputChannel().appendLine(`Running task ${task.name}:`);
     getOutputChannel().appendLine(e);
     getOutputChannel().show(true);
-  }
-
-  return;
-}
-
-export async function runMesonTests(buildDir: string, isBenchmark: boolean, name?: string) {
-  try {
-    const mode = isBenchmark ? "benchmark" : 'test'
-    await vscode.tasks.executeTask(await getTask(mode, name));
-  } catch (e) {
-    if (e.stderr) {
-      vscode.window.showErrorMessage(`${isBenchmark ? "Benchmarks" : "Tests"} failed.`);
-    }
   }
 }

@@ -30,6 +30,7 @@ function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
     })
   );
   testTask.group = vscode.TaskGroup.Test;
+  testTask.detail = `Timeout: ${t.timeout}s, ${!isBenchmark && t.is_parallel ? "run in parallel" : "run serially"}`
   return testTask;
 }
 
@@ -69,13 +70,13 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     );
     const defaultTestTask = new vscode.Task(
       { type: "meson", mode: "test" },
-      "Run tests",
+      "Run all tests",
       "Meson",
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test"], { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },
-      "Run benchmarks",
+      "Run all benchmarks",
       "Meson",
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", "--verbose"], { cwd: buildDir })
     );
