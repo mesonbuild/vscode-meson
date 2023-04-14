@@ -1,7 +1,4 @@
 import * as vscode from "vscode";
-import {
-  checkMesonIsConfigured,
-} from "./meson/utils";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets"
@@ -12,6 +9,7 @@ import {
   genEnvFile,
   patchCompileCommands,
   clearCache,
+  checkMesonIsConfigured
 } from "./utils";
 import { DebugConfigurationProvider } from "./configprovider";
 import {

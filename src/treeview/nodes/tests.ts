@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { Test, Tests } from "../../meson/types";
+import { Test, Tests } from "../../types";
 import { extensionRelative } from "../../utils";
 
 export class TestRootNode extends BaseNode {

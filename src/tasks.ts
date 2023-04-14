@@ -3,10 +3,10 @@ import {
   getMesonTargets,
   getMesonTests,
   getMesonBenchmarks
-} from "./meson/introspection";
+} from "./introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
-import { Test, Target } from "./meson/types";
-import { checkMesonIsConfigured } from "./meson/utils";
+import { Test, Target } from "./types";
+import { checkMesonIsConfigured } from "./utils";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";

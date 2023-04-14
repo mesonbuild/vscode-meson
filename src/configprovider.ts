@@ -2,10 +2,10 @@ import * as vscode from "vscode";
 import * as path from 'path';
 import {
   getMesonTargets
-} from "./meson/introspection"
+} from "./introspection"
 import {
   Target
-} from "./meson/types"
+} from "./types"
 import {
   extensionConfiguration,
   getTargetName

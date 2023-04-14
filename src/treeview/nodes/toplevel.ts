@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject, Targets, Tests } from "../../meson/types";
+import { ProjectInfo, Subproject, Targets, Tests } from "../../types";
 import { extensionRelative } from "../../utils";
 import { TargetDirectoryNode, TargetNode } from "./targets";
-import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../meson/introspection";
+import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../introspection";
 import { TestRootNode } from "./tests";
 
 export class ProjectNode extends BaseNode {

@@ -6,11 +6,11 @@ import {
 } from "./utils";
 import {
   Tests
-} from "./meson/types"
+} from "./types"
 import {
   getMesonTests,
   getMesonTargets
-} from "./meson/introspection"
+} from "./introspection"
 
 export async function rebuildTests(controller: vscode.TestController) {
   let tests = await getMesonTests(workspaceRelative(extensionConfiguration("buildFolder")))
