@@ -2,7 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { Target, Targets } from "../../meson/types";
+import { Target, Targets } from "../../types";
 import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources";
 import { extensionRelative, getTargetName } from "../../utils";
 import { BaseDirectoryNode } from "./base";

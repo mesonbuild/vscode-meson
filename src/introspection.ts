@@ -1,5 +1,5 @@
 import * as path from "path";
-import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "../utils";
+import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils";
 import {
   Targets,
   Dependencies,

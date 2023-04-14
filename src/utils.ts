@@ -3,9 +3,8 @@ import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
 import { createHash, BinaryLike } from "crypto";
-import { Target } from "./meson/types";
-import { ExtensionConfiguration } from "./types";
-import { getMesonBuildOptions } from "./meson/introspection";
+import { ExtensionConfiguration, Target } from "./types";
+import { getMesonBuildOptions } from "./introspection";
 import { extensionPath } from "./extension";
 
 export async function exec(
@@ -228,4 +227,11 @@ export async function patchCompileCommands(buildDir: string) {
   } catch {
       // Ignore, C/C++ extension might not be installed
   }
+}
+
+// meson setup --reconfigure is needed if and only if coredata.dat exists.
+// Note: With Meson >= 1.1.0 we can always pass --reconfigure even if it was
+// not already configured.
+export function checkMesonIsConfigured(buildDir: string) {
+  return fs.existsSync(path.join(buildDir, "meson-private", "coredata.dat"))
 }

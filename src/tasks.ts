@@ -3,9 +3,10 @@ import {
   getMesonTargets,
   getMesonTests,
   getMesonBenchmarks
-} from "./meson/introspection";
+} from "./introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
-import { Test, Target } from "./meson/types";
+import { Test, Target } from "./types";
+import { checkMesonIsConfigured } from "./utils";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
@@ -25,11 +26,11 @@ function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
     `Test ${name}`,
     "Meson",
     new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, {
-      env: t.env,
       cwd: buildDir
     })
   );
   testTask.group = vscode.TaskGroup.Test;
+  testTask.detail = `Timeout: ${t.timeout}s, ${!isBenchmark && t.is_parallel ? "run in parallel" : "run serially"}`
   return testTask;
 }
 
@@ -53,13 +54,23 @@ function createRunTask(t: Target, targetName: string) {
   return runTask;
 }
 
+function createReconfigureTask(buildDir: string) {
+  const configureOpts = extensionConfiguration("configureOptions");
+  const setupOpts = extensionConfiguration("setupOptions");
+  const reconfigureOpts = checkMesonIsConfigured(buildDir) ? ["--reconfigure"] : []
+  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir]
+  return new vscode.Task(
+    { type: "meson", mode: "reconfigure" },
+    "Reconfigure",
+    "Meson",
+    // Note "setup --reconfigure" needs to be run from the root.
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args,
+      { cwd: vscode.workspace.rootPath })
+  );
+}
+
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   try {
-    const [targets, tests, benchmarks] = await Promise.all([
-      getMesonTargets(buildDir),
-      getMesonTests(buildDir),
-      getMesonBenchmarks(buildDir)
-    ]);
     const defaultBuildTask = new vscode.Task(
       { type: "meson", mode: "build" },
       "Build all targets",
@@ -69,24 +80,17 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     );
     const defaultTestTask = new vscode.Task(
       { type: "meson", mode: "test" },
-      "Run tests",
+      "Run all tests",
       "Meson",
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test"], { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },
-      "Run benchmarks",
+      "Run all benchmarks",
       "Meson",
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", "--verbose"], { cwd: buildDir })
     );
-    const defaultReconfigureTask = new vscode.Task(
-      { type: "meson", mode: "reconfigure" },
-      "Reconfigure",
-      "Meson",
-      // Note "setup --reconfigure" needs to be run from the root.
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", buildDir],
-        { cwd: vscode.workspace.rootPath })
-    );
+    const defaultReconfigureTask = createReconfigureTask(buildDir);
     const defaultInstallTask = new vscode.Task(
       { type: "meson", mode: "install" },
       "Run install",
@@ -112,6 +116,17 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       defaultCleanTask,
       defaultInstallTask
     ];
+
+    // Remaining tasks needs a valid configuration
+    if (!checkMesonIsConfigured(buildDir))
+      return tasks;
+
+    const [targets, tests, benchmarks] = await Promise.all([
+      getMesonTargets(buildDir),
+      getMesonTests(buildDir),
+      getMesonBenchmarks(buildDir)
+    ]);
+
     tasks.push(
       ...(await Promise.all(
         targets.map(async t => {
@@ -169,4 +184,19 @@ export async function getTasks(mode: string) {
   return tasks.filter(
     t => t.definition.mode === mode
   );
+}
+
+export async function runTask(task: vscode.Task) {
+  try {
+    await vscode.tasks.executeTask(task);
+  } catch (e) {
+    vscode.window.showErrorMessage(`Could not ${task.definition.mode} ${task.name}`);
+    getOutputChannel().appendLine(`Running task ${task.name}:`);
+    getOutputChannel().appendLine(e);
+    getOutputChannel().show(true);
+  }
+}
+
+export async function runFirstTask(mode: string, name?: string) {
+  runTask(await getTask(mode, name));
 }
