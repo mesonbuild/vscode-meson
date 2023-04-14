@@ -1,16 +1,9 @@
-import { existsSync, exists } from "fs";
+import { existsSync } from "fs";
 import { join } from "path";
 
-// TODO: Check if this is the canonical way to check if Meson is configured
-export async function checkMesonIsConfigured(dir: string) {
-  return (await Promise.all([
-    existsP(join(dir, "meson-info")),
-    existsP(join(dir, "meson-private"))
-  ])).every(v => v);
-}
-
-function existsP(path: string) {
-  return new Promise<boolean>(res => {
-    exists(path, res);
-  });
+// meson setup --reconfigure is needed if and only if coredata.dat exists.
+// Note: With Meson >= 1.1.0 we can always pass --reconfigure even if it was
+// not already configured.
+export function checkMesonIsConfigured(buildDir: string) {
+  return existsSync(join(buildDir, "meson-private", "coredata.dat"))
 }

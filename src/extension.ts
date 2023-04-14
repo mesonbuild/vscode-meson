@@ -1,27 +1,18 @@
-import * as path from "path";
 import * as vscode from "vscode";
 import {
-  runMesonConfigure,
-} from "./meson/runners";
+  checkMesonIsConfigured,
+} from "./meson/utils";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets"
 import {
   extensionConfiguration,
-  execAsTask,
   workspaceRelative,
   extensionConfigurationSet,
-  getTargetName,
   genEnvFile,
   patchCompileCommands,
   clearCache,
-  getOutputChannel
 } from "./utils";
-import {
-  getMesonTargets,
-  getMesonTests,
-  getMesonBenchmarks
-} from "./meson/introspection";
 import { DebugConfigurationProvider } from "./configprovider";
 import {
   testDebugHandler,
@@ -125,12 +116,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   ctx.subscriptions.push(
-    vscode.commands.registerCommand("mesonbuild.configure", async () => {
-      await runMesonConfigure(root, buildDir);
-    })
-  );
-
-  ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
       runFirstTask("reconfigure");
     })
@@ -172,42 +157,44 @@ export async function activate(ctx: vscode.ExtensionContext) {
     })
   );
 
-  const configureOnOpenKey = "configureOnOpen";
-  let configureOnOpen = extensionConfiguration(configureOnOpenKey);
-  if (configureOnOpen === "ask") {
-    enum Options {
-      no = "Not this time",
-      never = "Never",
-      yes = "Yes, this time",
-      automatic = "Automatic"
-    };
+  if (!checkMesonIsConfigured(buildDir)) {
+    const configureOnOpenKey = "configureOnOpen";
+    let configureOnOpen = extensionConfiguration(configureOnOpenKey);
+    if (configureOnOpen === "ask") {
+      enum Options {
+        yes = "Yes",
+        always = "Always",
+        no = "No",
+        never = "Never",
+      };
 
-    const response = await vscode.window.showInformationMessage(
-      "Meson project detected in this workspace. Would you like VS Code to configure it?",
-      ...Object.values(Options)
-    );
+      const response = await vscode.window.showInformationMessage(
+        "Meson project detected in this workspace but does not seems to be configured. Would you like VS Code to configure it?",
+        ...Object.values(Options)
+      );
 
-    switch (response) {
-      case Options.no:
-        break;
+      switch (response) {
+        case Options.no:
+          break;
 
-      case Options.never:
-        extensionConfigurationSet(configureOnOpenKey, false, vscode.ConfigurationTarget.Workspace);
-        break;
+        case Options.never:
+          extensionConfigurationSet(configureOnOpenKey, false, vscode.ConfigurationTarget.Workspace);
+          break;
 
-      case Options.yes:
-        configureOnOpen = true;
-        break;
+        case Options.yes:
+          configureOnOpen = true;
+          break;
 
-      case Options.automatic:
-        extensionConfigurationSet(configureOnOpenKey, true, vscode.ConfigurationTarget.Workspace);
-        configureOnOpen = true;
-        break;
+        case Options.always:
+          extensionConfigurationSet(configureOnOpenKey, true, vscode.ConfigurationTarget.Workspace);
+          configureOnOpen = true;
+          break;
+      }
     }
-  }
 
-  if (configureOnOpen === true) {
-    await vscode.commands.executeCommand("mesonbuild.configure");
+    if (configureOnOpen === true) {
+      runFirstTask("reconfigure");
+    }
   }
 
   async function pickTask(mode: string) {

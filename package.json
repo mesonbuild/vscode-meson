@@ -40,7 +40,6 @@
   ],
   "activationEvents": [
     "onLanguage:meson",
-    "onCommand:mesonbuild.configure",
     "onCommand:mesonbuild.build",
     "onCommand:mesonbuild.test",
     "onCommand:mesonbuild.benchmark",
@@ -57,16 +56,12 @@
         "icon": "$(preferences-open-settings)"
       },
       {
-        "command": "mesonbuild.configure",
-        "title": "Meson: Configure",
+        "command": "mesonbuild.reconfigure",
+        "title": "Meson: Reconfigure",
         "icon": {
           "dark": "res/meson_32.svg",
           "light": "res/meson_32.svg"
         }
-      },
-      {
-        "command": "mesonbuild.reconfigure",
-        "title": "Meson: Reconfigure"
       },
       {
         "command": "mesonbuild.clean",
@@ -122,12 +117,13 @@
         "mesonbuild.configureOptions": {
           "type": "array",
           "default": [],
-          "description": "Specify the list of configuration options used for Meson configuration."
+          "description": "Specify the list of options used for Meson setup."
         },
         "mesonbuild.setupOptions": {
           "type": "array",
           "default": [],
-          "description": "Specify the list of setup options used for Meson setup. Can be used to specify a cross file (use --cross-file=FILE)."
+          "description": "Specify the list of options used for Meson setup. Can be used to specify a cross file (use --cross-file=FILE).",
+          "deprecationMessage": "--cross-file and --native-file should be in configureOptions too."
         },
         "mesonbuild.mesonPath": {
           "type": "string",
@@ -290,7 +286,7 @@
       ],
       "view/title": [
         {
-          "command": "mesonbuild.configure",
+          "command": "mesonbuild.reconfigure",
           "when": "view == meson-project",
           "group": "navigation"
         }

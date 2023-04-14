@@ -6,6 +6,7 @@ import {
 } from "./meson/introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
 import { Test, Target } from "./meson/types";
+import { checkMesonIsConfigured } from "./meson/utils";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
@@ -53,13 +54,23 @@ function createRunTask(t: Target, targetName: string) {
   return runTask;
 }
 
+function createReconfigureTask(buildDir: string) {
+  const configureOpts = extensionConfiguration("configureOptions");
+  const setupOpts = extensionConfiguration("setupOptions");
+  const reconfigureOpts = checkMesonIsConfigured(buildDir) ? ["--reconfigure"] : []
+  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir]
+  return new vscode.Task(
+    { type: "meson", mode: "reconfigure" },
+    "Reconfigure",
+    "Meson",
+    // Note "setup --reconfigure" needs to be run from the root.
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args,
+      { cwd: vscode.workspace.rootPath })
+  );
+}
+
 export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
   try {
-    const [targets, tests, benchmarks] = await Promise.all([
-      getMesonTargets(buildDir),
-      getMesonTests(buildDir),
-      getMesonBenchmarks(buildDir)
-    ]);
     const defaultBuildTask = new vscode.Task(
       { type: "meson", mode: "build" },
       "Build all targets",
@@ -79,14 +90,7 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       "Meson",
       new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", "--verbose"], { cwd: buildDir })
     );
-    const defaultReconfigureTask = new vscode.Task(
-      { type: "meson", mode: "reconfigure" },
-      "Reconfigure",
-      "Meson",
-      // Note "setup --reconfigure" needs to be run from the root.
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["setup", "--reconfigure", buildDir],
-        { cwd: vscode.workspace.rootPath })
-    );
+    const defaultReconfigureTask = createReconfigureTask(buildDir);
     const defaultInstallTask = new vscode.Task(
       { type: "meson", mode: "install" },
       "Run install",
@@ -112,6 +116,17 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       defaultCleanTask,
       defaultInstallTask
     ];
+
+    // Remaining tasks needs a valid configuration
+    if (!checkMesonIsConfigured(buildDir))
+      return tasks;
+
+    const [targets, tests, benchmarks] = await Promise.all([
+      getMesonTargets(buildDir),
+      getMesonTests(buildDir),
+      getMesonBenchmarks(buildDir)
+    ]);
+
     tasks.push(
       ...(await Promise.all(
         targets.map(async t => {
