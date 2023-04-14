@@ -25,7 +25,6 @@ function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
     `Test ${name}`,
     "Meson",
     new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, {
-      env: t.env,
       cwd: buildDir
     })
   );
