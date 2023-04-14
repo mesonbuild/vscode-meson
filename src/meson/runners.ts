@@ -50,36 +50,3 @@ export async function runMesonConfigure(source: string, build: string) {
     }
   );
 }
-
-export async function runMesonReconfigure() {
-  try {
-    await vscode.tasks.executeTask(await getTask("reconfigure"));
-  } catch (e) {
-    vscode.window.showErrorMessage("Could not reconfigure project.");
-    getOutputChannel().appendLine("Reconfiguring Meson:");
-    getOutputChannel().appendLine(e);
-    getOutputChannel().show(true);
-  }
-}
-
-export async function runMesonInstall() {
-  try {
-    await vscode.tasks.executeTask(await getTask("install"));
-  } catch (e) {
-    vscode.window.showErrorMessage("Could not install project.");
-    getOutputChannel().appendLine("Installing:");
-    getOutputChannel().appendLine(e);
-    getOutputChannel().show(true);
-  }
-}
-
-export async function runTask(task: vscode.Task) {
-  try {
-    await vscode.tasks.executeTask(task);
-  } catch (e) {
-    vscode.window.showErrorMessage(`Could not ${task.definition.mode} ${task.name}`);
-    getOutputChannel().appendLine(`Running task ${task.name}:`);
-    getOutputChannel().appendLine(e);
-    getOutputChannel().show(true);
-  }
-}

@@ -2,11 +2,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 import {
   runMesonConfigure,
-  runTask,
-  runMesonReconfigure,
-  runMesonInstall
 } from "./meson/runners";
-import { getMesonTasks, getTask, getTasks } from "./tasks";
+import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets"
 import {
@@ -135,7 +132,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
-      await runMesonReconfigure();
+      runFirstTask("reconfigure");
     })
   );
 
@@ -147,7 +144,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
-      await runMesonInstall();
+      runFirstTask("install");
     })
   );
 
@@ -165,7 +162,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
-      await execAsTask(extensionConfiguration("mesonPath"), ["compile", "--clean", "-C", buildDir], {});
+      runFirstTask("clean");
     })
   );
 
@@ -243,8 +240,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   async function pickAndRunTask(mode: string, name?: string) {
     if (name) {
-      const task = await getTask(mode, name);
-      runTask(task);
+      runFirstTask(mode, name);
       return;
     }
     let taskItem: TaskQuickPickItem;

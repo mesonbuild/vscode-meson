@@ -171,3 +171,18 @@ export async function getTasks(mode: string) {
     t => t.definition.mode === mode
   );
 }
+
+export async function runTask(task: vscode.Task) {
+  try {
+    await vscode.tasks.executeTask(task);
+  } catch (e) {
+    vscode.window.showErrorMessage(`Could not ${task.definition.mode} ${task.name}`);
+    getOutputChannel().appendLine(`Running task ${task.name}:`);
+    getOutputChannel().appendLine(e);
+    getOutputChannel().show(true);
+  }
+}
+
+export async function runFirstTask(mode: string, name?: string) {
+  runTask(await getTask(mode, name));
+}
