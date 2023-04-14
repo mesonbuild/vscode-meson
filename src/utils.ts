@@ -146,9 +146,9 @@ export async function genEnvFile(buildDir: string) {
   // Load into a dict because vscode.ProcessExecution() does not support envFile.
   _envDict = {}
   const data = await fs.promises.readFile(envfile);
-  for (const i of data.toString().split("\n")) {
+  for (const i of data.toString().split(/\r?\n/)) {
     // Poor man's i.split("=", 1), JS won't return part after first equal sign.
-    // Value is quoted, remove first and last " char.
+    // Value is quoted, remove first and last " char and also possible \r ending.
     const index = i.indexOf('=');
     const key = i.substring(0, index);
     const value = i.slice(index + 2, -1);
