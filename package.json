@@ -121,9 +121,7 @@
         },
         "mesonbuild.configureOptions": {
           "type": "array",
-          "default": [
-            "--buildtype=debug"
-          ],
+          "default": [],
           "description": "Specify the list of configuration options used for Meson configuration."
         },
         "mesonbuild.setupOptions": {
