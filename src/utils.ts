@@ -23,28 +23,6 @@ export async function exec(
   });
 }
 
-export function execStream(
-  command: string,
-  args: string[],
-  options: cp.SpawnOptions
-) {
-  const spawned = cp.spawn(command, args, options);
-  return {
-    onLine(fn: (line: string, isError: boolean) => void) {
-      spawned.stdout.on("data", (msg: Buffer) => fn(msg.toString(), false));
-      spawned.stderr.on("data", (msg: Buffer) => fn(msg.toString(), true));
-    },
-    kill(signal?: NodeJS.Signals) {
-      spawned.kill(signal || "SIGKILL");
-    },
-    finishP() {
-      return new Promise<number>(res => {
-        spawned.on("exit", code => res(code));
-      });
-    }
-  };
-}
-
 export async function execFeed(
   command: string,
   args: string[],
@@ -59,24 +37,6 @@ export async function execFeed(
     p.stdin?.write(stdin);
     p.stdin?.end();
   });
-}
-
-export function execAsTask(
-  command: string,
-  args: string[],
-  options: vscode.ProcessExecutionOptions,
-  revealMode = vscode.TaskRevealKind.Silent
-) {
-  const task = new vscode.Task(
-    { type: "temp" },
-    command,
-    "Meson",
-    new vscode.ProcessExecution(command, args, options)
-  );
-  task.presentationOptions.echo = false;
-  task.presentationOptions.focus = false;
-  task.presentationOptions.reveal = revealMode;
-  return vscode.tasks.executeTask(task);
 }
 
 export async function parseJSONFileIfExists<T = object>(path: string) {
