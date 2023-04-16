@@ -56,6 +56,10 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
   }
 
   const lintAll = (document: vscode.TextDocument) => {
+    if (document.languageId != 'meson') {
+      return;
+    }
+
     Promise.all(enabled_linters.map(l => l(document))).then(values => {
       diagnostics.set(document.uri, values.flat());
     })
