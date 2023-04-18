@@ -21,7 +21,9 @@ export class ProjectNode extends BaseNode {
   getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
-    item.label = `${this.project.descriptive_name} ${this.project.version}`;
+    item.label = `${this.project.descriptive_name}`;
+    if (this.project.version !== "undefined")
+      item.label += ` (${this.project.version})`;
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
 
@@ -99,7 +101,7 @@ class SubprojectNode extends BaseNode {
     benchmarks: Tests,
 
     ) {
-    super(`${parentId}-${subproject.descriptive_name}-${subproject.version}`);
+    super(`${parentId}-${subproject.descriptive_name}${subproject.version !== "undefined" ? `-${subproject.version}` : ""}`);
     this.targets = targets.filter(t => t.subproject === this.subproject.name);
     this.tests = tests.filter(t => t.suite[0].split(":")[0] === this.subproject.name);
     this.benchmarks = benchmarks.filter(t => t.suite[0].split(":")[0] === this.subproject.name);
@@ -109,7 +111,9 @@ class SubprojectNode extends BaseNode {
     const item = super.getTreeItem() as vscode.TreeItem;
     const has_children = this.targets.length > 0 || this.tests.length > 0 || this.benchmarks.length > 0
 
-    item.label = `${this.subproject.descriptive_name} ${this.subproject.version}`;
+    item.label = `${this.subproject.descriptive_name}`;
+    if (this.subproject.version !== "undefined")
+      item.label += ` (${this.subproject.version})`;
     item.iconPath = extensionRelative("res/icon-subproject.svg");
     item.collapsibleState = has_children ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
 
