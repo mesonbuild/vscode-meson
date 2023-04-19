@@ -53,8 +53,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
       vscode.DebugConfigurationProviderTriggerKind.Dynamic)
   );
 
-  let updateHasProject = async () => {
-    let mesonFiles = await vscode.workspace.findFiles("**/meson.build");
+  const updateHasProject = async () => {
+    const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
     vscode.commands.executeCommand("setContext", 'mesonbuild.hasProject', mesonFiles.length > 0);
   }
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
@@ -68,23 +68,21 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
   ctx.subscriptions.push(controller);
 
-  let mesonTasks: Thenable<vscode.Task[]> | undefined = undefined;
+  let mesonTasks: Thenable<vscode.Task[]> | null = null;
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
       provideTasks() {
-        if (!mesonTasks) {
-          mesonTasks = getMesonTasks(buildDir);
-        }
+        mesonTasks ??= getMesonTasks(buildDir);
         return mesonTasks;
       },
       resolveTask() {
-        return undefined;
+        return null;
       }
     })
   );
 
-  let changeHandler = async () => {
-    mesonTasks = undefined;
+  const changeHandler = async () => {
+    mesonTasks = null;
     clearCache();
     await rebuildTests(controller);
     await genEnvFile(buildDir);
@@ -96,7 +94,16 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(watcher);
   await genEnvFile(buildDir);
 
-  let compileCommandsHandler = async () => {
+  // Refresh if the extension configuration is changed. builddir changes won't be reflected, however.
+  ctx.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+      if (e.affectsConfiguration("mesonbuild")) {
+        changeHandler();
+      }
+    })
+  );
+
+  const compileCommandsHandler = async () => {
     await patchCompileCommands(buildDir);
   };
   compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/compile_commands.json`, false, false, true);
@@ -107,8 +114,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
-      let file = node.getTarget().defined_in;
-      let uri = vscode.Uri.file(file)
+      const file = node.getTarget().defined_in;
+      const uri = vscode.Uri.file(file)
       await vscode.commands.executeCommand('vscode.open', uri);
     })
   );
