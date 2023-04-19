@@ -41,7 +41,7 @@ export async function getMesonBuildOptions(buildDir: string) {
 }
 
 export async function getMesonProjectInfo(buildDir: string) {
-  return introspectMeson<ProjectInfo>(buildDir, "intro-projectinfo.json", "--project-info");
+  return introspectMeson<ProjectInfo>(buildDir, "intro-projectinfo.json", "--projectinfo");
 }
 
 export async function getMesonDependencies(buildDir: string) {
