@@ -112,7 +112,7 @@
         "mesonbuild.buildFolder": {
           "type": "string",
           "default": "builddir",
-          "description": "Specify in which folder Meson build configure and build the project."
+          "description": "Specify in which folder Meson build configure and build the project. Changing this value will reload the VS Code window."
         },
         "mesonbuild.configureOptions": {
           "type": "array",

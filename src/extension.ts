@@ -94,10 +94,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(watcher);
   await genEnvFile(buildDir);
 
-  // Refresh if the extension configuration is changed. builddir changes won't be reflected, however.
+  // Refresh if the extension configuration is changed.
   ctx.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
-      if (e.affectsConfiguration("mesonbuild")) {
+      if (e.affectsConfiguration("mesonbuild.buildFolder")) {
+        // buildFolder is rather ingrained right now, so changes there require a full reload.
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+      } else if (e.affectsConfiguration("mesonbuild")) {
         changeHandler();
       }
     })
