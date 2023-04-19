@@ -6,6 +6,7 @@
 
 - Automatically configure Intellisense to use compile_commands.json generated
   by Meson.
+- Meson `tasks.json` entries specifying `target` will now need to include the target's type. E.g. `"target": "relative/path/to/targetname:shared_library"`.
 
 ## 1.8.1
 

@@ -187,7 +187,7 @@
         "properties": {
           "target": {
             "type": "string",
-            "description": "The Meson target to... target",
+            "description": "The Meson target. The full name, including path and type, is mandatory (e.g. relative/path/to/targetname:shared_library)",
             "default": "all",
             "dependencies": {
               "mode": {

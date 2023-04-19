@@ -103,7 +103,8 @@ export class TargetNode extends BaseNode {
   async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
-    item.label = `${this.target.name} ${this.target.type}`;
+    item.label = this.target.name;
+    item.tooltip = this.target.type;
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.contextValue = "meson-target";
@@ -129,6 +130,8 @@ export class TargetNode extends BaseNode {
         return "res/icon-run-java.svg";
 
       case "shared library":
+        return "res/icon-shared-library.svg";
+
       case "static library":
       case "shared module":
         return "res/icon-library.svg";
