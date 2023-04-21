@@ -12,6 +12,8 @@ export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
   configureOptions: string[];
   setupOptions: string[];
+  testOptions: string[];
+  benchmarkOptions: string[];
   buildFolder: string;
   mesonPath: string;
   muonPath: string;

@@ -16,13 +16,14 @@ interface MesonTaskDefinition extends vscode.TaskDefinition {
 }
 
 function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
-  const project = t.suite[0].split(":")[0]
+  const project = t.suite[0].split(":")[0];
   const name = `${project}:${t.name}`;
-  const mode = isBenchmark ? "benchmark" : 'test'
-  const benchmarkArgs = isBenchmark ? ["--benchmark", "--verbose"] : [];
-  const args = ["test", ...benchmarkArgs].concat(name);
+  const mode = isBenchmark ? "benchmark" : "test";
+  const benchmarkSwitch = isBenchmark ? ["--benchmark"] : [];
+  const args = ["test", ...benchmarkSwitch, ...extensionConfiguration(`${mode}Options`), name];
+
   const testTask = new vscode.Task(
-    { type: "meson", mode: mode, target: name },
+    { type: "meson", mode, target: name },
     `Test ${name}`,
     "Meson",
     new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, {
@@ -82,13 +83,13 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       { type: "meson", mode: "test" },
       "Run all tests",
       "Meson",
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test"], { cwd: buildDir })
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", ...extensionConfiguration("testOptions")], { cwd: buildDir })
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },
       "Run all benchmarks",
       "Meson",
-      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", "--verbose"], { cwd: buildDir })
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["test", "--benchmark", ...extensionConfiguration("benchmarkOptions")], { cwd: buildDir })
     );
     const defaultReconfigureTask = createReconfigureTask(buildDir);
     const defaultInstallTask = new vscode.Task(

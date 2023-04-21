@@ -125,6 +125,18 @@
           "description": "Specify the list of options used for Meson setup. Can be used to specify a cross file (use --cross-file=FILE).",
           "deprecationMessage": "--cross-file and --native-file should be in configureOptions too."
         },
+        "mesonbuild.testOptions": {
+          "type": "array",
+          "default": [],
+          "description": "Specify the list of options used for running tests."
+        },
+        "mesonbuild.benchmarkOptions": {
+          "type": "array",
+          "default": [
+            "--verbose"
+          ],
+          "description": "Specify the list of options used for running benchmarks. --benchmark is implicit."
+        },
         "mesonbuild.mesonPath": {
           "type": "string",
           "default": "meson",
@@ -304,7 +316,7 @@
         "source": "gcc",
         "owner": "meson",
         "fileLocation": [
-          "autodetect",
+          "autoDetect",
           "${workspaceFolder}/${config:mesonbuild.buildFolder}"
         ],
         "pattern": {
