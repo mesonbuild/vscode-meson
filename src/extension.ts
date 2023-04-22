@@ -68,11 +68,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
   controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
   ctx.subscriptions.push(controller);
 
-  let mesonTasks: Thenable<vscode.Task[]> | null = null;
+  let mesonTasks: Promise<vscode.Task[]> | null = null;
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
       provideTasks() {
-        mesonTasks ??= getMesonTasks(buildDir);
+        if (mesonTasks == null) {
+          mesonTasks = getMesonTasks(buildDir);
+          mesonTasks.catch(() => mesonTasks = null);
+        }
+
         return mesonTasks;
       },
       resolveTask() {

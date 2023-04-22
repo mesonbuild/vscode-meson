@@ -172,7 +172,7 @@ export async function getMesonTasks(buildDir: string) {
       "Could not fetch targets. See Meson Build output tab for more info."
     );
 
-    return [];
+    throw e;
   }
 }
 
