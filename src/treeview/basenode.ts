@@ -9,7 +9,7 @@ export abstract class BaseNode {
     return [];
   }
 
-  getTreeItem(): vscode.ProviderResult<vscode.TreeItem> {
+  getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
     // All derived getTreeItem()s set an appropriate label.
     const item = new vscode.TreeItem("");
 

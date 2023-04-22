@@ -70,7 +70,7 @@ function createReconfigureTask(buildDir: string) {
   );
 }
 
-export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
+export async function getMesonTasks(buildDir: string) {
   try {
     const defaultBuildTask = new vscode.Task(
       { type: "meson", mode: "build" },
@@ -119,8 +119,9 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
     ];
 
     // Remaining tasks needs a valid configuration
-    if (!checkMesonIsConfigured(buildDir))
+    if (!checkMesonIsConfigured(buildDir)) {
       return tasks;
+    }
 
     const [targets, tests, benchmarks] = await Promise.all([
       getMesonTargets(buildDir),
@@ -159,9 +160,14 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
       ...benchmarks.map(b => createTestTask(b, buildDir, true))
     );
     return tasks;
-  } catch (e) {
-    getOutputChannel().appendLine(e);
-    if (e.stderr) getOutputChannel().appendLine(e.stderr);
+  } catch (e: any) {
+    if ("error" in e) {
+      getOutputChannel().appendLine(e.error.message);
+    }
+    if ("stderr" in e) {
+      getOutputChannel().appendLine(e.stderr);
+    }
+
     vscode.window.showErrorMessage(
       "Could not fetch targets. See Meson Build output tab for more info."
     );
@@ -173,27 +179,36 @@ export async function getMesonTasks(buildDir: string): Promise<vscode.Task[]> {
 export async function getTask(mode: string, name?: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
   const filtered = tasks.filter(
-    t => t.definition.mode === mode && (!name || t.definition.target === name)
+    (t) => t.definition["mode"] === mode && !name || t.definition["target"] === name
   );
-  if (filtered.length === 0)
+  if (filtered.length === 0) {
     throw new Error(`Cannot find ${mode} target ${name}.`);
+  }
+
   return filtered[0];
 }
 
 export async function getTasks(mode: string) {
   const tasks = await vscode.tasks.fetchTasks({ type: "meson" });
   return tasks.filter(
-    t => t.definition.mode === mode
+    (t) => t.definition["mode"] === mode
   );
 }
 
 export async function runTask(task: vscode.Task) {
   try {
     await vscode.tasks.executeTask(task);
-  } catch (e) {
-    vscode.window.showErrorMessage(`Could not ${task.definition.mode} ${task.name}`);
+  } catch (e: any) {
+    vscode.window.showErrorMessage(`Could not ${task.definition["mode"]} ${task.name}`);
     getOutputChannel().appendLine(`Running task ${task.name}:`);
-    getOutputChannel().appendLine(e);
+
+    if ("error" in e) {
+      getOutputChannel().appendLine(e.error.message);
+    }
+    if ("stderr" in e) {
+      getOutputChannel().appendLine(e.stderr);
+    }
+
     getOutputChannel().show(true);
   }
 }

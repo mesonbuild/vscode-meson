@@ -27,7 +27,7 @@ async function introspectMeson<T>(buildDir: string, filename: string, introspect
 export async function getMesonTargets(buildDir: string) {
   const parsed = await introspectMeson<Targets>(buildDir, "intro-targets.json", "--targets");
 
-  if (getMesonVersion()[1] < 50) {
+  if ((await getMesonVersion())[1] < 50) {
     return parsed.map(t => {
       if (typeof t.filename === "string") t.filename = [t.filename]; // Old versions would directly pass a string with only 1 filename on the target
       return t;

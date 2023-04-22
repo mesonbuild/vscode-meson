@@ -8,11 +8,11 @@ import { extensionRelative, getTargetName } from "../../utils";
 import { BaseDirectoryNode } from "./base";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
-  constructor(parentId, folder: string, targets: Targets) {
+  constructor(parentId: string, folder: string, targets: Targets) {
     super(`${parentId}-${path.basename(folder)}`, folder, targets);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem();
 
     if (this.folder === ".") {
@@ -26,7 +26,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
     return item;
   }
 
-  async getChildren() {
+  override async getChildren() {
     return Array.from((await this.subfolders).entries())
       .map(([folder, targets]) => {
         if (folder === ".") {
@@ -54,7 +54,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
 
       let folderName = path.relative(this.folder, targetName);
       if (path.dirname(folderName) === ".") {
-        folders.get(".").push(target);
+        folders.get(".")!.push(target);
         continue;
       }
 
@@ -63,9 +63,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
       }
 
       const absFolder = path.join(this.folder, folderName);
-      if (folders.has(absFolder)) {
-        folders.get(absFolder).push(target);
-      } else {
+      if (!folders.get(absFolder)?.push(target)) {
         folders.set(absFolder, [target]);
       }
     }
@@ -83,7 +81,7 @@ export class TargetNode extends BaseNode {
     return this.target;
   }
 
-  getChildren() {
+  override getChildren() {
     if (!this.target.target_sources) {
       return [];
     }
@@ -100,7 +98,7 @@ export class TargetNode extends BaseNode {
     }
   }
 
-  async getTreeItem() {
+  override async getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = this.target.name;

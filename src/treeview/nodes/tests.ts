@@ -5,11 +5,11 @@ import { Test, Tests } from "../../types";
 import { extensionRelative } from "../../utils";
 
 export class TestRootNode extends BaseNode {
-  constructor(parentId, private readonly tests: Tests, private readonly isBenchmark) {
+  constructor(parentId: string, private readonly tests: Tests, private readonly isBenchmark: boolean) {
     super(`${parentId}-${isBenchmark ? "benchmarks" : "tests"}`);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = this.isBenchmark ? "Benchmarks" : "Tests";
@@ -19,17 +19,17 @@ export class TestRootNode extends BaseNode {
     return item;
   }
 
-  getChildren() {
+  override getChildren() {
     return this.tests.map((test) => new TestNode(this.id, test, this.isBenchmark));
   }
 }
 
 class TestNode extends BaseNode {
-  constructor(parentId: string, private readonly test: Test, private readonly isBenchmark) {
+  constructor(parentId: string, private readonly test: Test, private readonly isBenchmark: boolean) {
     super(`${parentId}-${test.suite[0]}-${test.name}`);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     const project = this.test.suite[0].split(":")[0]
     const name = `${project}:${this.test.name}`;

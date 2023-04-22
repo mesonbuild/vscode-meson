@@ -238,7 +238,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
       runFirstTask(mode, name);
       return;
     }
-    let taskItem: TaskQuickPickItem;
+    let taskItem;
     try {
       taskItem = await pickTask(mode);
     } catch (err) {

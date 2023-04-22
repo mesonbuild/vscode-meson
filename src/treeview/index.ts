@@ -4,12 +4,12 @@ import { getMesonProjectInfo } from "../introspection";
 import { ProjectNode } from "./nodes/toplevel";
 
 class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
-  private readonly _onDataChangeEmitter = new vscode.EventEmitter<BaseNode>();
+  private readonly _onDataChangeEmitter = new vscode.EventEmitter<BaseNode | void>();
   readonly onDidChangeTreeData = this._onDataChangeEmitter.event;
 
   static readonly commandName = "mesonbuild.view-refresh";
 
-  constructor(ctx: vscode.ExtensionContext, private readonly projectDir, private readonly buildDir: string) {
+  constructor(ctx: vscode.ExtensionContext, private readonly projectDir: string, private readonly buildDir: string) {
     ctx.subscriptions.push(
       vscode.commands.registerCommand(MesonProjectDataProvider.commandName, () =>
         this.refresh()
@@ -18,7 +18,7 @@ class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
   }
 
   refresh() {
-    this._onDataChangeEmitter.fire(null);
+    this._onDataChangeEmitter.fire();
   }
 
   getTreeItem(element: BaseNode) {
