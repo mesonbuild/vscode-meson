@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as cp from 'child_process';
 import {
+  ExecResult,
   exec,
   execFeed,
   extensionConfiguration,
@@ -15,7 +15,7 @@ export async function lint(
   root: string,
   document: vscode.TextDocument
 ): Promise<vscode.Diagnostic[]> {
-  const { error, stdout, stderr } = await execFeed(
+  const { stderr } = await execFeed(
     muon.path,
     ["analyze", "-l", "-O", document.uri.fsPath],
     { cwd: root },
@@ -87,24 +87,22 @@ export async function format(
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<{ tool: Tool, error: string }> {
+export async function check(): Promise<{ tool?: Tool, error?: string }> {
   const muon_path = extensionConfiguration("muonPath");
-
-  const undef_muon = { path: undefined, version: undefined };
-
   let stdout: string, stderr: string;
 
   try {
-    ({ stdout, stderr } = await exec(muon_path, ["version"]))
-  } catch (exception) {
-    const { error, stdout, stderr }: { error: cp.ExecException, stdout: string, stderr: string } = exception;
+    ({ stdout, stderr } = await exec(muon_path, ["version"]));
+  }
+  catch (e) {
+    const { error, stdout, stderr } = e as ExecResult;
     console.log(error);
-    return { tool: undef_muon, error: error.message };
+    return { error: error!.message };
   }
 
   const line1 = stdout.split("\n")[0].split(" ")
   if (line1.length !== 2) {
-    return { tool: undef_muon, error: `Invalid version string: ${line1}` };
+    return { error: `Invalid version string: ${line1}` };
   }
 
   const ver = line1[1].split("-")[0].split('.').map((s) => {
@@ -115,5 +113,5 @@ export async function check(): Promise<{ tool: Tool, error: string }> {
     return Number.parseInt(s)
   }) as [number, number, number];
 
-  return { tool: { path: muon_path, version: ver }, error: undefined };
+  return { tool: { path: muon_path, version: ver } };
 }

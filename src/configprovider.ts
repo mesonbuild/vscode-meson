@@ -38,8 +38,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
   async createGDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     let debugConfig = await this.createBaseDebugConfiguration(target);
-    debugConfig.MIMode = MIModes.gdb;
-    debugConfig.setupCommands = [{
+    debugConfig["MIMode"] = MIModes.gdb;
+    debugConfig["setupCommands"] = [{
       description: 'Enable pretty-printing for gdb',
       text: '-enable-pretty-printing',
       ignoreFailures: true
@@ -49,7 +49,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
   async createLLDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     let debugConfig = await this.createBaseDebugConfiguration(target);
-    debugConfig.MIMode = MIModes.lldb;
+    debugConfig["MIMode"] = MIModes.lldb;
     return debugConfig;
   }
 
@@ -68,7 +68,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     let ret: vscode.DebugConfiguration[] = [];
 
     for (const target of executables) {
-      if (!target.target_sources.some(source => ['cpp', 'c'].includes(source.language))) {
+      if (!target.target_sources?.some(source => ['cpp', 'c'].includes(source.language))) {
         continue;
       }
 

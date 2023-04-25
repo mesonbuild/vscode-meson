@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import {
+  ExecResult,
   exec,
   extensionConfiguration,
   workspaceRelative,
@@ -28,7 +29,7 @@ export async function rebuildTests(controller: vscode.TestController) {
 }
 
 export async function testRunHandler(controller: vscode.TestController, request: vscode.TestRunRequest, token: vscode.CancellationToken) {
-  const run = controller.createTestRun(request, null, false);
+  const run = controller.createTestRun(request, undefined, false);
   const queue: vscode.TestItem[] = [];
 
   if (request.include) {
@@ -45,13 +46,15 @@ export async function testRunHandler(controller: vscode.TestController, request:
       let duration = Date.now() - starttime;
       run.passed(test, duration);
     } catch (e) {
-      run.appendOutput(e.stdout);
+      const execResult = e as ExecResult;
+
+      run.appendOutput(execResult.stdout);
       let duration = Date.now() - starttime;
-      if (e.error.code == 125) {
+      if (execResult.error?.code == 125) {
         vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
-        run.errored(test, new vscode.TestMessage(e.stderr));
+        run.errored(test, new vscode.TestMessage(execResult.stderr));
       } else {
-        run.failed(test, new vscode.TestMessage(e.stderr), duration);
+        run.failed(test, new vscode.TestMessage(execResult.stderr), duration);
       }
     }
   }
@@ -60,7 +63,7 @@ export async function testRunHandler(controller: vscode.TestController, request:
 }
 
 export async function testDebugHandler(controller: vscode.TestController, request: vscode.TestRunRequest, token: vscode.CancellationToken) {
-  const run = controller.createTestRun(request, null, false);
+  const run = controller.createTestRun(request, undefined, false);
   const queue: vscode.TestItem[] = [];
 
   if (request.include) {

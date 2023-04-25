@@ -6,7 +6,7 @@ import { BaseNode } from "../basenode";
 import { BaseDirectoryNode } from "./base";
 
 abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
-  async getChildren() {
+  override async getChildren() {
     const subfolders = await this.subfolders;
 
     return Array.from(subfolders.entries())
@@ -27,7 +27,7 @@ abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
     for (const f of fpaths) {
       let folderName = path.relative(this.folder, f);
       if (path.dirname(folderName) === ".") {
-        folders.get(".").push(f);
+        folders.get(".")?.push(f);
         continue;
       }
 
@@ -36,9 +36,7 @@ abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
       }
 
       const absFolder = path.join(this.folder, folderName);
-      if (folders.has(absFolder)) {
-        folders.get(absFolder).push(f);
-      } else {
+      if (!folders.get(absFolder)?.push(f)) {
         folders.set(absFolder, [f]);
       }
     }
@@ -52,7 +50,7 @@ export class TargetSourcesRootNode extends BaseFileDirectoryNode {
     super(`${parentId}-sources`, rootFolder, allFiles);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = `Sources${(this.allFiles.length === 0) ? " (no files)" : ""}`;
@@ -64,10 +62,10 @@ export class TargetSourcesRootNode extends BaseFileDirectoryNode {
 
 export class TargetGeneratedSourcesRootNode extends BaseFileDirectoryNode {
   constructor(parentId: string, files: string[]) {
-    super(`${parentId}-gensources`, vscode.workspace.rootPath, files);
+    super(`${parentId}-gensources`, vscode.workspace.rootPath!, files);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = "Sources (generated)";
@@ -82,7 +80,7 @@ export class TargetSourceDirectoryNode extends BaseFileDirectoryNode {
     super(`${parentId}-${path.basename(folder)}`, folder, files);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem();
 
     item.label = path.basename(this.folder);
@@ -97,7 +95,7 @@ export class TargetSourceFileNode extends BaseNode {
     super(`${parentId}-${path.basename(file)}`);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = path.basename(this.file);

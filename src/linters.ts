@@ -4,6 +4,7 @@ import {
   getOutputChannel,
 } from "./utils";
 import {
+  ExtensionConfiguration,
   LinterConfiguration,
   ToolCheckFunc,
   Tool
@@ -21,29 +22,30 @@ type LinterDefinition = {
   check: ToolCheckFunc
 }
 
-const linters: Record<string, LinterDefinition> = {
+const linters: Record<keyof ExtensionConfiguration["linter"], LinterDefinition> = {
   muon: {
     lint: muon.lint,
     check: muon.check,
   }
 }
 
-async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContext, diagnostics: vscode.DiagnosticCollection): Promise<vscode.Disposable[]> {
-  let disposables = [];
+async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContext, diagnostics: vscode.DiagnosticCollection) {
+  let disposables: vscode.Disposable[] = [];
 
   if (!extensionConfiguration("linting").enabled) {
     return disposables;
   }
 
-  let enabled_linters: ((document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>)[] = [];
+  let enabledLinters: ((document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>)[] = [];
+  let name: keyof typeof linters;
 
-  for (const [name, props] of Object.entries(linters)) {
+  for (name in linters) {
     const config: LinterConfiguration = extensionConfiguration("linter")[name];
-
     if (!config.enabled) {
       continue;
     }
 
+    const props = linters[name];
     const { tool, error } = await props.check();
     if (error) {
       getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`)
@@ -51,8 +53,8 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => await props.lint(tool, sourceRoot, document)
-    enabled_linters.push(linter);
+    const linter = async (document: vscode.TextDocument) => await props.lint(tool!, sourceRoot, document)
+    enabledLinters.push(linter);
   }
 
   const lintAll = (document: vscode.TextDocument) => {
@@ -60,7 +62,7 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
       return;
     }
 
-    Promise.all(enabled_linters.map(l => l(document))).then(values => {
+    Promise.all(enabledLinters.map(l => l(document))).then(values => {
       diagnostics.set(document.uri, values.flat());
     })
   }

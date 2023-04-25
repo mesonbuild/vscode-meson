@@ -3,21 +3,19 @@ import * as vscode from "vscode";
 import { isThenable } from "../../utils";
 import { BaseNode } from "../basenode";
 
+type FolderMap<T> = Map<string, T[]>;
+
 export abstract class BaseDirectoryNode<T> extends BaseNode {
-  subfolders: Thenable<Map<string, T[]>>;
+  protected subfolders: Thenable<FolderMap<T>>;
 
   constructor(id: string, protected readonly folder: string, protected readonly filepaths: T[]) {
     super(id);
 
     const subs = this.buildFileTree(filepaths);
-    if (isThenable(subs)) {
-      this.subfolders = subs;
-    } else {
-      this.subfolders = Promise.resolve(subs);
-    }
+    this.subfolders = isThenable(subs) ? subs : Promise.resolve(subs);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = path.basename(this.folder);
@@ -27,5 +25,5 @@ export abstract class BaseDirectoryNode<T> extends BaseNode {
     return item;
   }
 
-  abstract buildFileTree(fpaths: T[]): vscode.ProviderResult<Map<string, T[]>>;
+  abstract buildFileTree(fpaths: T[]): FolderMap<T> | Thenable<FolderMap<T>>;
 }

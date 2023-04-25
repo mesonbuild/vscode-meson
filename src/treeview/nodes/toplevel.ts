@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { BaseNode } from "../basenode";
 import { ProjectInfo, Subproject, Targets, Tests } from "../../types";
 import { extensionRelative } from "../../utils";
-import { TargetDirectoryNode, TargetNode } from "./targets";
+import { TargetDirectoryNode } from "./targets";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../introspection";
 import { TestRootNode } from "./tests";
 
@@ -18,7 +18,7 @@ export class ProjectNode extends BaseNode {
     super(`project-${projectDir}-${project.descriptive_name}-${buildDir}`);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = `${this.project.descriptive_name}`;
@@ -30,7 +30,7 @@ export class ProjectNode extends BaseNode {
     return item;
   }
 
-  async getChildren() {
+  override async getChildren() {
     const targets = await getMesonTargets(this.buildDir);
 
     let children: BaseNode[] = [
@@ -72,7 +72,7 @@ class SubprojectsRootNode extends BaseNode {
     super(`${parentId}-subprojects`);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = "Subprojects";
@@ -82,7 +82,7 @@ class SubprojectsRootNode extends BaseNode {
     return item;
   }
 
-  getChildren() {
+  override getChildren() {
     return this.subprojects.map((subproject) => new SubprojectNode(this.id, subproject, this.buildDir, this.targets, this.tests, this.benchmarks));
   }
 }
@@ -107,7 +107,7 @@ class SubprojectNode extends BaseNode {
     this.benchmarks = benchmarks.filter(t => t.suite[0].split(":")[0] === this.subproject.name);
   }
 
-  getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
     const has_children = this.targets.length > 0 || this.tests.length > 0 || this.benchmarks.length > 0
 
@@ -120,7 +120,7 @@ class SubprojectNode extends BaseNode {
     return item;
   }
 
-  async getChildren() {
+  override async getChildren() {
     let children: BaseNode[] = [];
     if (this.targets.length > 0) {
       children.push(new TargetDirectoryNode(`${this.id}-targets`, ".", this.targets))

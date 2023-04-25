@@ -7,12 +7,18 @@ import { ExtensionConfiguration, Target } from "./types";
 import { getMesonBuildOptions } from "./introspection";
 import { extensionPath } from "./extension";
 
+export interface ExecResult {
+  stdout: string;
+  stderr: string;
+  error?: cp.ExecException;
+}
+
 export async function exec(
   command: string,
   args: string[],
   options: cp.ExecOptions = {}
-): Promise<{ stdout: string; stderr: string, error?: cp.ExecException }> {
-  return new Promise<{ stdout: string; stderr: string, error?: cp.ExecException }>((resolve, reject) => {
+) {
+  return new Promise<ExecResult>((resolve, reject) => {
     cp.execFile(command, args, options, (error, stdout, stderr) => {
       if (error) {
         reject({ error, stdout, stderr });
@@ -28,8 +34,8 @@ export async function execFeed(
   args: string[],
   options: cp.ExecOptions = {},
   stdin: string
-): Promise<{ stdout: string; stderr: string, error?: cp.ExecFileException }> {
-  return new Promise<{ stdout: string; stderr: string, error?: cp.ExecFileException }>(resolve => {
+) {
+  return new Promise<ExecResult>(resolve => {
     let p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       resolve({ stdout, stderr, error: error ? error : undefined });
     });
@@ -62,10 +68,10 @@ export function extensionRelative(filepath: string) {
 }
 
 export function workspaceRelative(filepath: string) {
-  return path.resolve(vscode.workspace.rootPath, filepath);
+  return path.resolve(vscode.workspace.rootPath!, filepath);
 }
 
-let _layout_promise: Promise<string> | undefined = undefined;;
+let _layoutPromise: Promise<string> | null = null;
 
 async function getLayout() {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
@@ -74,23 +80,20 @@ async function getLayout() {
 }
 
 export function clearCache() {
-  _layout_promise = undefined
+  _layoutPromise = null;
 }
 
 export async function getTargetName(target: Target) {
-  if (!_layout_promise) {
-    _layout_promise = getLayout();
-  }
-  const layout = await _layout_promise;
+  _layoutPromise ??= getLayout();
+  const layout = await _layoutPromise;
 
   if (layout === "mirror") {
-    let relativePath = path.relative(vscode.workspace.rootPath, path.dirname(target.defined_in));
+    let relativePath = path.relative(vscode.workspace.rootPath!, path.dirname(target.defined_in));
 
     // Meson requires the separator between path and target name to be '/'.
     relativePath = path.join(relativePath, target.name);
     const p = relativePath.split(path.sep).join(path.posix.sep);
-    return `${p}:${target.type.replace(" ", "_")}`
-
+    return `${p}:${target.type.replace(" ", "_")}`;
   }
   else {
     return `meson-out/${target.name}`;
@@ -110,7 +113,7 @@ export function getConfiguration() {
 export function extensionConfiguration<K extends keyof ExtensionConfiguration>(
   key: K
 ) {
-  return getConfiguration().get<ExtensionConfiguration[K]>(key);
+  return getConfiguration().get<ExtensionConfiguration[K]>(key)!;
 }
 
 export function extensionConfigurationSet<
@@ -181,7 +184,7 @@ export async function patchCompileCommands(buildDir: string) {
 
   // Since we have compile_commands.json, make sure we use it.
   try {
-    const relFilePath = path.relative(vscode.workspace.rootPath, vsCodeFilePath);
+    const relFilePath = path.relative(vscode.workspace.rootPath!, vsCodeFilePath);
     const conf = vscode.workspace.getConfiguration("C_Cpp");
     conf.update("default.compileCommands", relFilePath, vscode.ConfigurationTarget.Workspace);
   } catch {

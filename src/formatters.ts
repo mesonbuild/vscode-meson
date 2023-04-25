@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import {
   extensionConfiguration,
   getOutputChannel
@@ -28,7 +27,7 @@ const formatters: Record<string, FormatterDefinition> = {
 }
 
 async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
-  let disposables = [];
+  let disposables: vscode.Disposable[] = [];
 
   if (!extensionConfiguration("formatting").enabled) {
     return disposables;
@@ -46,7 +45,7 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
 
   const sub = vscode.languages.registerDocumentFormattingEditProvider('meson', {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-      return await props.format(tool, document);
+      return await props.format(tool!, document);
     }
   })
 
