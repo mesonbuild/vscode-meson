@@ -86,6 +86,10 @@
       {
         "command": "mesonbuild.benchmark",
         "title": "Meson: Run Benchmarks"
+      },
+      {
+        "command": "mesonbuild.restartLanguageServer",
+        "title": "Meson: Restart Language Server"
       }
     ],
     "configuration": {
@@ -187,6 +191,35 @@
             ]
           },
           "description": "Give an object that's merged into the debug configuration provider"
+        },
+        "mesonbuild.languageServer": {
+          "type": "string",
+          "default": "Swift-MesonLSP",
+          "enum": [
+            "Swift-MesonLSP",
+            null
+          ],
+          "description": "Select which language server to use"
+        },
+        "mesonbuild.languageServerPath": {
+          "type": "string",
+          "description": "Binary name or path to language server",
+          "default": ""
+        },
+        "mesonbuild.downloadLanguageServer": {
+          "type": "string",
+          "default": "ask",
+          "enum": [
+            true,
+            false,
+            "ask"
+          ],
+          "enumDescriptions": [
+            "Download the language server",
+            "Do not download the language server",
+            "Ask every time to download the language server"
+          ],
+          "description": "Have VSCode download the language server automatically (MacOS/Windows only for Swift-MesonLSP)"
         }
       }
     },
@@ -338,14 +371,20 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.1",
     "@types/node": "^16.11.7",
     "@types/vscode": "^1.1.59",
+    "@types/which": "^3.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
     "prettier": "^3.0.3",
     "typescript": "^4.4.4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "adm-zip": "0.5.10",
+    "vscode-languageclient": "8.0.2",
+    "which": "4.0.0"
+  },
   "prettier": {
     "proseWrap": "always"
   }
