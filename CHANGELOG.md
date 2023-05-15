@@ -2,6 +2,12 @@
 
 ## next
 
+- Add integration with
+  [Swift-MesonLSP](https://github.com/JCWasmx86/Swift-MesonLSP). vscode-meson
+  will automatically download it on Windows, Linux and MacOS. Linux users can
+  follow the [docs](https://github.com/JCWasmx86/Swift-MesonLSP/tree/main/Docs)
+  if they want to have updates delivered using their package manager.
+
 ## 1.11.0
 
 - Add syntax highlight for `meson.options` files.

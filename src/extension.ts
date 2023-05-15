@@ -10,12 +10,14 @@ import {
   useCompileCommands,
   clearCache,
   checkMesonIsConfigured,
+  getOutputChannel,
 } from "./utils";
 import { DebugConfigurationProvider } from "./configprovider";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
-import { TaskQuickPickItem } from "./types";
+import { SettingsKey, TaskQuickPickItem } from "./types";
+import { createLanguageServerClient } from "./lsp/common";
 
 export let extensionPath: string;
 let explorer: MesonProjectExplorer;
@@ -33,9 +35,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
-
-  activateLinters(root, ctx);
-  activateFormatters(ctx);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
@@ -176,8 +175,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   if (!checkMesonIsConfigured(buildDir)) {
-    const configureOnOpenKey = "configureOnOpen";
-    let configureOnOpen = extensionConfiguration(configureOnOpenKey);
+    let configureOnOpen = extensionConfiguration(SettingsKey.configureOnOpen);
     if (configureOnOpen === "ask") {
       enum Options {
         yes = "Yes",
@@ -196,7 +194,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
           break;
 
         case Options.never:
-          extensionConfigurationSet(configureOnOpenKey, false, vscode.ConfigurationTarget.Workspace);
+          extensionConfigurationSet(SettingsKey.configureOnOpen, false, vscode.ConfigurationTarget.Workspace);
           break;
 
         case Options.yes:
@@ -204,16 +202,71 @@ export async function activate(ctx: vscode.ExtensionContext) {
           break;
 
         case Options.always:
-          extensionConfigurationSet(configureOnOpenKey, true, vscode.ConfigurationTarget.Workspace);
+          extensionConfigurationSet(SettingsKey.configureOnOpen, true, vscode.ConfigurationTarget.Workspace);
           configureOnOpen = true;
           break;
       }
     }
-
-    if (configureOnOpen === true) {
-      runFirstTask("reconfigure");
-    }
   }
+
+  const downloadLanguageServer = extensionConfiguration(SettingsKey.downloadLanguageServer);
+  const server = extensionConfiguration(SettingsKey.languageServer);
+  const shouldDownload = async (downloadLanguageServer: boolean | "ask"): Promise<boolean> => {
+    if (typeof downloadLanguageServer === "boolean") return downloadLanguageServer;
+
+    enum Options {
+      yes = "Yes",
+      no = "Not this time",
+      never = "Never",
+    }
+
+    const response = await vscode.window.showInformationMessage(
+      "Should the extension try to download the language server?",
+      ...Object.values(Options),
+    );
+
+    switch (response) {
+      case Options.yes:
+        extensionConfigurationSet(SettingsKey.downloadLanguageServer, true, vscode.ConfigurationTarget.Global);
+        return true;
+
+      case Options.never:
+        extensionConfigurationSet(SettingsKey.downloadLanguageServer, false, vscode.ConfigurationTarget.Global);
+        return false;
+
+      case Options.no:
+        extensionConfigurationSet(SettingsKey.downloadLanguageServer, "ask", vscode.ConfigurationTarget.Global);
+        return false;
+    }
+
+    return false;
+  };
+
+  let client = await createLanguageServerClient(server, await shouldDownload(downloadLanguageServer), ctx);
+  if (client !== null && server == "Swift-MesonLSP") {
+    ctx.subscriptions.push(client);
+    client.start();
+
+    getOutputChannel().appendLine("Not enabling the muon linter/formatter because Swift-MesonLSP is active.");
+  } else {
+    activateLinters(root, ctx);
+    activateFormatters(ctx);
+  }
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.restartLanguageServer", async () => {
+      if (client === null) {
+        client = await createLanguageServerClient(server, await shouldDownload(downloadLanguageServer), ctx);
+        if (client !== null) {
+          ctx.subscriptions.push(client);
+          client.start();
+          // TODO: The output line from above about not enabling muon would be good to have here.
+        }
+      } else {
+        client.restart();
+      }
+    }),
+  );
 
   async function pickTask(mode: string) {
     const picker = vscode.window.createQuickPick<TaskQuickPickItem>();
