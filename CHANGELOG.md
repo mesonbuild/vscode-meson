@@ -2,11 +2,19 @@
 
 ## next
 
+- Add test and benchmark options
+- Fix linter running on all files instead of just meson.build files
+- Fix showing `undefined` for projects where `project(version:)` wasn't
+  specified
+- Add `Meson: Run Executable` command
+- Add target type tooltip when exploring the targets tree
+
 ## 1.9.0
 
 - Automatically configure Intellisense to use compile_commands.json generated
-  by Meson.
-- Meson `tasks.json` entries specifying `target` will now need to include the target's type. E.g. `"target": "relative/path/to/targetname:shared_library"`.
+  by Meson
+- Meson `tasks.json` entries specifying `target` will now need to include the
+  target's type. E.g. `"target": "relative/path/to/targetname:shared_library"`
 
 ## 1.8.1
 
