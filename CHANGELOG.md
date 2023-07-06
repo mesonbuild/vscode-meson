@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.10.0
 
 - Add test and benchmark options
 - Fix linter running on all files instead of just meson.build files
