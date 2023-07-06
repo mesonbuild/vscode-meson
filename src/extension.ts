@@ -7,7 +7,7 @@ import {
   workspaceRelative,
   extensionConfigurationSet,
   genEnvFile,
-  patchCompileCommands,
+  useCompileCommands,
   clearCache,
   checkMesonIsConfigured
 } from "./utils";
@@ -107,13 +107,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   const compileCommandsHandler = async () => {
-    await patchCompileCommands(buildDir);
+    await useCompileCommands(buildDir);
   };
   compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/compile_commands.json`, false, false, true);
   compileCommandsWatcher.onDidChange(compileCommandsHandler);
   compileCommandsWatcher.onDidCreate(compileCommandsHandler);
   ctx.subscriptions.push(compileCommandsWatcher);
-  await patchCompileCommands(buildDir);
+  await useCompileCommands(buildDir);
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
