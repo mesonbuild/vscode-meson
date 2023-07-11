@@ -2,6 +2,8 @@
 
 ## next
 
+- Add syntax highlight for `meson.options` files.
+
 ## 1.10.0
 
 - Add test and benchmark options
