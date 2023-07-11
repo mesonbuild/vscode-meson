@@ -4,7 +4,8 @@
   "author": "Patrick Griffis",
   "fileTypes": [
     "meson.build",
-    "meson_options.txt"
+    "meson_options.txt",
+    "meson.options"
   ],
   "uuid": "b3713e1e-4289-4e0c-88af-79e8876e5adb",
   "patterns": [
