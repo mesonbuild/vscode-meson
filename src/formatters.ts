@@ -1,30 +1,21 @@
-import * as vscode from 'vscode';
-import {
-  extensionConfiguration,
-  getOutputChannel
-} from './utils';
-import {
-  ToolCheckFunc,
-  Tool
-} from './types'
+import * as vscode from "vscode";
+import { extensionConfiguration, getOutputChannel } from "./utils";
+import { ToolCheckFunc, Tool } from "./types";
 import * as muon from "./tools/muon";
 
-type FormatterFunc = (
-  tool: Tool,
-  document: vscode.TextDocument
-) => Promise<vscode.TextEdit[]>
+type FormatterFunc = (tool: Tool, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
 
 type FormatterDefinition = {
-  format: FormatterFunc,
-  check: ToolCheckFunc,
-}
+  format: FormatterFunc;
+  check: ToolCheckFunc;
+};
 
 const formatters: Record<string, FormatterDefinition> = {
   muon: {
     format: muon.format,
     check: muon.check,
-  }
-}
+  },
+};
 
 async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
   let disposables: vscode.Disposable[] = [];
@@ -38,16 +29,16 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
 
   const { tool, error } = await props.check();
   if (error) {
-    getOutputChannel().appendLine(`Failed to enable formatter ${name}: ${error}`)
+    getOutputChannel().appendLine(`Failed to enable formatter ${name}: ${error}`);
     getOutputChannel().show(true);
     return disposables;
   }
 
-  const sub = vscode.languages.registerDocumentFormattingEditProvider('meson', {
+  const sub = vscode.languages.registerDocumentFormattingEditProvider("meson", {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
       return await props.format(tool!, document);
-    }
-  })
+    },
+  });
 
   context.subscriptions.push(sub);
   disposables.push(sub);
@@ -65,6 +56,6 @@ export async function activateFormatters(context: vscode.ExtensionContext) {
       }
 
       subscriptions = await reloadFormatters(context);
-    })
+    }),
   );
 }

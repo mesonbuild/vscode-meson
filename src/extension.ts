@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
-import { TargetNode } from "./treeview/nodes/targets"
+import { TargetNode } from "./treeview/nodes/targets";
 import {
   extensionConfiguration,
   workspaceRelative,
@@ -9,20 +9,12 @@ import {
   genEnvFile,
   useCompileCommands,
   clearCache,
-  checkMesonIsConfigured
+  checkMesonIsConfigured,
 } from "./utils";
 import { DebugConfigurationProvider } from "./configprovider";
-import {
-  testDebugHandler,
-  testRunHandler,
-  rebuildTests
-} from "./tests";
-import {
-  activateLinters
-} from "./linters"
-import {
-  activateFormatters
-} from "./formatters"
+import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
+import { activateLinters } from "./linters";
+import { activateFormatters } from "./formatters";
 import { TaskQuickPickItem } from "./types";
 
 export let extensionPath: string;
@@ -48,24 +40,36 @@ export async function activate(ctx: vscode.ExtensionContext) {
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
   ctx.subscriptions.push(
-    vscode.debug.registerDebugConfigurationProvider('cppdbg',
+    vscode.debug.registerDebugConfigurationProvider(
+      "cppdbg",
       new DebugConfigurationProvider(buildDir),
-      vscode.DebugConfigurationProviderTriggerKind.Dynamic)
+      vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+    ),
   );
 
   const updateHasProject = async () => {
     const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
-    vscode.commands.executeCommand("setContext", 'mesonbuild.hasProject', mesonFiles.length > 0);
-  }
+    vscode.commands.executeCommand("setContext", "mesonbuild.hasProject", mesonFiles.length > 0);
+  };
   mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
-  mesonWatcher.onDidCreate(updateHasProject)
-  mesonWatcher.onDidDelete(updateHasProject)
+  mesonWatcher.onDidCreate(updateHasProject);
+  mesonWatcher.onDidDelete(updateHasProject);
   ctx.subscriptions.push(mesonWatcher);
-  await updateHasProject()
+  await updateHasProject();
 
-  controller = vscode.tests.createTestController('meson-test-controller', 'Meson test controller');
-  controller.createRunProfile("Meson debug test", vscode.TestRunProfileKind.Debug, (request, token) => testDebugHandler(controller, request, token), true)
-  controller.createRunProfile("Meson run test", vscode.TestRunProfileKind.Run, (request, token) => testRunHandler(controller, request, token), true)
+  controller = vscode.tests.createTestController("meson-test-controller", "Meson test controller");
+  controller.createRunProfile(
+    "Meson debug test",
+    vscode.TestRunProfileKind.Debug,
+    (request, token) => testDebugHandler(controller, request, token),
+    true,
+  );
+  controller.createRunProfile(
+    "Meson run test",
+    vscode.TestRunProfileKind.Run,
+    (request, token) => testRunHandler(controller, request, token),
+    true,
+  );
   ctx.subscriptions.push(controller);
 
   let mesonTasks: Thenable<vscode.Task[]> | null = null;
@@ -77,8 +81,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
       },
       resolveTask() {
         return null;
-      }
-    })
+      },
+    }),
   );
 
   const changeHandler = async () => {
@@ -103,13 +107,18 @@ export async function activate(ctx: vscode.ExtensionContext) {
       } else if (e.affectsConfiguration("mesonbuild")) {
         changeHandler();
       }
-    })
+    }),
   );
 
   const compileCommandsHandler = async () => {
     await useCompileCommands(buildDir);
   };
-  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(`${buildDir}/compile_commands.json`, false, false, true);
+  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(
+    `${buildDir}/compile_commands.json`,
+    false,
+    false,
+    true,
+  );
   compileCommandsWatcher.onDidChange(compileCommandsHandler);
   compileCommandsWatcher.onDidCreate(compileCommandsHandler);
   ctx.subscriptions.push(compileCommandsWatcher);
@@ -118,51 +127,51 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
       const file = node.getTarget().defined_in;
-      const uri = vscode.Uri.file(file)
-      await vscode.commands.executeCommand('vscode.open', uri);
-    })
+      const uri = vscode.Uri.file(file);
+      await vscode.commands.executeCommand("vscode.open", uri);
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.reconfigure", async () => {
       runFirstTask("reconfigure");
-    })
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.build", async (name?: string) => {
-      pickAndRunTask("build", name)
-    })
+      pickAndRunTask("build", name);
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.install", async () => {
       runFirstTask("install");
-    })
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.test", async (name?: string) => {
       pickAndRunTask("test", name);
-    })
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.benchmark", async (name?: string) => {
       pickAndRunTask("benchmark", name);
-    })
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.clean", async () => {
       runFirstTask("clean");
-    })
+    }),
   );
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.run", async () => {
       pickAndRunTask("run");
-    })
+    }),
   );
 
   if (!checkMesonIsConfigured(buildDir)) {
@@ -174,11 +183,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
         always = "Always",
         no = "No",
         never = "Never",
-      };
+      }
 
       const response = await vscode.window.showInformationMessage(
         "Meson project detected in this workspace but does not seems to be configured. Would you like VS Code to configure it?",
-        ...Object.values(Options)
+        ...Object.values(Options),
       );
 
       switch (response) {
@@ -214,13 +223,13 @@ export async function activate(ctx: vscode.ExtensionContext) {
     const runnableTasks = await getTasks(mode);
 
     picker.busy = false;
-    picker.items = runnableTasks.map(task => {
+    picker.items = runnableTasks.map((task) => {
       return {
         label: task.name,
         detail: task.detail,
         picked: false,
         task: task,
-      }
+      };
     });
 
     return new Promise<TaskQuickPickItem>((resolve, reject) => {

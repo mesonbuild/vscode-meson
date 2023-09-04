@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 
 type Dict<T> = { [x: string]: T };
-export type Tool = { path: string, version: [number, number, number] }
-export type ToolCheckFunc = () => Promise<{ tool?: Tool, error?: string }>
+export type Tool = { path: string; version: [number, number, number] };
+export type ToolCheckFunc = () => Promise<{ tool?: Tool; error?: string }>;
 
 export type LinterConfiguration = {
-  enabled: boolean,
-}
+  enabled: boolean;
+};
 
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
@@ -19,12 +19,12 @@ export interface ExtensionConfiguration {
   muonPath: string;
   linting: { enabled: boolean };
   linter: {
-    muon: LinterConfiguration
+    muon: LinterConfiguration;
   };
   formatting: {
-    enabled: boolean,
-    provider: "muon",
-    muonConfig: string | null,
+    enabled: boolean;
+    provider: "muon";
+    muonConfig: string | null;
   };
   debugOptions: object;
 }
@@ -54,14 +54,7 @@ export interface OptionTypeMap {
   array: string[];
 }
 
-export type SectionType =
-  | "core"
-  | "backend"
-  | "base"
-  | "compiler"
-  | "directory"
-  | "user"
-  | "test";
+export type SectionType = "core" | "backend" | "base" | "compiler" | "directory" | "user" | "test";
 
 export interface TargetSource {
   language: LanguageID;
