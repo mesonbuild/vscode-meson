@@ -333,6 +333,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "postinstall": "husky install",
+    "prettier:check": "prettier --check **.md **.ts **.yml **.json",
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
