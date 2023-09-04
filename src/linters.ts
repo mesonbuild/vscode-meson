@@ -1,35 +1,27 @@
-import * as vscode from 'vscode';
-import {
-  extensionConfiguration,
-  getOutputChannel,
-} from "./utils";
-import {
-  ExtensionConfiguration,
-  LinterConfiguration,
-  ToolCheckFunc,
-  Tool
-} from "./types"
+import * as vscode from "vscode";
+import { extensionConfiguration, getOutputChannel } from "./utils";
+import { ExtensionConfiguration, LinterConfiguration, ToolCheckFunc, Tool } from "./types";
 import * as muon from "./tools/muon";
 
-type LinterFunc = (
-  tool: Tool,
-  sourceRoot: string,
-  document: vscode.TextDocument
-) => Promise<vscode.Diagnostic[]>
+type LinterFunc = (tool: Tool, sourceRoot: string, document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>;
 
 type LinterDefinition = {
-  lint: LinterFunc,
-  check: ToolCheckFunc
-}
+  lint: LinterFunc;
+  check: ToolCheckFunc;
+};
 
 const linters: Record<keyof ExtensionConfiguration["linter"], LinterDefinition> = {
   muon: {
     lint: muon.lint,
     check: muon.check,
-  }
-}
+  },
+};
 
-async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContext, diagnostics: vscode.DiagnosticCollection) {
+async function reloadLinters(
+  sourceRoot: string,
+  context: vscode.ExtensionContext,
+  diagnostics: vscode.DiagnosticCollection,
+) {
   let disposables: vscode.Disposable[] = [];
 
   if (!extensionConfiguration("linting").enabled) {
@@ -48,29 +40,33 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
     const props = linters[name];
     const { tool, error } = await props.check();
     if (error) {
-      getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`)
+      getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`);
       getOutputChannel().show(true);
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => await props.lint(tool!, sourceRoot, document)
+    const linter = async (document: vscode.TextDocument) => await props.lint(tool!, sourceRoot, document);
     enabledLinters.push(linter);
   }
 
   const lintAll = (document: vscode.TextDocument) => {
-    if (document.languageId != 'meson') {
+    if (document.languageId != "meson") {
       return;
     }
 
-    Promise.all(enabledLinters.map(l => l(document))).then(values => {
+    Promise.all(enabledLinters.map((l) => l(document))).then((values) => {
       diagnostics.set(document.uri, values.flat());
-    })
-  }
+    });
+  };
 
   const subscriptions = [
-    vscode.workspace.onDidChangeTextDocument(c => lintAll(c.document)),
-    vscode.window.onDidChangeActiveTextEditor(e => { if (e) { lintAll(e.document) } }),
-  ]
+    vscode.workspace.onDidChangeTextDocument((c) => lintAll(c.document)),
+    vscode.window.onDidChangeActiveTextEditor((e) => {
+      if (e) {
+        lintAll(e.document);
+      }
+    }),
+  ];
 
   for (const sub of subscriptions) {
     context.subscriptions.push(sub);
@@ -81,7 +77,7 @@ async function reloadLinters(sourceRoot: string, context: vscode.ExtensionContex
 }
 
 export async function activateLinters(sourceRoot: string, context: vscode.ExtensionContext) {
-  const diagnostics = vscode.languages.createDiagnosticCollection('meson');
+  const diagnostics = vscode.languages.createDiagnosticCollection("meson");
 
   let subscriptions: vscode.Disposable[] = await reloadLinters(sourceRoot, context, diagnostics);
 
@@ -93,6 +89,6 @@ export async function activateLinters(sourceRoot: string, context: vscode.Extens
 
       diagnostics.clear();
       subscriptions = await reloadLinters(sourceRoot, context, diagnostics);
-    })
+    }),
   );
 }

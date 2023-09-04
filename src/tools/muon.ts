@@ -1,29 +1,17 @@
-import * as vscode from 'vscode';
-import {
-  ExecResult,
-  exec,
-  execFeed,
-  extensionConfiguration,
-  getOutputChannel
-} from "../utils"
-import {
-  Tool
-} from "../types"
+import * as vscode from "vscode";
+import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
+import { Tool } from "../types";
 
-export async function lint(
-  muon: Tool,
-  root: string,
-  document: vscode.TextDocument
-): Promise<vscode.Diagnostic[]> {
+export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stderr } = await execFeed(
     muon.path,
     ["analyze", "-l", "-O", document.uri.fsPath],
     { cwd: root },
-    document.getText()
-  )
+    document.getText(),
+  );
 
   let diagnostics: vscode.Diagnostic[] = [];
-  stderr.split("\n").forEach(line => {
+  stderr.split("\n").forEach((line) => {
     const parts = line.split(":");
     if (parts.length < 4) {
       return;
@@ -54,27 +42,24 @@ export async function lint(
   return diagnostics;
 }
 
-export async function format(
-  muon: Tool,
-  document: vscode.TextDocument
-): Promise<vscode.TextEdit[]> {
+export async function format(muon: Tool, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
 
-  let args = ["fmt"]
+  let args = ["fmt"];
 
   if (muon.version[0] == 0 && muon.version[1] == 0) {
-    args = ["fmt_unstable"]
+    args = ["fmt_unstable"];
   }
 
-  const config_path = extensionConfiguration("formatting").muonConfig
+  const config_path = extensionConfiguration("formatting").muonConfig;
   if (config_path) {
-    args.push("-c", config_path)
+    args.push("-c", config_path);
   }
-  args.push("-")
+  args.push("-");
 
   const { stdout, stderr, error } = await execFeed(muon.path, args, {}, originalDocumentText);
   if (error) {
-    getOutputChannel().appendLine(`Failed to format document with muon: ${stderr}`)
+    getOutputChannel().appendLine(`Failed to format document with muon: ${stderr}`);
     getOutputChannel().show(true);
     return [];
   }
@@ -87,31 +72,33 @@ export async function format(
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<{ tool?: Tool, error?: string }> {
+export async function check(): Promise<{ tool?: Tool; error?: string }> {
   const muon_path = extensionConfiguration("muonPath");
   let stdout: string, stderr: string;
 
   try {
     ({ stdout, stderr } = await exec(muon_path, ["version"]));
-  }
-  catch (e) {
+  } catch (e) {
     const { error, stdout, stderr } = e as ExecResult;
     console.log(error);
     return { error: error!.message };
   }
 
-  const line1 = stdout.split("\n")[0].split(" ")
+  const line1 = stdout.split("\n")[0].split(" ");
   if (line1.length !== 2) {
     return { error: `Invalid version string: ${line1}` };
   }
 
-  const ver = line1[1].split("-")[0].split('.').map((s) => {
-    if (s[0] == 'v') {
-      s = s.slice(1)
-    }
+  const ver = line1[1]
+    .split("-")[0]
+    .split(".")
+    .map((s) => {
+      if (s[0] == "v") {
+        s = s.slice(1);
+      }
 
-    return Number.parseInt(s)
-  }) as [number, number, number];
+      return Number.parseInt(s);
+    }) as [number, number, number];
 
   return { tool: { path: muon_path, version: ver } };
 }

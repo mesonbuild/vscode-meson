@@ -5,7 +5,11 @@ import { Test, Tests } from "../../types";
 import { extensionRelative } from "../../utils";
 
 export class TestRootNode extends BaseNode {
-  constructor(parentId: string, private readonly tests: Tests, private readonly isBenchmark: boolean) {
+  constructor(
+    parentId: string,
+    private readonly tests: Tests,
+    private readonly isBenchmark: boolean,
+  ) {
     super(`${parentId}-${isBenchmark ? "benchmarks" : "tests"}`);
   }
 
@@ -14,7 +18,8 @@ export class TestRootNode extends BaseNode {
 
     item.label = this.isBenchmark ? "Benchmarks" : "Tests";
     item.iconPath = extensionRelative("res/meson_32.svg");
-    item.collapsibleState = (this.tests.length === 0) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
+    item.collapsibleState =
+      this.tests.length === 0 ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed;
 
     return item;
   }
@@ -25,13 +30,17 @@ export class TestRootNode extends BaseNode {
 }
 
 class TestNode extends BaseNode {
-  constructor(parentId: string, private readonly test: Test, private readonly isBenchmark: boolean) {
+  constructor(
+    parentId: string,
+    private readonly test: Test,
+    private readonly isBenchmark: boolean,
+  ) {
     super(`${parentId}-${test.suite[0]}-${test.name}`);
   }
 
   override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
-    const project = this.test.suite[0].split(":")[0]
+    const project = this.test.suite[0].split(":")[0];
     const name = `${project}:${this.test.name}`;
 
     item.label = this.test.name;
@@ -39,7 +48,7 @@ class TestNode extends BaseNode {
     item.command = {
       title: `Run ${this.isBenchmark ? "benchmark" : "test"}`,
       command: `mesonbuild.${this.isBenchmark ? "benchmark" : "test"}`,
-      arguments: [name]
+      arguments: [name],
     };
 
     // No children currently, so don't display toggle.

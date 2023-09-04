@@ -8,7 +8,11 @@ type FolderMap<T> = Map<string, T[]>;
 export abstract class BaseDirectoryNode<T> extends BaseNode {
   protected subfolders: Thenable<FolderMap<T>>;
 
-  constructor(id: string, protected readonly folder: string, protected readonly filepaths: T[]) {
+  constructor(
+    id: string,
+    protected readonly folder: string,
+    protected readonly filepaths: T[],
+  ) {
     super(id);
 
     const subs = this.buildFileTree(filepaths);

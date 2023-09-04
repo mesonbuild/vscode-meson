@@ -30,7 +30,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
     return Array.from((await this.subfolders).entries())
       .map(([folder, targets]) => {
         if (folder === ".") {
-          return targets.map(tgt => new TargetNode(this.id, tgt));
+          return targets.map((tgt) => new TargetNode(this.id, tgt));
         } else {
           return new TargetDirectoryNode(this.id, folder, targets);
         }
@@ -73,7 +73,10 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
 }
 
 export class TargetNode extends BaseNode {
-  constructor(parentId: string, private readonly target: Target) {
+  constructor(
+    parentId: string,
+    private readonly target: Target,
+  ) {
     super(`${parentId}-${target.id}`);
   }
 
@@ -84,8 +87,7 @@ export class TargetNode extends BaseNode {
   override getChildren() {
     if (!this.target.target_sources) {
       return [];
-    }
-    else {
+    } else {
       const sources = new Array<string>();
       const generated_sources = new Array<string>();
       for (const s of this.target.target_sources) {
@@ -94,7 +96,9 @@ export class TargetNode extends BaseNode {
       }
 
       const sourceNode = new TargetSourcesRootNode(this.id, path.dirname(this.target.defined_in), sources);
-      return (generated_sources.length === 0) ? [sourceNode] : [sourceNode, new TargetGeneratedSourcesRootNode(this.id, generated_sources)];
+      return generated_sources.length === 0
+        ? [sourceNode]
+        : [sourceNode, new TargetGeneratedSourcesRootNode(this.id, generated_sources)];
     }
   }
 
@@ -112,7 +116,7 @@ export class TargetNode extends BaseNode {
     item.command = {
       title: `Build ${this.target.name}`,
       command: "mesonbuild.build",
-      arguments: [targetName]
+      arguments: [targetName],
     };
 
     return item;

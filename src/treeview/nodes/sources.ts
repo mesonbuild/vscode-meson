@@ -46,14 +46,18 @@ abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
 }
 
 export class TargetSourcesRootNode extends BaseFileDirectoryNode {
-  constructor(parentId: string, rootFolder: string, private readonly allFiles: string[]) {
+  constructor(
+    parentId: string,
+    rootFolder: string,
+    private readonly allFiles: string[],
+  ) {
     super(`${parentId}-sources`, rootFolder, allFiles);
   }
 
   override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
-    item.label = `Sources${(this.allFiles.length === 0) ? " (no files)" : ""}`;
+    item.label = `Sources${this.allFiles.length === 0 ? " (no files)" : ""}`;
     item.iconPath = extensionRelative("res/meson_32.svg");
 
     return item;
@@ -91,7 +95,10 @@ export class TargetSourceDirectoryNode extends BaseFileDirectoryNode {
 }
 
 export class TargetSourceFileNode extends BaseNode {
-  constructor(parentId: string, private readonly file: string) {
+  constructor(
+    parentId: string,
+    private readonly file: string,
+  ) {
     super(`${parentId}-${path.basename(file)}`);
   }
 
@@ -103,7 +110,7 @@ export class TargetSourceFileNode extends BaseNode {
     item.command = {
       command: "vscode.open",
       title: "Open file",
-      arguments: [vscode.Uri.file(this.file)]
+      arguments: [vscode.Uri.file(this.file)],
     };
 
     // No children currently, so don't display toggle.

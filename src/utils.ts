@@ -13,11 +13,7 @@ export interface ExecResult {
   error?: cp.ExecException;
 }
 
-export async function exec(
-  command: string,
-  args: string[],
-  options: cp.ExecOptions = {}
-) {
+export async function exec(command: string, args: string[], options: cp.ExecOptions = {}) {
   return new Promise<ExecResult>((resolve, reject) => {
     cp.execFile(command, args, options, (error, stdout, stderr) => {
       if (error) {
@@ -29,13 +25,8 @@ export async function exec(
   });
 }
 
-export async function execFeed(
-  command: string,
-  args: string[],
-  options: cp.ExecOptions = {},
-  stdin: string
-) {
-  return new Promise<ExecResult>(resolve => {
+export async function execFeed(command: string, args: string[], options: cp.ExecOptions = {}, stdin: string) {
+  return new Promise<ExecResult>((resolve) => {
     let p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       resolve({ stdout, stderr, error: error ? error : undefined });
     });
@@ -49,8 +40,7 @@ export async function parseJSONFileIfExists<T = object>(path: string) {
   try {
     const data = await fs.promises.readFile(path);
     return JSON.parse(data.toString()) as T;
-  }
-  catch (err) {
+  } catch (err) {
     return false;
   }
 }
@@ -76,7 +66,7 @@ let _layoutPromise: Promise<string> | null = null;
 async function getLayout() {
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
   const buildOptions = await getMesonBuildOptions(buildDir);
-  return buildOptions.filter(o => o.name === "layout")[0].value;
+  return buildOptions.filter((o) => o.name === "layout")[0].value;
 }
 
 export function clearCache() {
@@ -94,8 +84,7 @@ export async function getTargetName(target: Target) {
     relativePath = path.join(relativePath, target.name);
     const p = relativePath.split(path.sep).join(path.posix.sep);
     return `${p}:${target.type.replace(" ", "_")}`;
-  }
-  else {
+  } else {
     return `meson-out/${target.name}`;
   }
 }
@@ -110,18 +99,14 @@ export function getConfiguration() {
   return vscode.workspace.getConfiguration("mesonbuild");
 }
 
-export function extensionConfiguration<K extends keyof ExtensionConfiguration>(
-  key: K
-) {
+export function extensionConfiguration<K extends keyof ExtensionConfiguration>(key: K) {
   return getConfiguration().get<ExtensionConfiguration[K]>(key)!;
 }
 
-export function extensionConfigurationSet<
-  K extends keyof ExtensionConfiguration
->(
+export function extensionConfigurationSet<K extends keyof ExtensionConfiguration>(
   key: K,
   value: ExtensionConfiguration[K],
-  target = vscode.ConfigurationTarget.Global
+  target = vscode.ConfigurationTarget.Global,
 ) {
   return getConfiguration().update(key, value, target);
 }
@@ -137,22 +122,29 @@ export function isThenable<T>(x: vscode.ProviderResult<T>): x is Thenable<T> {
 let _envDict: { [key: string]: string } | undefined = undefined;
 
 export async function genEnvFile(buildDir: string) {
-  const envfile = path.join(buildDir, "meson-vscode.env")
+  const envfile = path.join(buildDir, "meson-vscode.env");
   try {
-    await exec(
-      extensionConfiguration("mesonPath"), ["devenv", "-C", buildDir, "--dump", envfile, "--dump-format", "vscode"]);
+    await exec(extensionConfiguration("mesonPath"), [
+      "devenv",
+      "-C",
+      buildDir,
+      "--dump",
+      envfile,
+      "--dump-format",
+      "vscode",
+    ]);
   } catch {
     // Ignore errors, Meson could be too old to support --dump-format.
     return;
   }
 
   // Load into a dict because vscode.ProcessExecution() does not support envFile.
-  _envDict = {}
+  _envDict = {};
   const data = await fs.promises.readFile(envfile);
   for (const i of data.toString().split(/\r?\n/)) {
     // Poor man's i.split("=", 1), JS won't return part after first equal sign.
     // Value is quoted, remove first and last " char and also possible \r ending.
-    const index = i.indexOf('=');
+    const index = i.indexOf("=");
     const key = i.substring(0, index);
     const value = i.slice(index + 2, -1);
     _envDict[key] = value;
@@ -172,7 +164,7 @@ export async function useCompileCommands(buildDir: string) {
       const conf = vscode.workspace.getConfiguration("C_Cpp");
       conf.update("default.compileCommands", relFilePath, vscode.ConfigurationTarget.Workspace);
     } catch {
-        // Ignore, C/C++ extension might not be installed
+      // Ignore, C/C++ extension might not be installed
     }
   }
 }
@@ -181,5 +173,5 @@ export async function useCompileCommands(buildDir: string) {
 // Note: With Meson >= 1.1.0 we can always pass --reconfigure even if it was
 // not already configured.
 export function checkMesonIsConfigured(buildDir: string) {
-  return fs.existsSync(path.join(buildDir, "meson-private", "coredata.dat"))
+  return fs.existsSync(path.join(buildDir, "meson-private", "coredata.dat"));
 }

@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { hash } from "../utils";
 
 export abstract class BaseNode {
-  constructor(protected readonly id: string) { }
+  constructor(protected readonly id: string) {}
 
   getChildren(): vscode.ProviderResult<BaseNode[]> {
     return [];

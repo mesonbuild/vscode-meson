@@ -5,29 +5,29 @@ permissions:
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: install node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - name: yarn install
-      run: yarn install
-    - name: tsc
-      run: tsc --noEmit --noErrorTruncation --pretty false
+      - uses: actions/checkout@v3
+      - name: install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: yarn install
+        run: yarn install
+      - name: tsc
+        run: tsc --noEmit --noErrorTruncation --pretty false
   api-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Check Meson API
-      run: |
-        git clone https://github.com/mesonbuild/meson --depth 1
-        ./ci/check-meson-api.py
+      - uses: actions/checkout@v3
+      - name: Check Meson API
+        run: |
+          git clone https://github.com/mesonbuild/meson --depth 1
+          ./ci/check-meson-api.py
