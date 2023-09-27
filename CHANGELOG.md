@@ -4,6 +4,7 @@
 
 - Add syntax highlight for `meson.options` files.
 - Fix listing tests in the Test Explorer on activation
+- Add support to run executables that are not installed (eg: examples)
 
 ## 1.10.0
 
