@@ -3,6 +3,7 @@
 ## next
 
 - Add syntax highlight for `meson.options` files.
+- Fix listing tests in the Test Explorer on activation
 
 ## 1.10.0
 

@@ -96,6 +96,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   watcher.onDidChange(changeHandler);
   watcher.onDidCreate(changeHandler);
   ctx.subscriptions.push(watcher);
+  await rebuildTests(controller);
   await genEnvFile(buildDir);
 
   // Refresh if the extension configuration is changed.
