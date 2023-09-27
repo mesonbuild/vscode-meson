@@ -152,10 +152,12 @@ export async function getMesonTasks(buildDir: string) {
               "$meson-gcc",
             );
             buildTask.group = vscode.TaskGroup.Build;
-            // FIXME: We should only include executable installed in bindir,
-            // but install_dir is missing from intro data.
-            if (t.type == "executable" && t.installed) {
-              return [buildTask, createRunTask(t, targetName)];
+            if (t.type == "executable") {
+              // Create run tasks for executables that are not tests,
+              // both installed and uninstalled (eg: examples)
+              if (!tests.some((test) => test.name === t.name)) {
+                return [buildTask, createRunTask(t, targetName)];
+              }
             }
             return buildTask;
           }),
