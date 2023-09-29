@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.11.0
 
 - Add syntax highlight for `meson.options` files.
 - Fix listing tests in the Test Explorer on activation
