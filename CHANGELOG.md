@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.12.0
 
 - Add integration with
   [Swift-MesonLSP](https://github.com/JCWasmx86/Swift-MesonLSP). vscode-meson
