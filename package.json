@@ -33,16 +33,12 @@
   },
   "homepage": "https://github.com/mesonbuild/vscode-meson/blob/master/README.md",
   "engines": {
-    "vscode": "^1.59.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:meson",
-    "onCommand:mesonbuild.build",
-    "onCommand:mesonbuild.test",
-    "onCommand:mesonbuild.benchmark",
     "workspaceContains:meson.build",
     "onDebugDynamicConfigurations",
     "onDebugDynamicConfigurations:cppdbg"
