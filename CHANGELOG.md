@@ -2,6 +2,8 @@
 
 ## next
 
+- Fix [#155](https://github.com/mesonbuild/vscode-meson/issues/155)
+
 ## 1.12.0
 
 - Add integration with
