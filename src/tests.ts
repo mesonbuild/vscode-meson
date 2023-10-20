@@ -99,6 +99,24 @@ export async function testDebugHandler(
     return;
   }
 
+  let debugType = null;
+
+  const cppTools = vscode.extensions.getExtension("ms-vscode.cpptools");
+  if (cppTools && cppTools.isActive) {
+    debugType = "cppdbg";
+  } else {
+    const codelldb = vscode.extensions.getExtension("vadimcn.vscode-lldb");
+    if (codelldb && codelldb.isActive) {
+      debugType = "lldb";
+    }
+  }
+
+  if (!debugType) {
+    vscode.window.showErrorMessage("No debugger extension found. Please install one and try again");
+    run.end();
+    return;
+  }
+
   let configDebugOptions = extensionConfiguration("debugOptions");
 
   /* We already figured out which tests we want to run.
@@ -109,7 +127,7 @@ export async function testDebugHandler(
 
     let debugConfiguration = {
       name: `meson-debug-${test.name}`,
-      type: "cppdbg",
+      type: debugType,
       request: "launch",
       cwd: test.workdir || workspaceRelative(extensionConfiguration("buildFolder")),
       env: test.env,
