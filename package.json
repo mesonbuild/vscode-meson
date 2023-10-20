@@ -41,7 +41,8 @@
   "activationEvents": [
     "workspaceContains:meson.build",
     "onDebugDynamicConfigurations",
-    "onDebugDynamicConfigurations:cppdbg"
+    "onDebugDynamicConfigurations:cppdbg",
+    "onDebugDynamicConfigurations:lldb"
   ],
   "main": "./out/extension",
   "contributes": {

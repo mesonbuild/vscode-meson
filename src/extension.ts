@@ -13,6 +13,7 @@ import {
   getOutputChannel,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./configprovider-cppdbg";
+import { DebugConfigurationProviderLldb } from "./configprovider-lldb";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
@@ -42,6 +43,14 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.debug.registerDebugConfigurationProvider(
       "cppdbg",
       new DebugConfigurationProviderCppdbg(buildDir),
+      vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+    ),
+  );
+
+  ctx.subscriptions.push(
+    vscode.debug.registerDebugConfigurationProvider(
+      "lldb",
+      new DebugConfigurationProviderLldb(buildDir),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic,
     ),
   );
