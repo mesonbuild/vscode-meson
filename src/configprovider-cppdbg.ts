@@ -9,7 +9,7 @@ export enum MIModes {
   gdb = "gdb",
 }
 
-export class DebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+export class DebugConfigurationProviderCppdbg implements vscode.DebugConfigurationProvider {
   private path: string;
 
   constructor(path: string) {
@@ -20,7 +20,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     const targetName = await getTargetName(target);
     return {
       type: "cppdbg",
-      name: `Debug ${target.name}`,
+      name: `Debug ${target.name} (cppdbg)`,
       request: "launch",
       cwd: path.dirname(this.path),
       program: target.filename[0],

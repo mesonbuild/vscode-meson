@@ -12,7 +12,7 @@ import {
   checkMesonIsConfigured,
   getOutputChannel,
 } from "./utils";
-import { DebugConfigurationProvider } from "./configprovider";
+import { DebugConfigurationProviderCppdbg } from "./configprovider-cppdbg";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
@@ -41,7 +41,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(
       "cppdbg",
-      new DebugConfigurationProvider(buildDir),
+      new DebugConfigurationProviderCppdbg(buildDir),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic,
     ),
   );
