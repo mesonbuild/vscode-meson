@@ -39,21 +39,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
-  ctx.subscriptions.push(
-    vscode.debug.registerDebugConfigurationProvider(
-      DebugConfigurationProviderCppdbg.type,
-      new DebugConfigurationProviderCppdbg(buildDir),
-      vscode.DebugConfigurationProviderTriggerKind.Dynamic,
-    ),
-  );
-
-  ctx.subscriptions.push(
-    vscode.debug.registerDebugConfigurationProvider(
-      DebugConfigurationProviderLldb.type,
-      new DebugConfigurationProviderLldb(buildDir),
-      vscode.DebugConfigurationProviderTriggerKind.Dynamic,
-    ),
-  );
+  const providers = [DebugConfigurationProviderCppdbg, DebugConfigurationProviderLldb];
+  providers.forEach((provider) => {
+    const p = new provider(buildDir);
+    ctx.subscriptions.push(
+      vscode.debug.registerDebugConfigurationProvider(
+        p.getName(),
+        p,
+        vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+      ),
+    );
+  });
 
   const updateHasProject = async () => {
     const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
