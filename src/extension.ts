@@ -41,7 +41,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(
-      "cppdbg",
+      DebugConfigurationProviderCppdbg.type,
       new DebugConfigurationProviderCppdbg(buildDir),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic,
     ),
@@ -49,7 +49,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.debug.registerDebugConfigurationProvider(
-      "lldb",
+      DebugConfigurationProviderLldb.type,
       new DebugConfigurationProviderLldb(buildDir),
       vscode.DebugConfigurationProviderTriggerKind.Dynamic,
     ),

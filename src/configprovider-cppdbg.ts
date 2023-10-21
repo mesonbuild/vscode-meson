@@ -10,6 +10,8 @@ export enum MIModes {
 }
 
 export class DebugConfigurationProviderCppdbg implements vscode.DebugConfigurationProvider {
+  static readonly type = "cppdbg";
+
   private path: string;
 
   constructor(path: string) {
@@ -19,7 +21,7 @@ export class DebugConfigurationProviderCppdbg implements vscode.DebugConfigurati
   async createBaseDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     const targetName = await getTargetName(target);
     return {
-      type: "cppdbg",
+      type: DebugConfigurationProviderCppdbg.type,
       name: `Debug ${target.name} (cppdbg)`,
       request: "launch",
       cwd: path.dirname(this.path),
