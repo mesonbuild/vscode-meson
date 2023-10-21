@@ -5,6 +5,8 @@ import { Target } from "./types";
 import { extensionConfiguration, getTargetName } from "./utils";
 
 export class DebugConfigurationProviderLldb implements vscode.DebugConfigurationProvider {
+  static readonly type = "lldb";
+
   private path: string;
 
   constructor(path: string) {
@@ -14,7 +16,7 @@ export class DebugConfigurationProviderLldb implements vscode.DebugConfiguration
   async createDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     const targetName = await getTargetName(target);
     return {
-      type: "lldb",
+      type: DebugConfigurationProviderLldb.type,
       name: `Debug ${target.name} (lldb)`,
       request: "launch",
       cwd: path.dirname(this.path),
