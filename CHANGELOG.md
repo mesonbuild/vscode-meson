@@ -2,6 +2,8 @@
 
 ## next
 
+- Add support for CodeLLDB extension
+
 ## 1.12.1
 
 - Fix [#155](https://github.com/mesonbuild/vscode-meson/issues/155)
