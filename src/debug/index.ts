@@ -36,8 +36,7 @@ export abstract class MesonDebugConfigurationProvider implements vscode.DebugCon
     const configDebugOptions = extensionConfiguration("debugOptions");
 
     const executables = targets.filter((target) => target.type == "executable");
-    let ret: vscode.DebugConfiguration[] = [];
-
+    const ret: vscode.DebugConfiguration[] = [];
     for (const target of executables) {
       if (!target.target_sources?.some((source) => ["cpp", "c"].includes(source.language))) {
         continue;

@@ -24,7 +24,7 @@ export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationPro
   }
 
   async createGDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
-    let debugConfig = await super.createDebugConfiguration(target);
+    const debugConfig = await super.createDebugConfiguration(target);
     debugConfig["MIMode"] = "gdb";
     debugConfig["setupCommands"] = [
       {
@@ -37,13 +37,13 @@ export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationPro
   }
 
   async createLLDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
-    let debugConfig = await super.createDebugConfiguration(target);
+    const debugConfig = await super.createDebugConfiguration(target);
     debugConfig["MIMode"] = "lldb";
     return debugConfig;
   }
 
   async createMSVCDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
-    let debugConfig = await super.createDebugConfiguration(target);
+    const debugConfig = await super.createDebugConfiguration(target);
     debugConfig.type = "cppvsdbg";
     return debugConfig;
   }
