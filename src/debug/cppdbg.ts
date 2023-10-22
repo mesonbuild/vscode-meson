@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { Target } from "./types";
-import { MesonDebugConfigurationProvider } from "./configprovider";
+import { Target } from "../types";
+import { MesonDebugConfigurationProvider } from ".";
 
 export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationProvider {
   constructor(path: string) {

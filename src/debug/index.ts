@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { getMesonTargets } from "./introspection";
-import { Target } from "./types";
-import { extensionConfiguration, getTargetName } from "./utils";
+import { getMesonTargets } from "../introspection";
+import { Target } from "../types";
+import { extensionConfiguration, getTargetName } from "../utils";
 
 export abstract class MesonDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
   private readonly path: string;

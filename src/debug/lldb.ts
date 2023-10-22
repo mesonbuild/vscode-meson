@@ -1,4 +1,4 @@
-import { MesonDebugConfigurationProvider } from "./configprovider";
+import { MesonDebugConfigurationProvider } from ".";
 
 export class DebugConfigurationProviderLldb extends MesonDebugConfigurationProvider {
   constructor(path: string) {

@@ -12,8 +12,8 @@ import {
   checkMesonIsConfigured,
   getOutputChannel,
 } from "./utils";
-import { DebugConfigurationProviderCppdbg } from "./configprovider-cppdbg";
-import { DebugConfigurationProviderLldb } from "./configprovider-lldb";
+import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
+import { DebugConfigurationProviderLldb } from "./debug/lldb";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
