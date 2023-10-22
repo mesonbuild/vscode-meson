@@ -204,7 +204,10 @@
           "default": ""
         },
         "mesonbuild.downloadLanguageServer": {
-          "type": "string",
+          "type": [
+            "boolean",
+            "string"
+          ],
           "default": "ask",
           "enum": [
             true,
