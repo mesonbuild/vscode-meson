@@ -32,21 +32,18 @@ export abstract class MesonDebugConfigurationProvider implements vscode.DebugCon
     token?: vscode.CancellationToken,
   ): Promise<vscode.DebugConfiguration[]> {
     const targets = await getMesonTargets(this.path);
-
     const configDebugOptions = extensionConfiguration("debugOptions");
+    const executables = targets.filter(
+      (target) =>
+        target.type === "executable" && target.target_sources?.some((source) => ["cpp", "c"].includes(source.language)),
+    );
 
-    const executables = targets.filter((target) => target.type == "executable");
-    const ret: vscode.DebugConfiguration[] = [];
-    for (const target of executables) {
-      if (!target.target_sources?.some((source) => ["cpp", "c"].includes(source.language))) {
-        continue;
-      }
-
-      const debugConfiguration = await this.createDebugConfiguration(target);
-      ret.push({ ...configDebugOptions, ...debugConfiguration });
-    }
-
-    return ret;
+    return Promise.all(
+      executables.map(async (target) => {
+        const targetDebugConfiguation = await this.createDebugConfiguration(target);
+        return { ...configDebugOptions, ...targetDebugConfiguation };
+      }),
+    );
   }
 
   resolveDebugConfiguration(
