@@ -3,12 +3,10 @@ import { Target } from "../types";
 import { MesonDebugConfigurationProvider } from ".";
 
 export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationProvider {
+  override type: string = "cppdbg";
+
   constructor(path: string) {
     super(path);
-  }
-
-  override getName(): string {
-    return "cppdbg";
   }
 
   override async createDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {

@@ -43,11 +43,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   providers.forEach((provider) => {
     const p = new provider(buildDir);
     ctx.subscriptions.push(
-      vscode.debug.registerDebugConfigurationProvider(
-        p.getName(),
-        p,
-        vscode.DebugConfigurationProviderTriggerKind.Dynamic,
-      ),
+      vscode.debug.registerDebugConfigurationProvider(p.type, p, vscode.DebugConfigurationProviderTriggerKind.Dynamic),
     );
   });
 

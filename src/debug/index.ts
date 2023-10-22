@@ -7,15 +7,15 @@ import { extensionConfiguration, getTargetName } from "../utils";
 export abstract class MesonDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
   private readonly path: string;
 
+  abstract type: string;
+
   constructor(path: string) {
     this.path = path;
   }
 
-  abstract getName(): string;
-
   async createDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     const targetName = await getTargetName(target);
-    const name = this.getName();
+    const name = this.type;
     return {
       type: name,
       name: `Debug ${target.name} (${name})`,
