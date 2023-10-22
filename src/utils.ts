@@ -10,7 +10,7 @@ import { extensionPath } from "./extension";
 export interface ExecResult {
   stdout: string;
   stderr: string;
-  error?: cp.ExecException;
+  error?: cp.ExecFileException;
 }
 
 export async function exec(command: string, args: string[], options: cp.ExecOptions = {}) {
@@ -27,7 +27,7 @@ export async function exec(command: string, args: string[], options: cp.ExecOpti
 
 export async function execFeed(command: string, args: string[], options: cp.ExecOptions = {}, stdin: string) {
   return new Promise<ExecResult>((resolve) => {
-    let p = cp.execFile(command, args, options, (error, stdout, stderr) => {
+    const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       resolve({ stdout, stderr, error: error ? error : undefined });
     });
 
