@@ -2,11 +2,6 @@ import * as vscode from "vscode";
 import { Target } from "./types";
 import { MesonDebugConfigurationProvider } from "./configprovider";
 
-export enum MIModes {
-  lldb = "lldb",
-  gdb = "gdb",
-}
-
 export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationProvider {
   constructor(path: string) {
     super(path);
@@ -30,7 +25,7 @@ export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationPro
 
   async createGDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     let debugConfig = await super.createDebugConfiguration(target);
-    debugConfig["MIMode"] = MIModes.gdb;
+    debugConfig["MIMode"] = "gdb";
     debugConfig["setupCommands"] = [
       {
         description: "Enable pretty-printing for gdb",
@@ -43,7 +38,7 @@ export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationPro
 
   async createLLDBDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     let debugConfig = await super.createDebugConfiguration(target);
-    debugConfig["MIMode"] = MIModes.lldb;
+    debugConfig["MIMode"] = "lldb";
     return debugConfig;
   }
 
