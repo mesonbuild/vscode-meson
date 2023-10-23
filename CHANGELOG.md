@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.14.0
 
 - Add configuration options specific for Swift-MesonLSP.
 - Add auto-updater for Swift-MesonLSP.
