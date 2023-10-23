@@ -7,6 +7,8 @@ import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import {
+  DidChangeConfigurationNotification,
+  DidChangeConfigurationParams,
   Executable,
   LanguageClient,
   LanguageClientOptions,
@@ -15,6 +17,7 @@ import {
 } from "vscode-languageclient/node";
 import * as storage from "../storage";
 import { LanguageServer } from "../types";
+import { getOutputChannel } from "../utils";
 
 export abstract class LanguageServerClient {
   private static readonly clientOptions: LanguageClientOptions = {
@@ -183,7 +186,8 @@ export abstract class LanguageServerClient {
       debug: this.debugExe,
       transport: TransportKind.stdio,
     };
-
+    const options = LanguageServerClient.clientOptions;
+    options.initializationOptions = vscode.workspace.getConfiguration(`mesonbuild.${this.server}`);
     this.ls = new LanguageClient(
       this.server!,
       `Meson Language Server (${this.server})`,
@@ -192,5 +196,13 @@ export abstract class LanguageServerClient {
       true,
     );
     this.ls.start();
+  }
+
+  async reloadConfig(): Promise<void> {
+    const config = vscode.workspace.getConfiguration(`mesonbuild.${this.server}`);
+    const params: DidChangeConfigurationParams = {
+      settings: config,
+    };
+    await this.ls!.sendNotification(DidChangeConfigurationNotification.type, params);
   }
 }
