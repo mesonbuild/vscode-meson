@@ -4,20 +4,20 @@ import { LanguageServer } from "../types";
 import { SwiftMesonLspLanguageClient } from "./swift-mesonlsp";
 import { Uri } from "vscode";
 
+export function serverToClass(server: LanguageServer): any {
+  switch (server) {
+    case "Swift-MesonLSP":
+      return SwiftMesonLspLanguageClient;
+    default:
+      return null;
+  }
+}
+
 export async function createLanguageServerClient(
   server: LanguageServer,
   download: boolean,
   context: vscode.ExtensionContext,
 ): Promise<LanguageServerClient | null> {
-  const serverToClass = (server: LanguageServer) => {
-    switch (server) {
-      case "Swift-MesonLSP":
-        return SwiftMesonLspLanguageClient;
-      default:
-        return null;
-    }
-  };
-
   const klass = serverToClass(server);
   if (klass == null) {
     return null;
@@ -54,5 +54,5 @@ export async function createLanguageServerClient(
     }
   }
 
-  return new klass(languageServerPath, context);
+  return new klass(languageServerPath, context, klass.version);
 }

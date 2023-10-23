@@ -38,8 +38,8 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
     };
   }
 
-  constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext) {
-    super("Swift-MesonLSP", languageServerPath, context);
+  constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
+    super("Swift-MesonLSP", languageServerPath, context, referenceVersion);
   }
 
   static override artifact(): { url: string; hash: string } | null {

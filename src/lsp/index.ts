@@ -17,7 +17,7 @@ import {
 } from "vscode-languageclient/node";
 import * as storage from "../storage";
 import { LanguageServer } from "../types";
-import { getOutputChannel } from "../utils";
+import { serverToClass } from "./common";
 
 export abstract class LanguageServerClient {
   private static readonly clientOptions: LanguageClientOptions = {
@@ -27,6 +27,7 @@ export abstract class LanguageServerClient {
   private readonly context: vscode.ExtensionContext;
 
   protected languageServerPath: vscode.Uri | null;
+  protected referenceVersion: string;
   readonly server: LanguageServer;
 
   static readonly repoURL: string;
@@ -36,10 +37,16 @@ export abstract class LanguageServerClient {
   protected abstract get debugExe(): Executable;
   protected abstract get runExe(): Executable;
 
-  protected constructor(server: LanguageServer, languageServerPath: vscode.Uri, context: vscode.ExtensionContext) {
+  protected constructor(
+    server: LanguageServer,
+    languageServerPath: vscode.Uri,
+    context: vscode.ExtensionContext,
+    referenceVersion: string,
+  ) {
     this.server = server;
     this.languageServerPath = languageServerPath;
     this.context = context;
+    this.referenceVersion = referenceVersion;
   }
 
   private static cachedLanguageServer(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
@@ -204,5 +211,19 @@ export abstract class LanguageServerClient {
       settings: config,
     };
     await this.ls!.sendNotification(DidChangeConfigurationNotification.type, params);
+  }
+
+  async update(context: vscode.ExtensionContext): Promise<void> {
+    const lspDir = storage.uri(storage.Location.LSP, context).fsPath;
+    const versionFile = path.join(lspDir, "version");
+    if (!fs.existsSync(versionFile)) return; // Either we use binaries from PATH or something is broken.
+
+    const currentVersion = fs.readFileSync(versionFile, { encoding: "utf-8" });
+    if (currentVersion == this.referenceVersion) return;
+
+    vscode.window.showInformationMessage(`Updating language server to ${this.referenceVersion}`);
+    this.dispose();
+    await serverToClass(this.server).download(this.server, "2.4.4", context);
+    this.restart();
   }
 }
