@@ -253,6 +253,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
         }
       }),
     );
+
+    await client.update(ctx);
     ctx.subscriptions.push(client);
     client.start();
     await client.reloadConfig();
