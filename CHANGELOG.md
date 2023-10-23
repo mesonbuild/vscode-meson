@@ -4,6 +4,7 @@
 
 - Add configuration options specific for Swift-MesonLSP.
 - Add auto-updater for Swift-MesonLSP.
+- Bump Swift-MesonLSP to v3.0.5.
 
 ## 1.13.0
 
