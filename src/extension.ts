@@ -246,8 +246,16 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   let client = await createLanguageServerClient(server, await shouldDownload(downloadLanguageServer), ctx);
   if (client !== null && server == "Swift-MesonLSP") {
+    ctx.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration(`mesonbuild.${server}`)) {
+          client?.reloadConfig();
+        }
+      }),
+    );
     ctx.subscriptions.push(client);
     client.start();
+    await client.reloadConfig();
 
     getOutputChannel().appendLine("Not enabling the muon linter/formatter because Swift-MesonLSP is active.");
   } else {
@@ -262,10 +270,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
         if (client !== null) {
           ctx.subscriptions.push(client);
           client.start();
+          await client.reloadConfig();
           // TODO: The output line from above about not enabling muon would be good to have here.
         }
       } else {
         client.restart();
+        await client.reloadConfig();
       }
     }),
   );

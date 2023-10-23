@@ -2,6 +2,8 @@
 
 ## next
 
+- Add configuration options specific for Swift-MesonLSP.
+
 ## 1.13.0
 
 - Add support for CodeLLDB extension
