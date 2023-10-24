@@ -2,6 +2,8 @@
 
 ## next
 
+- Bump Swift-MesonLSP to v3.0.6 that provides an important bugfix.
+
 ## 1.14.0
 
 - Add configuration options specific for Swift-MesonLSP.
