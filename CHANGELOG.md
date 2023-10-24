@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.14.1
 
 - Bump Swift-MesonLSP to v3.0.6 that provides an important bugfix.
