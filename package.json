@@ -190,7 +190,10 @@
           "description": "Give an object that's merged into the debug configuration provider"
         },
         "mesonbuild.languageServer": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "default": "Swift-MesonLSP",
           "enum": [
             "Swift-MesonLSP",
