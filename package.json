@@ -223,6 +223,54 @@
             "Ask every time to download the language server"
           ],
           "description": "Have VSCode download the language server automatically (MacOS/Windows only for Swift-MesonLSP)"
+        },
+        "mesonbuild.Swift-MesonLSP.others.ignoreDiagnosticsFromSubprojects": {
+          "type": [
+            "boolean",
+            "array"
+          ],
+          "default": false,
+          "description": "Ignore diagnostics from either all subprojects (if true) or from selected subprojects (if the value is an array)"
+        },
+        "mesonbuild.Swift-MesonLSP.others.disableInlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable inlay hints"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableNameLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking variable names for snake_case"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableAllIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Shortcut for all other `mesonbuild.Swift-MesonLSP.linting.disableXXXIdLinting` options"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableCompilerIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_id()`"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableCompilerArgumentIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_argument_syntax()`"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableLinkerIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_linker_id()`"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableCpuFamilyLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known CPU family, if comparing it with the result of `XXX_machine.cpu_family()`"
+        },
+        "mesonbuild.Swift-MesonLSP.linting.disableOsFamilyLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known system, if comparing it with the result of `XXX_machine.system()`"
         }
       }
     },
