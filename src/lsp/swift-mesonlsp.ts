@@ -8,21 +8,21 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
     "win32-x64": {
       name: "Swift-MesonLSP-win64.zip",
-      hash: "5a43030f6bcd98bc1c4fdced827f0185af08fe7397cc08ecd29878b8fff3b18d",
+      hash: "32054d79988613dd304705817a31cf05cc48e486b95952a9e6b78e111b540322",
     },
     "darwin-x64": {
       name: "Swift-MesonLSP-macos12.zip",
-      hash: "024457775bbaa55ce1a0c1ba65a8f92c4c7879ee42c7d7259f131bbb02fb3fa2",
+      hash: "f7d12dcecf60f0d61993f952dd3d43ab33abe5b87cc5c72ec7904805e3f902a1",
     },
     "linux-x64": {
       name: "Swift-MesonLSP.zip",
-      hash: "f0bd8294a91feecdaa6aeedb20d390f445d74bfba37c274de981878cc26b2a2b",
+      hash: "77f3b01b59992d1e4e2775c05dc74d60a4cd34a99085a6fd9663ef0d698c3270",
     },
   };
 
   static override repoURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP";
   static override setupURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP/tree/main/Docs";
-  static override version: string = "3.0.6";
+  static override version: string = "3.0.22";
 
   get runExe(): Executable {
     return {
