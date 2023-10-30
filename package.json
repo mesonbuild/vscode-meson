@@ -416,6 +416,7 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
+    "markdownlint:check": "markdownlint-cli2 **.md",
     "postinstall": "husky install",
     "prettier:check": "prettier --check **.md **.ts **.yml **.json",
     "vscode:prepublish": "npm run compile",
@@ -428,6 +429,7 @@
     "@types/which": "^3.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
+    "markdownlint-cli2": "^0.10.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
     "vscode-textmate": "^9.0.0"
