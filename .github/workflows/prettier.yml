@@ -3,6 +3,11 @@ name: Prettier
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "**.md"
+      - "**.ts"
+      - "**.yml"
+      - "**.json"
 
 permissions:
   contents: read
