@@ -429,7 +429,8 @@
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vscode-textmate": "^9.0.0"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",

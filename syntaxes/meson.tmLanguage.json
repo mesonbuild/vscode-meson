@@ -1,48 +1,29 @@
 {
   "name": "Meson",
   "scopeName": "source.meson",
-  "author": "Patrick Griffis",
   "fileTypes": ["meson.build", "meson_options.txt", "meson.options"],
-  "uuid": "b3713e1e-4289-4e0c-88af-79e8876e5adb",
   "patterns": [
     {
-      "match": "\\#.*$",
-      "name": "comment.line.meson"
+      "begin": "(\\#)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.comment.meson"
+        }
+      },
+      "end": "$",
+      "name": "comment.line.number-sign.meson"
     },
     {
-      "include": "#string_quoted_single"
+      "match": "\\\\$",
+      "name": "punctuation.separator.continuation.line.meson"
     },
     {
-      "match": "\\b(if|else|elif|endif|foreach|endforeach|break|continue)\\b",
+      "match": "\\b(if|else|elif|endif|foreach|endforeach|break|continue|testcase|endtestcase)\\b",
       "name": "keyword.control.flow.meson"
     },
     {
       "match": "\\b(and|not|or|in)\\b",
       "name": "keyword.operator.logical.meson"
-    },
-    {
-      "match": "\\b(true|false)\\b",
-      "name": "constant.language.meson"
-    },
-    {
-      "match": "\\b([1-9]+[0-9]*\\.[0-9]*)",
-      "name": "constant.numeric.float.meson"
-    },
-    {
-      "match": "\\b(?i:(0x[0-9a-f]+))",
-      "name": "constant.numeric.integer.hexadecimal.meson"
-    },
-    {
-      "match": "\\b([1-9]+[0-9]*|0)",
-      "name": "constant.numeric.integer.decimal.meson"
-    },
-    {
-      "match": "\\b(build_machine|host_machine|meson|target_machine)\\b",
-      "name": "support.constant.meson variable.language.meson"
-    },
-    {
-      "match": "\\b([\\w_]+)\\s*(?=:)",
-      "name": "variable.parameter.function.keyword.meson"
     },
     {
       "match": "<\\=|>\\=|\\=\\=|<|>|\\!\\=",
@@ -61,16 +42,96 @@
       "name": "keyword.operator.arithmetic.meson"
     },
     {
-      "match": "(?x)\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_dependencies|add_project_link_arguments|add_test_setup|alias_target|assert|benchmark|both_libraries|build_target|configuration_data|configure_file|custom_target|debug|declare_dependency|dependency|disabler|environment|error|executable|files|find_program|generator|get_option|get_variable|import|include_directories|install_data|install_emptydir|install_headers|install_man|install_subdir|install_symlink|is_disabler|is_variable|jar|join_paths|library|message|project|range|run_command|run_target|set_variable|shared_library|shared_module|static_library|structured_sources|subdir|subdir_done|subproject|summary|test|unset_variable|vcs_tag|warning\n)\\b\\s*(?=\\()",
-      "name": "support.function.builtin.meson"
+      "include": "#expression"
     }
   ],
   "repository": {
-    "constant_placeholder": {
-      "match": "(?i:(%(\\([a-z_]+\\))?#?0?\\-?[ ]?\\+?([0-9]*|\\*)(\\.([0-9]*|\\*))?([hL][a-z]|[a-z%]))|(\\{([!\\[\\].:\\w ]+)?\\}))",
-      "name": "constant.other.placeholder.meson"
+    "array_literal": {
+      "begin": "(\\[)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.array.begin.meson"
+        }
+      },
+      "end": "(\\])",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.array.end.meson"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expression"
+        }
+      ],
+      "name": "meta.array.meson"
     },
-    "escaped_character": {
+    "binary_literal": {
+      "match": "\\b(0b)[01]+",
+      "captures": {
+        "1": {
+          "name": "storage.type.number.meson"
+        }
+      },
+      "name": "constant.numeric.integer.binary.meson"
+    },
+    "boolean_literal": {
+      "match": "\\b(true|false)\\b",
+      "name": "constant.language.meson"
+    },
+    "builtin_literal": {
+      "match": "\\b(build_machine|host_machine|meson|target_machine)\\b",
+      "name": "support.constant.meson variable.language.meson"
+    },
+    "conditional_expression": {
+      "begin": "(\\?)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.operator.ternary.meson"
+        }
+      },
+      "end": "(:)",
+      "endCaptures": {
+        "1": {
+          "name": "keyword.operator.ternary.meson"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "decimal_literal": {
+      "match": "\\b([1-9][0-9]*|0)",
+      "name": "constant.numeric.integer.decimal.meson"
+    },
+    "dictionary_literal": {
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.dictionary.begin.meson"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.dictionary.end.meson"
+        }
+      },
+      "patterns": [
+        {
+          "name": "punctuation.separator.dictionary.meson",
+          "match": ":"
+        },
+        {
+          "include": "#expression"
+        }
+      ],
+      "name": "meta.dictionary.meson"
+    },
+    "escaped-character": {
+      "match": "((\\\\\\n)|(\\\\\\\\)|(\\\\')|(\\\\n)|(\\\\r)|(\\\\t))",
       "captures": {
         "1": {
           "name": "constant.character.escape.newline.meson"
@@ -90,77 +151,327 @@
         "6": {
           "name": "constant.character.escape.tab.meson"
         }
-      },
-      "match": "((\\\\\\n)|(\\\\\\\\)|(\\\\')|(\\\\n)|(\\\\r)|(\\\\t))"
+      }
     },
-    "string_quoted_single": {
+    "expression": {
       "patterns": [
         {
+          "include": "#subscript"
+        },
+        {
+          "include": "#dictionary_literal"
+        },
+        {
+          "include": "#array_literal"
+        },
+        {
+          "include": "#literal"
+        },
+        {
+          "include": "#conditional_expression"
+        },
+        {
+          "include": "#odd_function_expression"
+        },
+        {
+          "include": "#function_expression"
+        },
+        {
+          "include": "#punctuation"
+        }
+      ]
+    },
+    "float_literal": {
+      "match": "\\b[1-9][0-9]*|0\\.[0-9]+",
+      "name": "constant.numeric.float.meson"
+    },
+    "format-placeholder": {
+      "begin": "(@)",
+      "beginCaptures": {
+        "1": {
+          "name": "constant.character.format.placeholder.begin.meson punctuation.definition.placeholder.begin.meson"
+        }
+      },
+      "end": "(@)",
+      "endCaptures": {
+        "1": {
+          "name": "constant.character.format.placeholder.end.meson punctuation.definition.placeholder.begin.meson"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#decimal_literal"
+        },
+        {
+          "match": "[[:alpha:]_]+",
+          "name": "variable.parameter.interpolated.meson"
+        }
+      ]
+    },
+    "function_expression": {
+      "name": "meta.function-call.meson",
+      "comment": "Regular function call of the type \"name(args)\"",
+      "begin": "(?x)\n  \\b(?=\n    ([[:alpha:]_]\\w*) \\s* (\\()\n  )\n",
+      "end": "(\\))",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.arguments.end.meson"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#function_name"
+        },
+        {
+          "include": "#function_arguments"
+        }
+      ]
+    },
+    "function_name": {
+      "comment": "Some color schemas support meta.function-call.generic scope",
+      "name": "meta.function-call.generic.meson entity.name.function.meson",
+      "match": "(?x)\n  \\b ([[:alpha:]_]\\w*) \\b\n"
+    },
+    "function_arguments": {
+      "begin": "(\\()",
+      "end": "(?=\\))(?!\\)\\s*\\()",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.arguments.begin.meson"
+        }
+      },
+      "contentName": "meta.function-call.arguments.meson",
+      "patterns": [
+        {
+          "name": "punctuation.separator.arguments.meson",
+          "match": "(,)"
+        },
+        {
+          "match": "\\b([[:alpha:]_]\\w*)\\s*(:)(?!:)",
           "captures": {
             "1": {
-              "name": "punctuation.definition.string.begin.meson"
+              "name": "variable.parameter.function-call.meson"
             },
             "2": {
-              "name": "punctuation.definition.string.end.meson"
-            },
-            "3": {
-              "name": "meta.empty-string.single.meson"
+              "name": "keyword.operator.assignment.meson"
             }
-          },
-          "match": "(?<!')(')(('))(?!')",
-          "name": "string.quoted.single.single-line.meson"
+          }
         },
         {
-          "begin": "(''')",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.string.begin.meson"
-            }
-          },
-          "end": "((?<=''')(')''|''')",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.string.end.meson"
-            },
-            "2": {
-              "name": "meta.empty-string.single.meson"
-            }
-          },
-          "name": "string.quoted.single.block.meson",
-          "patterns": [
-            {
-              "include": "#constant_placeholder"
-            },
-            {
-              "include": "#escaped_character"
-            }
-          ]
+          "name": "keyword.operator.assignment.meson",
+          "match": ":(?!:)"
         },
         {
-          "begin": "(')",
-          "beginCaptures": {
+          "include": "#expression"
+        },
+        {
+          "match": "\\s*(\\))\\s*(\\()",
+          "captures": {
             "1": {
-              "name": "punctuation.definition.string.begin.meson"
-            }
-          },
-          "end": "(')|(\\n)",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.string.end.meson"
+              "name": "punctuation.definition.arguments.end.meson"
             },
             "2": {
-              "name": "invalid.illegal.unclosed-string.meson"
+              "name": "punctuation.definition.arguments.begin.meson"
+            }
+          }
+        }
+      ]
+    },
+    "hexadecimal_literal": {
+      "match": "\\b(0x)[a-fA-F0-9]+",
+      "captures": {
+        "1": {
+          "name": "storage.type.number.meson"
+        }
+      },
+      "name": "constant.numeric.integer.hexadecimal.meson"
+    },
+    "keyword_argument": {
+      "match": "\\b([a-zA-Z_][a-zA-Z_0-9]*)\\s*(:)",
+      "captures": {
+        "1": {
+          "name": "variable.parameter.function-call.meson"
+        },
+        "2": {
+          "name": "punctuation.separator.colon.meson"
+        }
+      }
+    },
+    "literal": {
+      "patterns": [
+        {
+          "include": "#builtin_literal"
+        },
+        {
+          "include": "#numeric_literal"
+        },
+        {
+          "include": "#string_literal"
+        },
+        {
+          "include": "#boolean_literal"
+        }
+      ]
+    },
+    "numeric_literal": {
+      "patterns": [
+        {
+          "include": "#binary_literal"
+        },
+        {
+          "include": "#hexadecimal_literal"
+        },
+        {
+          "include": "#octal_literal"
+        },
+        {
+          "include": "#float_literal"
+        },
+        {
+          "include": "#decimal_literal"
+        }
+      ]
+    },
+    "octal_literal": {
+      "match": "\\b(0o)[0-7]+",
+      "captures": {
+        "1": {
+          "name": "storage.type.number.meson"
+        }
+      },
+      "name": "constant.numeric.integer.octal.meson"
+    },
+    "odd_function_expression": {
+      "comment": "A bit obscured function call where there may have been an\narbitrary number of other operations to get the function.\nE.g. \"arr[idx](args)\"\n",
+      "begin": "(?x)\n  (?<= \\] | \\) ) \\s*\n  (?=\\()\n",
+      "end": "(\\))",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.arguments.end.meson"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#function_arguments"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.colon.meson",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.separator.element.meson",
+          "match": ","
+        }
+      ]
+    },
+    "string_literal": {
+      "patterns": [
+        {
+          "include": "#string_multi_literal"
+        },
+        {
+          "include": "#string_single_literal"
+        }
+      ]
+    },
+    "string_multi_literal": {
+      "begin": "(''')",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.multi.begin.meson"
+        }
+      },
+      "end": "(''')",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.multi.end.meson"
+        }
+      },
+      "name": "string.quoted.triple",
+      "patterns": [
+        {
+          "include": "#format-placeholder"
+        },
+        {
+          "include": "#escaped-character"
+        }
+      ]
+    },
+    "string_single_literal": {
+      "begin": "(')",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.single.begin.meson"
+        }
+      },
+      "end": "(')|(\\n)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.single.end.meson"
+        },
+        "2": {
+          "name": "invalid.illegal.string.single.meson"
+        }
+      },
+      "name": "string.quoted.single.meson",
+      "patterns": [
+        {
+          "include": "#format-placeholder"
+        },
+        {
+          "include": "#escaped-character"
+        }
+      ]
+    },
+    "subscript": {
+      "patterns": [
+        {
+          "name": "meta.subscript.meson",
+          "begin": "(?x)\n  \\b(?=\n    [[:alpha:]_]\\w* \\s* \\[\n  )\n",
+          "end": "(\\])",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.arguments.end.meson"
             }
           },
-          "name": "string.quoted.single.single-line.meson",
           "patterns": [
             {
-              "include": "#constant_placeholder"
+              "include": "#subscript_name"
             },
             {
-              "include": "#escaped_character"
+              "include": "#subscript_index"
+            },
+            {
+              "include": "#expression"
             }
           ]
+        }
+      ]
+    },
+    "subscript_name": {
+      "patterns": [
+        {
+          "name": "meta.subscript.meson",
+          "match": "(?x)\n  \\b ([[:alpha:]_]\\w*) \\b\n"
+        }
+      ]
+    },
+    "subscript_index": {
+      "begin": "(\\[)",
+      "end": "(?=\\])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.arguments.begin.meson"
+        }
+      },
+      "contentName": "meta.subscript.arguments.meson",
+      "patterns": [
+        {
+          "include": "#expression"
         }
       ]
     }

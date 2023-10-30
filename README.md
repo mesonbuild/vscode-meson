@@ -1,10 +1,13 @@
 # Meson for VisualStudio Code
 
 This extension provides support for [Meson](http://mesonbuild.com/) in
-[Visual Studio Code](https://code.visualstudio.com/). This is entirely based on
-the grammar found in the
+[Visual Studio Code](https://code.visualstudio.com/). This language grammar was
+based on the grammar found in the
 [atom extension](https://github.com/TingPing/language-meson) from
-[Patrick Griffis](https://github.com/TingPing).
+[Patrick Griffis](https://github.com/TingPing), but has since been added onto to
+support more features, including code from the VSCode
+[grammar](https://github.com/microsoft/vscode/blob/main/extensions/python/syntaxes/MagicPython.tmLanguage.json)
+for Python.
 
 Meson logo by @jpakkane,
 [licensed for use by this project](http://mesonbuild.com/legal.html). Icons from
