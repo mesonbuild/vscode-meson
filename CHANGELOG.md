@@ -2,7 +2,7 @@
 
 ## next
 
-- Updates TextMate grammar
+- Update TextMate grammar
 
 ## 1.15.0
 
@@ -69,7 +69,7 @@
 
 - Generate `<builddir>/meson-vscode.env` to be used in `launch.json`'s `envFile`
   to run programs using Meson's developper environment. See
-  https://mesonbuild.com/Commands.html#devenv
+  [meson devenv](https://mesonbuild.com/Commands.html#devenv).
 
 ## 1.7.1
 
