@@ -171,9 +171,6 @@
           "include": "#conditional_expression"
         },
         {
-          "include": "#odd_function_expression"
-        },
-        {
           "include": "#function_expression"
         },
         {
@@ -340,21 +337,6 @@
         }
       },
       "name": "constant.numeric.integer.octal.meson"
-    },
-    "odd_function_expression": {
-      "comment": "A bit obscured function call where there may have been an\narbitrary number of other operations to get the function.\nE.g. \"arr[idx](args)\"\n",
-      "begin": "(?x)\n  (?<= \\] | \\) ) \\s*\n  (?=\\()\n",
-      "end": "(\\))",
-      "endCaptures": {
-        "1": {
-          "name": "punctuation.definition.arguments.end.meson"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#function_arguments"
-        }
-      ]
     },
     "punctuation": {
       "patterns": [
