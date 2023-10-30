@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.16.0
 
 - Update TextMate grammar
 
