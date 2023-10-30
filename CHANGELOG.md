@@ -2,6 +2,8 @@
 
 ## next
 
+- Allow using Swift-MesonLSP on Apple Silicon
+
 ## 1.14.2
 
 - Bump Swift-MesonLSP to v3.0.22
