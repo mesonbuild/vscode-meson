@@ -223,7 +223,7 @@ export abstract class LanguageServerClient {
 
     vscode.window.showInformationMessage(`Updating language server to ${this.referenceVersion}`);
     this.dispose();
-    await serverToClass(this.server).download(this.server, "2.4.4", context);
+    await serverToClass(this.server).download(this.server, this.referenceVersion, context);
     this.restart();
   }
 }
