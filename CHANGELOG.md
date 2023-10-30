@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.15.0
 
 - Allow using Swift-MesonLSP on Apple Silicon
 
