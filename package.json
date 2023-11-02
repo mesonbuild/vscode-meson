@@ -237,6 +237,11 @@
           "default": false,
           "description": "Disable inlay hints"
         },
+        "mesonbuild.Swift-MesonLSP.others.muonPath": {
+          "type": "string",
+          "default": null,
+          "description": "Set path to muon that will be used for formatting"
+        },
         "mesonbuild.Swift-MesonLSP.linting.disableNameLinting": {
           "type": "boolean",
           "default": false,
