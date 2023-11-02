@@ -2,6 +2,8 @@
 
 ## next
 
+- Bump Swift-MesonLSP to v3.1.0
+
 ## 1.16.1
 
 - Update TextMate grammar
