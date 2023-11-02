@@ -2,6 +2,8 @@
 
 ## next
 
+- Bump Swift-MesonLSP to v3.1.1
+
 ## 1.16.2
 
 - Fix format strings in TextMate grammar
