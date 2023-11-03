@@ -47,6 +47,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const buildDir = relativeBuildDir(mesonFile.fsPath);
 
   workspaceState.update("mesonbuild.buildDir", buildDir);
+  workspaceState.update("mesonbuild.sourceDir", sourceDir);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 

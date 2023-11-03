@@ -79,11 +79,14 @@ export async function getTargetName(target: Target) {
   const layout = await _layoutPromise;
 
   if (layout === "mirror") {
-    let relativePath = path.relative(vscode.workspace.rootPath!, path.dirname(target.defined_in));
+    const relativePath = path.relative(
+      workspaceState.get<string>("mesonbuild.sourceDir")!,
+      path.dirname(target.defined_in),
+    );
 
     // Meson requires the separator between path and target name to be '/'.
-    relativePath = path.join(relativePath, target.name);
-    const p = relativePath.split(path.sep).join(path.posix.sep);
+    const targetRelativePath = path.join(relativePath, target.name);
+    const p = targetRelativePath.split(path.sep).join(path.posix.sep);
     return `${p}:${target.type.replace(" ", "_")}`;
   } else {
     return `meson-out/${target.name}`;
