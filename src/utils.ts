@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { createHash, BinaryLike } from "crypto";
 import { ExtensionConfiguration, Target } from "./types";
 import { getMesonBuildOptions } from "./introspection";
-import { extensionPath } from "./extension";
+import { extensionPath, workspaceState } from "./extension";
 
 export interface ExecResult {
   stdout: string;
@@ -57,14 +57,10 @@ export function extensionRelative(filepath: string) {
   return path.join(extensionPath, filepath);
 }
 
-export function workspaceRelative(filepath: string) {
-  return path.resolve(vscode.workspace.rootPath!, filepath);
-}
-
 let _layoutPromise: Promise<string> | null = null;
 
 async function getLayout() {
-  const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+  const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
   const buildOptions = await getMesonBuildOptions(buildDir);
   return buildOptions.filter((o) => o.name === "layout")[0].value;
 }
