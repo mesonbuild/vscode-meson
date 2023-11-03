@@ -207,6 +207,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
           break;
       }
     }
+
+    if (configureOnOpen) {
+      runFirstTask("reconfigure");
+    }
   } else {
     await rebuildTests(controller);
   }
