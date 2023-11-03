@@ -21,6 +21,7 @@ import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
 
 export let extensionPath: string;
+export let workspaceState: vscode.Memento;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
 let compileCommandsWatcher: vscode.FileSystemWatcher;
@@ -29,6 +30,7 @@ let controller: vscode.TestController;
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
+  workspaceState = ctx.workspaceState;
 
   if (!vscode.workspace.workspaceFolders) {
     return;
@@ -36,6 +38,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
   const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+
+  workspaceState.update("mesonbuild.buildDir", buildDir);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
