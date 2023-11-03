@@ -4,13 +4,13 @@ import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets";
 import {
   extensionConfiguration,
-  workspaceRelative,
   extensionConfigurationSet,
   genEnvFile,
   useCompileCommands,
   clearCache,
   checkMesonIsConfigured,
   getOutputChannel,
+  relativeBuildDir,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
@@ -19,6 +19,7 @@ import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
+import { dirname } from "path";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -37,7 +38,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
   }
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  const buildDir = workspaceRelative(extensionConfiguration("buildFolder"));
+  const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
+  if (mesonFiles.length === 0) {
+    return;
+  }
+  const mesonFile = mesonFiles[0];
+  const buildDir = relativeBuildDir(mesonFile.fsPath);
 
   workspaceState.update("mesonbuild.buildDir", buildDir);
 
