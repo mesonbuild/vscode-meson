@@ -43,6 +43,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     return;
   }
   const mesonFile = mesonFiles[0];
+  const sourceDir = dirname(mesonFile.fsPath);
   const buildDir = relativeBuildDir(mesonFile.fsPath);
 
   workspaceState.update("mesonbuild.buildDir", buildDir);
@@ -86,7 +87,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.tasks.registerTaskProvider("meson", {
       provideTasks() {
-        mesonTasks ??= getMesonTasks(buildDir);
+        mesonTasks ??= getMesonTasks(buildDir, sourceDir);
         return mesonTasks;
       },
       resolveTask() {
