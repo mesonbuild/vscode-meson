@@ -51,21 +51,20 @@ function createRunTask(t: Target, targetName: string) {
   return runTask;
 }
 
-function createReconfigureTask(buildDir: string) {
+function createReconfigureTask(buildDir: string, sourceDir: string) {
   const configureOpts = extensionConfiguration("configureOptions");
   const setupOpts = extensionConfiguration("setupOptions");
   const reconfigureOpts = checkMesonIsConfigured(buildDir) ? ["--reconfigure"] : [];
-  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir];
+  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir, sourceDir];
   return new vscode.Task(
     { type: "meson", mode: "reconfigure" },
     "Reconfigure",
     "Meson",
-    // Note "setup --reconfigure" needs to be run from the root.
-    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, { cwd: vscode.workspace.rootPath }),
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args),
   );
 }
 
-export async function getMesonTasks(buildDir: string) {
+export async function getMesonTasks(buildDir: string, sourceDir: string) {
   try {
     const defaultBuildTask = new vscode.Task(
       { type: "meson", mode: "build" },
@@ -94,7 +93,7 @@ export async function getMesonTasks(buildDir: string) {
         { cwd: buildDir },
       ),
     );
-    const defaultReconfigureTask = createReconfigureTask(buildDir);
+    const defaultReconfigureTask = createReconfigureTask(buildDir, sourceDir);
     const defaultInstallTask = new vscode.Task(
       { type: "meson", mode: "install" },
       "Run install",
