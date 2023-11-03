@@ -115,7 +115,8 @@ export async function testDebugHandler(
     return;
   }
 
-  let configDebugOptions = extensionConfiguration("debugOptions");
+  const configDebugOptions = extensionConfiguration("debugOptions");
+  const sourceDir = workspaceState.get<string>("mesonbuild.sourceDir")!;
 
   /* We already figured out which tests we want to run.
    * We don't use the actual test either way, as we don't get the result here... */
@@ -127,7 +128,7 @@ export async function testDebugHandler(
       name: `meson-debug-${test.name}`,
       type: debugType,
       request: "launch",
-      cwd: test.workdir || buildDir,
+      cwd: test.workdir || sourceDir,
       env: test.env,
       program: test.cmd[0],
       args: args,
