@@ -3,6 +3,7 @@ import { getMesonTargets, getMesonTests, getMesonBenchmarks } from "./introspect
 import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
 import { Test, Target } from "./types";
 import { checkMesonIsConfigured } from "./utils";
+import { workspaceState } from "./extension";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";
@@ -43,7 +44,7 @@ function createRunTask(t: Target, targetName: string) {
     `Run ${targetDisplayName}`,
     "Meson",
     new vscode.ProcessExecution(t.filename[0], {
-      cwd: vscode.workspace.rootPath,
+      cwd: workspaceState.get<string>("mesonbuild.sourceDir")!,
       env: getEnvDict(),
     }),
   );
