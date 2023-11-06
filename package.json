@@ -3,7 +3,7 @@
   "displayName": "Meson",
   "description": "Meson language support for Visual Studio Code",
   "icon": "graphics/icon.png",
-  "version": "1.16.2",
+  "version": "1.16.3",
   "license": "Apache-2.0",
   "publisher": "mesonbuild",
   "author": {
