@@ -4,14 +4,7 @@
   "fileTypes": ["meson.build", "meson_options.txt", "meson.options"],
   "patterns": [
     {
-      "begin": "(\\#)",
-      "beginCaptures": {
-        "1": {
-          "name": "punctuation.definition.comment.meson"
-        }
-      },
-      "end": "$",
-      "name": "comment.line.number-sign.meson"
+      "include": "#comment"
     },
     {
       "match": "\\\\$",
@@ -61,6 +54,9 @@
       },
       "patterns": [
         {
+          "include": "#comment"
+        },
+        {
           "include": "#expression"
         }
       ],
@@ -82,6 +78,16 @@
     "builtin_literal": {
       "match": "\\b(build_machine|host_machine|meson|target_machine)\\b",
       "name": "support.constant.meson variable.language.meson"
+    },
+    "comment": {
+      "begin": "(\\#)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.comment.meson"
+        }
+      },
+      "end": "$",
+      "name": "comment.line.number-sign.meson"
     },
     "conditional_expression": {
       "begin": "(\\?)",
@@ -120,6 +126,9 @@
         }
       },
       "patterns": [
+        {
+          "include": "#comment"
+        },
         {
           "name": "punctuation.separator.dictionary.meson",
           "match": ":"
@@ -244,6 +253,9 @@
       },
       "contentName": "meta.function-call.arguments.meson",
       "patterns": [
+        {
+          "include": "#comment"
+        },
         {
           "name": "punctuation.separator.arguments.meson",
           "match": "(,)"
