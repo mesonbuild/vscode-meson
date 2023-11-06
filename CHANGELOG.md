@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.16.2
 
 - Fix format strings in TextMate grammar
 - Fix comments in various locations in TextMate grammar
