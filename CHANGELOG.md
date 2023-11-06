@@ -2,6 +2,9 @@
 
 ## next
 
+- Fix format strings in TextMate grammar
+- Fix comments in various locations in TextMate grammar
+
 ## 1.16.1
 
 - Update TextMate grammar

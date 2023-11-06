@@ -182,28 +182,33 @@
       "match": "\\b[1-9][0-9]*|0\\.[0-9]+",
       "name": "constant.numeric.float.meson"
     },
-    "format-placeholder": {
-      "begin": "(@)",
-      "beginCaptures": {
+    "format-placeholder-variable": {
+      "match": "(@)([[:alpha:]_]+)(@)",
+      "captures": {
         "1": {
           "name": "constant.character.format.placeholder.begin.meson punctuation.definition.placeholder.begin.meson"
-        }
-      },
-      "end": "(@)",
-      "endCaptures": {
-        "1": {
-          "name": "constant.character.format.placeholder.end.meson punctuation.definition.placeholder.begin.meson"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#decimal_literal"
         },
-        {
-          "match": "[[:alpha:]_]+",
+        "2": {
           "name": "variable.parameter.interpolated.meson"
+        },
+        "3": {
+          "name": "constant.character.format.placeholder.begin.meson punctuation.definition.placeholder.begin.meson"
         }
-      ]
+      }
+    },
+    "format-placeholder-index": {
+      "match": "(@)([1-9][0-9]*|0)(@)",
+      "captures": {
+        "1": {
+          "name": "constant.character.format.placeholder.begin.meson punctuation.definition.placeholder.begin.meson"
+        },
+        "2": {
+          "name": "constant.numeric.integer.decimal.meson"
+        },
+        "3": {
+          "name": "constant.character.format.placeholder.begin.meson punctuation.definition.placeholder.begin.meson"
+        }
+      }
     },
     "function_expression": {
       "name": "meta.function-call.meson",
@@ -353,7 +358,13 @@
     "string_literal": {
       "patterns": [
         {
+          "include": "#format_string_multi_literal"
+        },
+        {
           "include": "#string_multi_literal"
+        },
+        {
+          "include": "#format_string_single_literal"
         },
         {
           "include": "#string_single_literal"
@@ -376,7 +387,36 @@
       "name": "string.quoted.triple",
       "patterns": [
         {
-          "include": "#format-placeholder"
+          "include": "#format-placeholder-index"
+        },
+        {
+          "include": "#escaped-character"
+        }
+      ]
+    },
+    "format_string_multi_literal": {
+      "begin": "(f)(''')",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.string.python"
+        },
+        "2": {
+          "name": "punctuation.definition.string.triple.begin.meson"
+        }
+      },
+      "end": "(''')",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.triple.end.meson"
+        },
+        "2": {
+          "name": "invalid.illegal.string.triple.meson"
+        }
+      },
+      "name": "meta.fstring.meson string.interpolated.meson string.quoted.triple.meson",
+      "patterns": [
+        {
+          "include": "#format-placeholder-variable"
         },
         {
           "include": "#escaped-character"
@@ -402,7 +442,36 @@
       "name": "string.quoted.single.meson",
       "patterns": [
         {
-          "include": "#format-placeholder"
+          "include": "#format-placeholder-index"
+        },
+        {
+          "include": "#escaped-character"
+        }
+      ]
+    },
+    "format_string_single_literal": {
+      "begin": "(f)(')",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.string.python"
+        },
+        "2": {
+          "name": "punctuation.definition.string.single.begin.meson"
+        }
+      },
+      "end": "(')|(\\n)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.single.end.meson"
+        },
+        "2": {
+          "name": "invalid.illegal.string.single.meson"
+        }
+      },
+      "name": "meta.fstring.meson string.interpolated.meson string.quoted.single.meson",
+      "patterns": [
+        {
+          "include": "#format-placeholder-variable"
         },
         {
           "include": "#escaped-character"
