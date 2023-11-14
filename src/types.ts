@@ -65,8 +65,8 @@ export interface TargetSource {
   language: LanguageID;
   compiler: string[];
   parameters: string[];
-  sources: string[];
-  generated_sources: string[];
+  sources: string[] | null;
+  generated_sources: string[] | null;
 }
 
 export interface Target {
