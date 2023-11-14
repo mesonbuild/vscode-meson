@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.18.0
 
 - Enable storage of meson.build in a non-root directory in the workspace
