@@ -42,12 +42,26 @@ export async function activate(ctx: vscode.ExtensionContext) {
   if (mesonFiles.length === 0) {
     return;
   }
-  const mesonFile = mesonFiles[0];
-  const sourceDir = dirname(mesonFile.fsPath);
-  const buildDir = relativeBuildDir(mesonFile.fsPath);
 
+  let configurationChosen = false;
+  let savedMesonFile = workspaceState.get<string>("mesonbuild.mesonFile");
+  if (savedMesonFile) {
+    const filePaths = mesonFiles.map((file) => file.fsPath);
+    if (filePaths.includes(savedMesonFile)) {
+      configurationChosen = workspaceState.get<boolean>("mesonbuild.configurationChosen") ?? false;
+    } else {
+      savedMesonFile = undefined;
+    }
+  }
+
+  const mesonFile = savedMesonFile ?? mesonFiles[0].fsPath;
+  const sourceDir = dirname(mesonFile);
+  const buildDir = relativeBuildDir(mesonFile);
+
+  workspaceState.update("mesonbuild.mesonFile", mesonFile);
   workspaceState.update("mesonbuild.buildDir", buildDir);
   workspaceState.update("mesonbuild.sourceDir", sourceDir);
+  workspaceState.update("mesonbuild.configurationChosen", undefined);
 
   explorer = new MesonProjectExplorer(ctx, root, buildDir);
 
@@ -187,7 +201,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   if (!checkMesonIsConfigured(buildDir)) {
-    let configureOnOpen = extensionConfiguration(SettingsKey.configureOnOpen);
+    let configureOnOpen = configurationChosen || extensionConfiguration(SettingsKey.configureOnOpen);
     if (configureOnOpen === "ask") {
       enum Options {
         yes = "Yes",
@@ -221,7 +235,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     }
 
     if (configureOnOpen) {
-      if (mesonFiles.length > 1) {
+      if (!configurationChosen && mesonFiles.length > 1) {
         const items = mesonFiles.map((file, index) => ({ index: index, label: relative(root, file.fsPath) }));
         items.sort((a, b) => a.label.localeCompare(b.label));
         const selection = await vscode.window.showQuickPick(items, {
@@ -229,7 +243,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
           title: "Select configuration to use.",
           placeHolder: "path/to/meson.build",
         });
-        if (selection && mesonFiles[selection.index] !== mesonFile) {
+        if (selection && mesonFiles[selection.index].fsPath !== mesonFile) {
+          await workspaceState.update("mesonbuild.mesonFile", mesonFiles[selection.index].fsPath);
+          await workspaceState.update("mesonbuild.configurationChosen", true);
           vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
       }
