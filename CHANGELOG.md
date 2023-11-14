@@ -3,6 +3,7 @@
 ## next
 
 - Kill language server zombie processes
+- Highlight `wrap` files as `ini` files.
 
 ## 1.16.3
 
