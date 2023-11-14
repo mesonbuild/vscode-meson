@@ -276,7 +276,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
           // TODO: The output line from above about not enabling muon would be good to have here.
         }
       } else {
-        client.restart();
+        await client.restart();
         await client.reloadConfig();
       }
     }),
