@@ -168,15 +168,15 @@ export abstract class LanguageServerClient {
     return null;
   }
 
-  dispose() {
+  async dispose(): Promise<void> {
     if (this.ls !== null) {
-      this.ls.stop();
+      await this.ls.stop();
       this.ls = null;
     }
   }
 
-  restart(): void {
-    this.dispose();
+  async restart(): Promise<void> {
+    await this.dispose();
     this.languageServerPath = LanguageServerClient.resolveLanguageServerPath(this.server, this.context);
     if (this.languageServerPath === null) {
       vscode.window.showErrorMessage(
@@ -224,6 +224,6 @@ export abstract class LanguageServerClient {
     vscode.window.showInformationMessage(`Updating language server to ${this.referenceVersion}`);
     this.dispose();
     await serverToClass(this.server).download(this.server, this.referenceVersion, context);
-    this.restart();
+    await this.restart();
   }
 }
