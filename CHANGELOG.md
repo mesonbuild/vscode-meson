@@ -2,6 +2,9 @@
 
 ## next
 
+- Enable storage of meson.build in a non-root directory in the workspace
+- Add testcase support to snippets
+
 ## 1.17.0
 
 - Kill language server zombie processes
