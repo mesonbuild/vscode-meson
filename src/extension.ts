@@ -235,6 +235,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     }
 
     if (configureOnOpen) {
+      let cancel = false;
       if (!configurationChosen && mesonFiles.length > 1) {
         const items = mesonFiles.map((file, index) => ({ index: index, label: relative(root, file.fsPath) }));
         items.sort((a, b) => a.label.localeCompare(b.label));
@@ -248,8 +249,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
           await workspaceState.update("mesonbuild.configurationChosen", true);
           vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
+        cancel = selection === undefined;
       }
-      runFirstTask("reconfigure");
+      if (!cancel) {
+        runFirstTask("reconfigure");
+      }
     }
   } else {
     await rebuildTests(controller);
