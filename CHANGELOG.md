@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.17.0
 
 - Kill language server zombie processes
 - Highlight `wrap` files as `ini` files.
