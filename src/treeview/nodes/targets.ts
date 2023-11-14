@@ -91,8 +91,9 @@ export class TargetNode extends BaseNode {
       const sources = new Array<string>();
       const generated_sources = new Array<string>();
       for (const s of this.target.target_sources) {
-        sources.push(...s.sources);
-        sources.push(...s.generated_sources);
+        if (s.sources) sources.push(...s.sources);
+
+        if (s.generated_sources) sources.push(...s.generated_sources);
       }
 
       const sourceNode = new TargetSourcesRootNode(this.id, path.dirname(this.target.defined_in), sources);
