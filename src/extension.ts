@@ -19,7 +19,7 @@ import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
-import { dirname } from "path";
+import { dirname, relative } from "path";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -221,6 +221,18 @@ export async function activate(ctx: vscode.ExtensionContext) {
     }
 
     if (configureOnOpen) {
+      if (mesonFiles.length > 1) {
+        const items = mesonFiles.map((file, index) => ({ index: index, label: relative(root, file.fsPath) }));
+        items.sort((a, b) => a.label.localeCompare(b.label));
+        const selection = await vscode.window.showQuickPick(items, {
+          canPickMany: false,
+          title: "Select configuration to use.",
+          placeHolder: "path/to/meson.build",
+        });
+        if (selection && mesonFiles[selection.index] !== mesonFile) {
+          vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
+      }
       runFirstTask("reconfigure");
     }
   } else {
