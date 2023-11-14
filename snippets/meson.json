@@ -30,7 +30,7 @@
     ],
     "description": "else if statement"
   },
-  "For_each": {
+  "Foreach": {
     "prefix": "foreach",
     "body": [
       "foreach $1 : $2",
@@ -38,5 +38,14 @@
       "endforeach"
     ],
     "description": "foreach loop"
-  }
+  },
+  "Testcase_Statement": {
+    "prefix": "testcase",
+    "body": [
+      "testcase $1",
+      "$0",
+      "endtestcase"
+    ]
+  },
+  "description": "testcase statement"
 }
