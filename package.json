@@ -344,6 +344,15 @@
           "dark": "res/meson_32.svg",
           "light": "res/meson_32.svg"
         }
+      },
+      {
+        "id": "ini",
+        "filenamePatterns": [
+          "**/subprojects/*.wrap"
+        ],
+        "aliases": [
+          "Meson Wrap"
+        ]
       }
     ],
     "grammars": [
