@@ -19,7 +19,7 @@ import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
-import { dirname, relative } from "path";
+import { dirname, relative, sep } from "path";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -237,8 +237,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
     if (configureOnOpen) {
       let cancel = false;
       if (!configurationChosen && mesonFiles.length > 1) {
-        const items = mesonFiles.map((file, index) => ({ index: index, label: relative(root, file.fsPath) }));
-        items.sort((a, b) => a.label.localeCompare(b.label));
+        const items = mesonFiles.map((file, index) => {
+          const label = relative(root, file.fsPath);
+          return { index, label, depth: label.split(sep).length };
+        });
+        items.sort(function (a, b) {
+          if (a.depth === b.depth) {
+            return a.label.localeCompare(b.label);
+          } else {
+            return a.depth - b.depth;
+          }
+        });
         const selection = await vscode.window.showQuickPick(items, {
           canPickMany: false,
           title: "Select configuration to use.",
