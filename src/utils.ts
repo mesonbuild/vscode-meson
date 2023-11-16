@@ -179,3 +179,24 @@ export async function useCompileCommands(buildDir: string) {
 export function checkMesonIsConfigured(buildDir: string) {
   return fs.existsSync(path.join(buildDir, "meson-private", "coredata.dat"));
 }
+
+export async function rootMesonFiles(): Promise<vscode.Uri[]> {
+  const allFiles = (await vscode.workspace.findFiles("**/meson.build")).sort(
+    (a, b) => a.fsPath.length - b.fsPath.length,
+  );
+
+  const rootFiles: vscode.Uri[] = [];
+  for (const a of allFiles) {
+    if (rootFiles.length === 0) {
+      rootFiles.push(a);
+      continue;
+    }
+
+    if (!path.dirname(a.fsPath).startsWith(path.dirname(rootFiles[rootFiles.length - 1].fsPath))) {
+      rootFiles.push(a);
+      continue;
+    }
+  }
+
+  return rootFiles;
+}

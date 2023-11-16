@@ -11,6 +11,7 @@ import {
   checkMesonIsConfigured,
   getOutputChannel,
   relativeBuildDir,
+  rootMesonFiles,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
@@ -38,7 +39,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   }
 
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
+  const mesonFiles = await rootMesonFiles();
   if (mesonFiles.length === 0) {
     return;
   }
