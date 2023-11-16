@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.18.1
 
 - Fix random file being chosen to create project
 
