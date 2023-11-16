@@ -66,7 +66,11 @@
       },
       {
         "command": "mesonbuild.build",
-        "title": "Meson: Build"
+        "title": "Meson: Build",
+        "icon": {
+          "dark": "res/build-icon-dark.svg",
+          "light": "res/build-icon-light.svg"
+        }
       },
       {
         "command": "mesonbuild.test",
@@ -87,6 +91,26 @@
       {
         "command": "mesonbuild.restartLanguageServer",
         "title": "Meson: Restart Language Server"
+      },
+      {
+        "command": "mesonbuild.node.reconfigure",
+        "title": "Reconfigure",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
+      },
+      {
+        "command": "mesonbuild.node.build",
+        "title": "Build",
+        "icon": {
+          "dark": "res/build-icon-dark.svg",
+          "light": "res/build-icon-light.svg"
+        }
+      },
+      {
+        "command": "mesonbuild.node.clean",
+        "title": "Clean"
       },
       {
         "command": "mesonbuild.node.runAll",
@@ -399,9 +423,39 @@
     "menus": {
       "view/item/context": [
         {
+          "command": "mesonbuild.node.reconfigure",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@0"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@1"
+        },
+        {
+          "command": "mesonbuild.node.clean",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@2"
+        },
+        {
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
           "group": "inline"
+        },
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "build"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "build"
         },
         {
           "command": "mesonbuild.node.runAll",
@@ -434,6 +488,18 @@
       "commandPalette": [
         {
           "command": "mesonbuild.openBuildFile",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.reconfigure",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.clean",
           "when": "false"
         },
         {

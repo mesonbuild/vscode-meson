@@ -68,7 +68,7 @@ function createReconfigureTask(buildDir: string, sourceDir: string) {
 export async function getMesonTasks(buildDir: string, sourceDir: string) {
   try {
     const defaultBuildTask = new vscode.Task(
-      { type: "meson", mode: "build" },
+      { type: "meson", mode: "build", target: pseudoAllTarget },
       "Build all targets",
       "Meson",
       new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", "-C", buildDir]),

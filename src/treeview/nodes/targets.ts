@@ -5,7 +5,7 @@ import { BaseNode } from "../basenode";
 import { Target, Targets } from "../../types";
 import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources";
 import { extensionRelative, getTargetName } from "../../utils";
-import { BaseDirectoryNode } from "./base";
+import { BaseDirectoryNode, IBuildableNode } from "./base";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   constructor(parentId: string, folder: string, targets: Targets) {
@@ -72,7 +72,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   }
 }
 
-export class TargetNode extends BaseNode {
+export class TargetNode extends BaseNode implements IBuildableNode {
   constructor(
     parentId: string,
     private readonly target: Target,
@@ -121,6 +121,10 @@ export class TargetNode extends BaseNode {
     };
 
     return item;
+  }
+
+  async build() {
+    return vscode.commands.executeCommand("mesonbuild.build", await getTargetName(this.target));
   }
 
   private getIconPath() {
