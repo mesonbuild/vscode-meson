@@ -42,7 +42,7 @@ export async function lint(muon: Tool, root: string, document: vscode.TextDocume
   return diagnostics;
 }
 
-export async function format(muon: Tool, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+export async function format(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
 
   let args = ["fmt"];
@@ -57,7 +57,7 @@ export async function format(muon: Tool, document: vscode.TextDocument): Promise
   }
   args.push("-");
 
-  const { stdout, stderr, error } = await execFeed(muon.path, args, {}, originalDocumentText);
+  const { stdout, stderr, error } = await execFeed(muon.path, args, { cwd: root }, originalDocumentText);
   if (error) {
     getOutputChannel().appendLine(`Failed to format document with muon: ${stderr}`);
     getOutputChannel().show(true);

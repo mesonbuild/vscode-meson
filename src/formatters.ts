@@ -3,7 +3,7 @@ import { extensionConfiguration, getOutputChannel } from "./utils";
 import { ToolCheckFunc, Tool } from "./types";
 import * as muon from "./tools/muon";
 
-type FormatterFunc = (tool: Tool, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
+type FormatterFunc = (tool: Tool, root: string, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
 
 type FormatterDefinition = {
   format: FormatterFunc;
@@ -17,7 +17,7 @@ const formatters: Record<string, FormatterDefinition> = {
   },
 };
 
-async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
+async function reloadFormatters(sourceRoot: string, context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
   let disposables: vscode.Disposable[] = [];
 
   if (!extensionConfiguration("formatting").enabled) {
@@ -36,7 +36,7 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
 
   const sub = vscode.languages.registerDocumentFormattingEditProvider("meson", {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-      return await props.format(tool!, document);
+      return await props.format(tool!, sourceRoot, document);
     },
   });
 
@@ -46,8 +46,8 @@ async function reloadFormatters(context: vscode.ExtensionContext): Promise<vscod
   return disposables;
 }
 
-export async function activateFormatters(context: vscode.ExtensionContext) {
-  let subscriptions: vscode.Disposable[] = await reloadFormatters(context);
+export async function activateFormatters(sourceRoot: string, context: vscode.ExtensionContext) {
+  let subscriptions: vscode.Disposable[] = await reloadFormatters(sourceRoot, context);
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(async () => {
@@ -55,7 +55,7 @@ export async function activateFormatters(context: vscode.ExtensionContext) {
         handler.dispose();
       }
 
-      subscriptions = await reloadFormatters(context);
+      subscriptions = await reloadFormatters(sourceRoot, context);
     }),
   );
 }

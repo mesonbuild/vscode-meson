@@ -311,7 +311,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     getOutputChannel().appendLine("Not enabling the muon linter/formatter because Swift-MesonLSP is active.");
   } else {
     activateLinters(root, ctx);
-    activateFormatters(ctx);
+    activateFormatters(root, ctx);
   }
 
   ctx.subscriptions.push(
