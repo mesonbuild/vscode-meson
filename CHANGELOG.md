@@ -2,6 +2,8 @@
 
 ## next
 
+- Fix random file being chosen to create project
+
 ## 1.18.0
 
 - Enable storage of meson.build in a non-root directory in the workspace
