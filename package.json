@@ -87,6 +87,16 @@
       {
         "command": "mesonbuild.restartLanguageServer",
         "title": "Meson: Restart Language Server"
+      },
+      {
+        "command": "mesonbuild.node.runAll",
+        "title": "Run all",
+        "icon": "$(testing-run-all-icon)"
+      },
+      {
+        "command": "mesonbuild.node.run",
+        "title": "Run",
+        "icon": "$(testing-run-icon)"
       }
     ],
     "configuration": {
@@ -392,6 +402,26 @@
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
           "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
+          "when": "view == meson-project && viewItem == meson-test-root",
+          "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
+          "when": "view == meson-project && viewItem == meson-test-root",
+          "group": "run"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "view == meson-project && viewItem == meson-test",
+          "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "view == meson-project && viewItem == meson-test",
+          "group": "run"
         }
       ],
       "view/title": [
@@ -404,6 +434,14 @@
       "commandPalette": [
         {
           "command": "mesonbuild.openBuildFile",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
           "when": "false"
         }
       ]

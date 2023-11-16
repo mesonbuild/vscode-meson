@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getMesonTargets, getMesonTests, getMesonBenchmarks } from "./introspection";
 import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
-import { Test, Target } from "./types";
+import { Test, Target, pseudoAllTarget } from "./types";
 import { checkMesonIsConfigured } from "./utils";
 import { workspaceState } from "./extension";
 
@@ -75,22 +75,22 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       "$meson-gcc",
     );
     const defaultTestTask = new vscode.Task(
-      { type: "meson", mode: "test" },
+      { type: "meson", mode: "test", target: pseudoAllTarget },
       "Run all tests",
       "Meson",
       new vscode.ShellExecution(
         extensionConfiguration("mesonPath"),
-        ["test", ...extensionConfiguration("testOptions")],
+        ["test", ...extensionConfiguration("testOptions"), pseudoAllTarget],
         { cwd: buildDir },
       ),
     );
     const defaultBenchmarkTask = new vscode.Task(
-      { type: "meson", mode: "benchmark" },
+      { type: "meson", mode: "benchmark", target: pseudoAllTarget },
       "Run all benchmarks",
       "Meson",
       new vscode.ShellExecution(
         extensionConfiguration("mesonPath"),
-        ["test", "--benchmark", ...extensionConfiguration("benchmarkOptions")],
+        ["test", "--benchmark", ...extensionConfiguration("benchmarkOptions"), pseudoAllTarget],
         { cwd: buildDir },
       ),
     );

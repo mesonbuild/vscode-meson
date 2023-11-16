@@ -31,3 +31,8 @@ export abstract class BaseDirectoryNode<T> extends BaseNode {
 
   abstract buildFileTree(fpaths: T[]): FolderMap<T> | Thenable<FolderMap<T>>;
 }
+
+// A node in the meson tree view that can be run.
+export interface IRunnableNode {
+  run(): Thenable<any>;
+}
