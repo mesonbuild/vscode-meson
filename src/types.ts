@@ -32,6 +32,7 @@ export interface ExtensionConfiguration {
   languageServer: LanguageServer;
   languageServerPath: string;
   downloadLanguageServer: boolean | "ask";
+  selectRootDir: boolean;
 }
 
 export interface TaskQuickPickItem extends vscode.QuickPickItem {
@@ -129,4 +130,5 @@ export enum SettingsKey {
   downloadLanguageServer = "downloadLanguageServer",
   languageServer = "languageServer",
   configureOnOpen = "configureOnOpen",
+  selectRootDir = "selectRootDir",
 }

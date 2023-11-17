@@ -9,8 +9,8 @@ import {
   checkMesonIsConfigured,
   getOutputChannel,
   getBuildDirectory,
-  rootMesonFiles,
   whenFileExists,
+  mesonRootDirs,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
@@ -19,51 +19,57 @@ import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
-import { dirname, relative } from "path";
-import { askShouldDownloadLanguageServer, askConfigureOnOpen } from "./dialogs";
+import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDir, selectRootDir } from "./dialogs";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
-let mesonWatcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
   workspaceState = ctx.workspaceState;
 
-  if (!vscode.workspace.workspaceFolders) {
-    return;
-  }
-
-  const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  const mesonFiles = await rootMesonFiles();
-  if (mesonFiles.length === 0) {
-    return;
-  }
-
-  let configurationChosen = false;
-  let savedMesonFile = workspaceState.get<string>("mesonbuild.mesonFile");
-  if (savedMesonFile) {
-    const filePaths = mesonFiles.map((file) => file.fsPath);
-    if (filePaths.includes(savedMesonFile)) {
-      configurationChosen = workspaceState.get<boolean>("mesonbuild.configurationChosen") ?? false;
+  // The workspace could contain multiple Meson projects. Take all root
+  // meson.build files we find. Usually that's just one at the root of the
+  // workspace.
+  const rootDirs = await mesonRootDirs();
+  let rootDir: string | undefined = undefined;
+  if (rootDirs.length == 1) {
+    rootDir = rootDirs[0];
+  } else if (rootDirs.length > 1) {
+    let savedSourceDir = workspaceState.get<string>("mesonbuild.sourceDir");
+    if (savedSourceDir && rootDirs.includes(savedSourceDir)) {
+      rootDir = savedSourceDir;
     } else {
-      savedMesonFile = undefined;
+      // We have more than one root meson.build file and none has been previously
+      // saved. Ask the user to pick one.
+      rootDir = await askAndSelectRootDir(rootDirs);
     }
   }
 
-  const mesonFile = savedMesonFile ?? mesonFiles[0].fsPath;
-  const sourceDir = dirname(mesonFile);
-  const buildDir = getBuildDirectory(sourceDir);
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.selectRootDir", async () => {
+      let newRootDir = await selectRootDir(rootDirs);
+      if (newRootDir && newRootDir != rootDir) {
+        await workspaceState.update("mesonbuild.sourceDir", newRootDir);
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+      }
+    }),
+  );
 
-  workspaceState.update("mesonbuild.mesonFile", mesonFile);
+  getOutputChannel().appendLine(`Meson project root: ${rootDir}`);
+  vscode.commands.executeCommand("setContext", "mesonbuild.hasProject", rootDir !== undefined);
+  vscode.commands.executeCommand("setContext", "mesonbuild.hasMultipleProjects", rootDirs.length > 1);
+  if (!rootDir) return;
+
+  const sourceDir = rootDir;
+  const buildDir = getBuildDirectory(sourceDir);
   workspaceState.update("mesonbuild.buildDir", buildDir);
   workspaceState.update("mesonbuild.sourceDir", sourceDir);
-  workspaceState.update("mesonbuild.configurationChosen", undefined);
 
-  explorer = new MesonProjectExplorer(ctx, root, buildDir);
+  explorer = new MesonProjectExplorer(ctx, sourceDir, buildDir);
 
   const providers = [DebugConfigurationProviderCppdbg, DebugConfigurationProviderLldb];
   providers.forEach((provider) => {
@@ -72,16 +78,6 @@ export async function activate(ctx: vscode.ExtensionContext) {
       vscode.debug.registerDebugConfigurationProvider(p.type, p, vscode.DebugConfigurationProviderTriggerKind.Dynamic),
     );
   });
-
-  const updateHasProject = async () => {
-    const mesonFiles = await vscode.workspace.findFiles("**/meson.build");
-    vscode.commands.executeCommand("setContext", "mesonbuild.hasProject", mesonFiles.length > 0);
-  };
-  mesonWatcher = vscode.workspace.createFileSystemWatcher("**/meson.build", false, true, false);
-  mesonWatcher.onDidCreate(updateHasProject);
-  mesonWatcher.onDidDelete(updateHasProject);
-  ctx.subscriptions.push(mesonWatcher);
-  await updateHasProject();
 
   controller = vscode.tests.createTestController("meson-test-controller", "Meson test controller");
   controller.createRunProfile(
@@ -207,29 +203,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   if (!checkMesonIsConfigured(buildDir)) {
-    let configureOnOpen = await askConfigureOnOpen();
-
-    if (configureOnOpen) {
-      let cancel = false;
-      if (!configurationChosen && mesonFiles.length > 1) {
-        const items = mesonFiles.map((file, index) => ({ index: index, label: relative(root, file.fsPath) }));
-        items.sort((a, b) => a.label.localeCompare(b.label));
-        const selection = await vscode.window.showQuickPick(items, {
-          canPickMany: false,
-          title: "Select configuration to use.",
-          placeHolder: "path/to/meson.build",
-        });
-        if (selection && mesonFiles[selection.index].fsPath !== mesonFile) {
-          await workspaceState.update("mesonbuild.mesonFile", mesonFiles[selection.index].fsPath);
-          await workspaceState.update("mesonbuild.configurationChosen", true);
-          vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-        cancel = selection === undefined;
-      }
-      if (!cancel) {
-        runFirstTask("reconfigure");
-      }
-    }
+    if (await askConfigureOnOpen()) runFirstTask("reconfigure");
   } else {
     await rebuildTests(controller);
   }
@@ -252,8 +226,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
     getOutputChannel().appendLine("Not enabling the muon linter/formatter because Swift-MesonLSP is active.");
   } else {
-    activateLinters(root, ctx);
-    activateFormatters(root, ctx);
+    activateLinters(sourceDir, ctx);
+    activateFormatters(sourceDir, ctx);
   }
 
   ctx.subscriptions.push(

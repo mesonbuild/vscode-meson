@@ -87,11 +87,20 @@
       {
         "command": "mesonbuild.restartLanguageServer",
         "title": "Meson: Restart Language Server"
+      },
+      {
+        "command": "mesonbuild.selectRootDir",
+        "title": "Meson: Select Project Root Directory"
       }
     ],
     "configuration": {
       "title": "Meson build configuration",
       "properties": {
+        "mesonbuild.selectRootDir": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask to select a Meson project root directory when more than one project is detected."
+        },
         "mesonbuild.configureOnOpen": {
           "type": [
             "boolean",
@@ -437,6 +446,10 @@
         {
           "command": "mesonbuild.restartLanguageServer",
           "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.selectRootDir",
+          "when": "mesonbuild.hasMultipleProjects"
         }
       ]
     },

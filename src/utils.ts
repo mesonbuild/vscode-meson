@@ -65,7 +65,6 @@ export function extensionRelative(filepath: string) {
 export function getBuildDirectory(sourceDir: string) {
   const buildDir = extensionConfiguration("buildFolder");
   if (path.isAbsolute(buildDir)) return buildDir;
-
   return path.join(sourceDir, buildDir);
 }
 
@@ -187,30 +186,30 @@ export function checkMesonIsConfigured(buildDir: string) {
   return fs.existsSync(path.join(buildDir, "meson-private", "coredata.dat"));
 }
 
-export async function rootMesonFiles(): Promise<vscode.Uri[]> {
-  const allFiles = (await vscode.workspace.findFiles("**/meson.build")).sort((a, b) => {
-    const aComponents = a.fsPath.split(path.sep).length;
-    const bComponents = b.fsPath.split(path.sep).length;
-
-    if (aComponents == bComponents) return a.fsPath.localeCompare(b.fsPath);
-
-    return aComponents - bComponents;
-  });
-
-  const rootFiles: vscode.Uri[] = [];
-  for (const a of allFiles) {
-    if (rootFiles.length === 0) {
-      rootFiles.push(a);
-      continue;
+export async function mesonRootDirs(): Promise<string[]> {
+  let rootDirs: string[] = [];
+  let pending: vscode.Uri[] = [];
+  vscode.workspace.workspaceFolders!.forEach((i) => pending.push(i.uri));
+  while (true) {
+    const d = pending.pop();
+    if (!d) break;
+    let hasMesonFile: boolean = false;
+    let subdirs: vscode.Uri[] = [];
+    for (const [name, type] of await vscode.workspace.fs.readDirectory(d)) {
+      if (type === vscode.FileType.File && name == "meson.build") {
+        rootDirs.push(d.fsPath);
+        hasMesonFile = true;
+        break;
+      } else if (type === vscode.FileType.Directory) {
+        subdirs.push(vscode.Uri.joinPath(d, name));
+      }
     }
-
-    if (!path.dirname(a.fsPath).startsWith(path.dirname(rootFiles[rootFiles.length - 1].fsPath))) {
-      rootFiles.push(a);
-      continue;
+    if (!hasMesonFile) {
+      pending.push(...subdirs);
     }
   }
 
-  return rootFiles;
+  return rootDirs;
 }
 
 export function whenFileExists(ctx: vscode.ExtensionContext, file: string, listener: () => void) {
