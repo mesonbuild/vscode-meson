@@ -8,25 +8,25 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
     "win32-x64": {
       name: "Swift-MesonLSP-win64.zip",
-      hash: "4e3c3da70c8bb7328fac54965713a53149686929987836dc299ae2c1dc57ec40",
+      hash: "393c4e7c1ed588e61940cdca5201e115e223727fcb578627b15e719b9783e08f",
     },
     "darwin-x64": {
       name: "Swift-MesonLSP-macos12.zip",
-      hash: "ef6de87a4a4abd128ba3a2da8431db8bcc5b643993a14b73f7e12bedd6ace3ce",
+      hash: "f94e0e51806e7630e94f9dee21240a94f0269f75ebbf44a5a72e064c50cd8155",
     },
     "darwin-arm64": {
       name: "Swift-MesonLSP-macos12.zip",
-      hash: "ef6de87a4a4abd128ba3a2da8431db8bcc5b643993a14b73f7e12bedd6ace3ce",
+      hash: "f94e0e51806e7630e94f9dee21240a94f0269f75ebbf44a5a72e064c50cd8155",
     },
     "linux-x64": {
       name: "Swift-MesonLSP.zip",
-      hash: "4d279f545377451907cc4d0dca8dcabd6916ae2c2e82105741c276a18b6bfbe4",
+      hash: "aef1f6b386e517ac31e58286b25c6bd828ad1fc1e6958a18d5cd52a868bdf1aa",
     },
   };
 
   static override repoURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP";
   static override setupURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP/tree/main/Docs";
-  static override version: string = "3.1.1";
+  static override version: string = "3.1.3";
 
   get runExe(): Executable {
     return {
