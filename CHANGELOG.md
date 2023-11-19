@@ -2,6 +2,8 @@
 
 ## next
 
+- Bump Swift-MesonLSP to v3.1.3
+
 ## 1.18.1
 
 - Fix random file being chosen to create project
