@@ -148,8 +148,15 @@ export abstract class LanguageServerClient {
 
   static resolveLanguageServerPath(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
     const config = vscode.workspace.getConfiguration("mesonbuild");
-    if (config["languageServerPath"] !== null && config["languageServerPath"] != "")
-      return vscode.Uri.from({ scheme: "file", path: config["languageServerPath"] });
+
+    const configLanguageServerPath = config["languageServerPath"];
+    if (configLanguageServerPath !== null && configLanguageServerPath != "") {
+      if (!path.isAbsolute(configLanguageServerPath)) {
+        const binary = which.sync(configLanguageServerPath, { nothrow: true });
+        if (binary !== null) return vscode.Uri.from({ scheme: "file", path: binary });
+      }
+      return vscode.Uri.from({ scheme: "file", path: configLanguageServerPath });
+    }
 
     const cached = LanguageServerClient.cachedLanguageServer(server, context);
     if (cached !== null) return cached;
