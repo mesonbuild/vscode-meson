@@ -57,9 +57,11 @@ export function extensionRelative(filepath: string) {
   return path.join(extensionPath, filepath);
 }
 
-export function relativeBuildDir(mesonFile: string) {
+export function getBuildDirectory(sourceDir: string) {
   const buildDir = extensionConfiguration("buildFolder");
-  return path.join(path.dirname(mesonFile), buildDir);
+  if (path.isAbsolute(buildDir)) return buildDir;
+
+  return path.join(sourceDir, buildDir);
 }
 
 let _layoutPromise: Promise<string> | null = null;
