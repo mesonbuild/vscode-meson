@@ -4,7 +4,6 @@ import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets";
 import {
   extensionConfiguration,
-  extensionConfigurationSet,
   genEnvFile,
   clearCache,
   checkMesonIsConfigured,
@@ -21,6 +20,7 @@ import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
 import { dirname, relative } from "path";
+import { askShouldDownloadLanguageServer, askConfigureOnOpen } from "./dialogs";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -207,38 +207,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   if (!checkMesonIsConfigured(buildDir)) {
-    let configureOnOpen = configurationChosen || extensionConfiguration(SettingsKey.configureOnOpen);
-    if (configureOnOpen === "ask") {
-      enum Options {
-        yes = "Yes",
-        always = "Always",
-        no = "No",
-        never = "Never",
-      }
-
-      const response = await vscode.window.showInformationMessage(
-        "Meson project detected in this workspace but does not seems to be configured. Would you like VS Code to configure it?",
-        ...Object.values(Options),
-      );
-
-      switch (response) {
-        case Options.no:
-          break;
-
-        case Options.never:
-          extensionConfigurationSet(SettingsKey.configureOnOpen, false, vscode.ConfigurationTarget.Workspace);
-          break;
-
-        case Options.yes:
-          configureOnOpen = true;
-          break;
-
-        case Options.always:
-          extensionConfigurationSet(SettingsKey.configureOnOpen, true, vscode.ConfigurationTarget.Workspace);
-          configureOnOpen = true;
-          break;
-      }
-    }
+    let configureOnOpen = await askConfigureOnOpen();
 
     if (configureOnOpen) {
       let cancel = false;
@@ -265,40 +234,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
     await rebuildTests(controller);
   }
 
-  const downloadLanguageServer = extensionConfiguration(SettingsKey.downloadLanguageServer);
   const server = extensionConfiguration(SettingsKey.languageServer);
-  const shouldDownload = async (downloadLanguageServer: boolean | "ask"): Promise<boolean> => {
-    if (typeof downloadLanguageServer === "boolean") return downloadLanguageServer;
-
-    enum Options {
-      yes = "Yes",
-      no = "Not this time",
-      never = "Never",
-    }
-
-    const response = await vscode.window.showInformationMessage(
-      "Should the extension try to download the language server?",
-      ...Object.values(Options),
-    );
-
-    switch (response) {
-      case Options.yes:
-        extensionConfigurationSet(SettingsKey.downloadLanguageServer, true, vscode.ConfigurationTarget.Global);
-        return true;
-
-      case Options.never:
-        extensionConfigurationSet(SettingsKey.downloadLanguageServer, false, vscode.ConfigurationTarget.Global);
-        return false;
-
-      case Options.no:
-        extensionConfigurationSet(SettingsKey.downloadLanguageServer, "ask", vscode.ConfigurationTarget.Global);
-        return false;
-    }
-
-    return false;
-  };
-
-  let client = await createLanguageServerClient(server, await shouldDownload(downloadLanguageServer), ctx);
+  let client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
   if (client !== null && server == "Swift-MesonLSP") {
     ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
@@ -322,7 +259,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.restartLanguageServer", async () => {
       if (client === null) {
-        client = await createLanguageServerClient(server, await shouldDownload(downloadLanguageServer), ctx);
+        client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
         if (client !== null) {
           ctx.subscriptions.push(client);
           client.start();
