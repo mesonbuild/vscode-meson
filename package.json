@@ -405,6 +405,38 @@
         {
           "command": "mesonbuild.openBuildFile",
           "when": "false"
+        },
+        {
+          "command": "mesonbuild.reconfigure",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.clean",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.build",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.test",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.run",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.install",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.benchmark",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.restartLanguageServer",
+          "when": "mesonbuild.hasProject"
         }
       ]
     },
