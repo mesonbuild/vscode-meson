@@ -181,9 +181,14 @@ export function checkMesonIsConfigured(buildDir: string) {
 }
 
 export async function rootMesonFiles(): Promise<vscode.Uri[]> {
-  const allFiles = (await vscode.workspace.findFiles("**/meson.build")).sort(
-    (a, b) => a.fsPath.length - b.fsPath.length,
-  );
+  const allFiles = (await vscode.workspace.findFiles("**/meson.build")).sort((a, b) => {
+    const aComponents = a.fsPath.split(path.sep).length;
+    const bComponents = b.fsPath.split(path.sep).length;
+
+    if (aComponents == bComponents) return a.fsPath.localeCompare(b.fsPath);
+
+    return aComponents - bComponents;
+  });
 
   const rootFiles: vscode.Uri[] = [];
   for (const a of allFiles) {
