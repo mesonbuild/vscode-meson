@@ -443,19 +443,24 @@
           "group": "build@2"
         },
         {
-          "command": "mesonbuild.openBuildFile",
+          "command": "mesonbuild.node.build",
           "when": "view == meson-project && viewItem == meson-target",
-          "group": "inline"
+          "group": "inline@0"
         },
         {
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
-          "group": "build"
+          "group": "inline@1"
         },
         {
           "command": "mesonbuild.node.build",
           "when": "view == meson-project && viewItem == meson-target",
-          "group": "build"
+          "group": "build@0"
+        },
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "build@1"
         },
         {
           "command": "mesonbuild.node.runAll",

@@ -103,7 +103,7 @@ export class TargetNode extends BaseNode implements IBuildableNode {
     }
   }
 
-  override async getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = this.target.name;
@@ -111,14 +111,6 @@ export class TargetNode extends BaseNode implements IBuildableNode {
     item.iconPath = extensionRelative(this.getIconPath());
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.contextValue = "meson-target";
-
-    const targetName = await getTargetName(this.target);
-
-    item.command = {
-      title: `Build ${this.target.name}`,
-      command: "mesonbuild.build",
-      arguments: [targetName],
-    };
 
     return item;
   }
