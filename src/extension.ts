@@ -10,7 +10,7 @@ import {
   clearCache,
   checkMesonIsConfigured,
   getOutputChannel,
-  relativeBuildDir,
+  getBuildDirectory,
   rootMesonFiles,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
@@ -57,7 +57,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const mesonFile = savedMesonFile ?? mesonFiles[0].fsPath;
   const sourceDir = dirname(mesonFile);
-  const buildDir = relativeBuildDir(mesonFile);
+  const buildDir = getBuildDirectory(sourceDir);
 
   workspaceState.update("mesonbuild.mesonFile", mesonFile);
   workspaceState.update("mesonbuild.buildDir", buildDir);

@@ -3,6 +3,7 @@
 ## next
 
 - Bump Swift-MesonLSP to v3.1.3
+- Fix absolute build directories
 
 ## 1.18.1
 
