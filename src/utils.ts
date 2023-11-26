@@ -13,7 +13,7 @@ export interface ExecResult {
   error?: cp.ExecFileException;
 }
 
-export async function exec(command: string, args: string[], options: cp.ExecOptions = {}) {
+export async function exec(command: string, args: string[], options: cp.ExecFileOptions = { shell: true }) {
   return new Promise<ExecResult>((resolve, reject) => {
     cp.execFile(command, args, options, (error, stdout, stderr) => {
       if (error) {
@@ -25,7 +25,7 @@ export async function exec(command: string, args: string[], options: cp.ExecOpti
   });
 }
 
-export async function execFeed(command: string, args: string[], options: cp.ExecOptions = {}, stdin: string) {
+export async function execFeed(command: string, args: string[], options: cp.ExecFileOptions = { shell: true }, stdin: string) {
   return new Promise<ExecResult>((resolve) => {
     const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       resolve({ stdout, stderr, error: error ? error : undefined });
