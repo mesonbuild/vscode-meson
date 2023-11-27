@@ -25,7 +25,12 @@ export async function exec(command: string, args: string[], options: cp.ExecFile
   });
 }
 
-export async function execFeed(command: string, args: string[], options: cp.ExecFileOptions = { shell: true }, stdin: string) {
+export async function execFeed(
+  command: string,
+  args: string[],
+  options: cp.ExecFileOptions = { shell: true },
+  stdin: string,
+) {
   return new Promise<ExecResult>((resolve) => {
     const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       resolve({ stdout, stderr, error: error ? error : undefined });
