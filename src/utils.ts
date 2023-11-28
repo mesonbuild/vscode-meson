@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
+import * as which from "which";
+
 import { createHash, BinaryLike } from "crypto";
 import { ExtensionConfiguration, Target } from "./types";
 import { getMesonBuildOptions } from "./introspection";
@@ -219,4 +221,8 @@ export function whenFileExists(ctx: vscode.ExtensionContext, file: string, liste
   if (fs.existsSync(file)) {
     listener();
   }
+}
+
+export function mesonProgram(): string {
+  return which.sync(extensionConfiguration("mesonPath"));
 }
