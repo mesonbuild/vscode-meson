@@ -6,12 +6,12 @@ import {
   extensionConfiguration,
   extensionConfigurationSet,
   genEnvFile,
-  useCompileCommands,
   clearCache,
   checkMesonIsConfigured,
   getOutputChannel,
   getBuildDirectory,
   rootMesonFiles,
+  whenFileExists,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
@@ -26,7 +26,6 @@ export let extensionPath: string;
 export let workspaceState: vscode.Memento;
 let explorer: MesonProjectExplorer;
 let watcher: vscode.FileSystemWatcher;
-let compileCommandsWatcher: vscode.FileSystemWatcher;
 let mesonWatcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
@@ -137,19 +136,25 @@ export async function activate(ctx: vscode.ExtensionContext) {
     }),
   );
 
-  const compileCommandsHandler = async () => {
-    await useCompileCommands(buildDir);
-  };
-  compileCommandsWatcher = vscode.workspace.createFileSystemWatcher(
-    `${buildDir}/compile_commands.json`,
-    false,
-    false,
-    true,
-  );
-  compileCommandsWatcher.onDidChange(compileCommandsHandler);
-  compileCommandsWatcher.onDidCreate(compileCommandsHandler);
-  ctx.subscriptions.push(compileCommandsWatcher);
-  await useCompileCommands(buildDir);
+  const compileCommandsFile = `${buildDir}/compile_commands.json`;
+  whenFileExists(ctx, compileCommandsFile, async () => {
+    try {
+      const conf = vscode.workspace.getConfiguration("C_Cpp");
+      conf.update("default.compileCommands", compileCommandsFile, vscode.ConfigurationTarget.Workspace);
+    } catch {
+      // Ignore, C/C++ extension might not be installed
+    }
+  });
+
+  const rustProjectFile = `${buildDir}/rust-project.json`;
+  whenFileExists(ctx, rustProjectFile, async () => {
+    try {
+      const conf = vscode.workspace.getConfiguration("rust-analyzer");
+      conf.update("linkedProjects", [rustProjectFile], vscode.ConfigurationTarget.Workspace);
+    } catch {
+      // Ignore, rust-analyzer extension might not be installed
+    }
+  });
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.openBuildFile", async (node: TargetNode) => {
