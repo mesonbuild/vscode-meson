@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.19.0
 
 - Bump Swift-MesonLSP to v3.1.3
 - Fix absolute build directories
