@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
 
 import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject, Targets, Tests } from "../../types";
+import { ProjectInfo, Subproject, Targets, Tests, pseudoAllTarget } from "../../types";
 import { extensionRelative } from "../../utils";
 import { TargetDirectoryNode } from "./targets";
 import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../introspection";
 import { TestRootNode } from "./tests";
+import { IBuildableNode } from "./base";
 
-export class ProjectNode extends BaseNode {
+export class ProjectNode extends BaseNode implements IBuildableNode {
   constructor(
     private readonly project: ProjectInfo,
     projectDir: string,
@@ -25,6 +26,9 @@ export class ProjectNode extends BaseNode {
     if (this.project.version !== "undefined") item.label += ` (${this.project.version})`;
     item.iconPath = extensionRelative("res/meson_32.svg");
     item.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+
+    // To key in to "when": "view == meson-project && viewItem == test" in package.json.
+    item.contextValue = "meson-projectroot";
 
     return item;
   }
@@ -59,6 +63,10 @@ export class ProjectNode extends BaseNode {
     }
 
     return children;
+  }
+
+  build() {
+    return vscode.commands.executeCommand("mesonbuild.build", pseudoAllTarget);
   }
 }
 

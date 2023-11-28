@@ -21,6 +21,7 @@ import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
 import { dirname, relative } from "path";
+import { IBuildableNode, IRunnableNode } from "./treeview/nodes/base";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -199,6 +200,31 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("mesonbuild.run", async () => {
       pickAndRunTask("run");
     }),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.node.reconfigure", async () => {
+      runFirstTask("reconfigure");
+    }),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.node.build", async (node: IBuildableNode) => node.build()),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.node.clean", async () => {
+      runFirstTask("clean");
+    }),
+  );
+
+  // Two commands just to have different icons.
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.node.runAll", async (node: IRunnableNode) => node.run()),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("mesonbuild.node.run", async (node: IRunnableNode) => node.run()),
   );
 
   if (!checkMesonIsConfigured(buildDir)) {

@@ -66,7 +66,11 @@
       },
       {
         "command": "mesonbuild.build",
-        "title": "Meson: Build"
+        "title": "Meson: Build",
+        "icon": {
+          "dark": "res/build-icon-dark.svg",
+          "light": "res/build-icon-light.svg"
+        }
       },
       {
         "command": "mesonbuild.test",
@@ -87,6 +91,36 @@
       {
         "command": "mesonbuild.restartLanguageServer",
         "title": "Meson: Restart Language Server"
+      },
+      {
+        "command": "mesonbuild.node.reconfigure",
+        "title": "Reconfigure",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
+      },
+      {
+        "command": "mesonbuild.node.build",
+        "title": "Build",
+        "icon": {
+          "dark": "res/build-icon-dark.svg",
+          "light": "res/build-icon-light.svg"
+        }
+      },
+      {
+        "command": "mesonbuild.node.clean",
+        "title": "Clean"
+      },
+      {
+        "command": "mesonbuild.node.runAll",
+        "title": "Run all",
+        "icon": "$(testing-run-all-icon)"
+      },
+      {
+        "command": "mesonbuild.node.run",
+        "title": "Run",
+        "icon": "$(testing-run-icon)"
       }
     ],
     "configuration": {
@@ -389,9 +423,64 @@
     "menus": {
       "view/item/context": [
         {
+          "command": "mesonbuild.node.reconfigure",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@0"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@1"
+        },
+        {
+          "command": "mesonbuild.node.clean",
+          "when": "view == meson-project && viewItem == meson-projectroot",
+          "group": "build@2"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "inline@0"
+        },
+        {
           "command": "mesonbuild.openBuildFile",
           "when": "view == meson-project && viewItem == meson-target",
+          "group": "inline@1"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "build@0"
+        },
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "build@1"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
+          "when": "view == meson-project && viewItem == meson-test-root",
           "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
+          "when": "view == meson-project && viewItem == meson-test-root",
+          "group": "run"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "view == meson-project && viewItem == meson-test",
+          "group": "inline"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "view == meson-project && viewItem == meson-test",
+          "group": "run"
         }
       ],
       "view/title": [
@@ -404,6 +493,26 @@
       "commandPalette": [
         {
           "command": "mesonbuild.openBuildFile",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.reconfigure",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.build",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.clean",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.run",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.node.runAll",
           "when": "false"
         }
       ]

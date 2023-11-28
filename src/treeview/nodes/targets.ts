@@ -5,7 +5,7 @@ import { BaseNode } from "../basenode";
 import { Target, Targets } from "../../types";
 import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources";
 import { extensionRelative, getTargetName } from "../../utils";
-import { BaseDirectoryNode } from "./base";
+import { BaseDirectoryNode, IBuildableNode } from "./base";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   constructor(parentId: string, folder: string, targets: Targets) {
@@ -72,7 +72,7 @@ export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   }
 }
 
-export class TargetNode extends BaseNode {
+export class TargetNode extends BaseNode implements IBuildableNode {
   constructor(
     parentId: string,
     private readonly target: Target,
@@ -103,7 +103,7 @@ export class TargetNode extends BaseNode {
     }
   }
 
-  override async getTreeItem() {
+  override getTreeItem() {
     const item = super.getTreeItem() as vscode.TreeItem;
 
     item.label = this.target.name;
@@ -112,15 +112,11 @@ export class TargetNode extends BaseNode {
     item.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
     item.contextValue = "meson-target";
 
-    const targetName = await getTargetName(this.target);
-
-    item.command = {
-      title: `Build ${this.target.name}`,
-      command: "mesonbuild.build",
-      arguments: [targetName],
-    };
-
     return item;
+  }
+
+  async build() {
+    return vscode.commands.executeCommand("mesonbuild.build", await getTargetName(this.target));
   }
 
   private getIconPath() {

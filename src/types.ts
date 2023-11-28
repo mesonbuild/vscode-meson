@@ -130,3 +130,5 @@ export enum SettingsKey {
   languageServer = "languageServer",
   configureOnOpen = "configureOnOpen",
 }
+
+export const pseudoAllTarget = "'*'"; // Quoted for for ShellExecution.
