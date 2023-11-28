@@ -202,3 +202,12 @@ export async function rootMesonFiles(): Promise<vscode.Uri[]> {
 
   return rootFiles;
 }
+
+export function whenFileExists(ctx: vscode.ExtensionContext, file: string, listener: () => void) {
+  const watcher = vscode.workspace.createFileSystemWatcher(file, false, true, true);
+  watcher.onDidCreate(listener);
+  ctx.subscriptions.push(watcher);
+  if (fs.existsSync(file)) {
+    listener();
+  }
+}
