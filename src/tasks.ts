@@ -56,7 +56,7 @@ function createReconfigureTask(buildDir: string, sourceDir: string) {
   const configureOpts = extensionConfiguration("configureOptions");
   const setupOpts = extensionConfiguration("setupOptions");
   const reconfigureOpts = checkMesonIsConfigured(buildDir) ? ["--reconfigure"] : [];
-  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir, sourceDir];
+  const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, `"${buildDir}"`, `"${sourceDir}"`];
   return new vscode.Task(
     { type: "meson", mode: "reconfigure" },
     "Reconfigure",
@@ -71,7 +71,7 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       { type: "meson", mode: "build" },
       "Build all targets",
       "Meson",
-      new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", "-C", buildDir]),
+      new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", "-C", `"${buildDir}"`]),
       "$meson-gcc",
     );
     const defaultTestTask = new vscode.Task(
