@@ -23,7 +23,7 @@ function createTestTask(t: Test, buildDir: string, isBenchmark: boolean) {
     { type: "meson", mode, target: name },
     `Test ${name}`,
     "Meson",
-    new vscode.ShellExecution(extensionConfiguration("mesonPath"), args, {
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args, {
       cwd: buildDir,
     }),
   );
@@ -43,7 +43,7 @@ function createRunTask(t: Target, targetName: string) {
     },
     `Run ${targetDisplayName}`,
     "Meson",
-    new vscode.ShellExecution(t.filename[0], {
+    new vscode.ProcessExecution(t.filename[0], {
       cwd: workspaceState.get<string>("mesonbuild.sourceDir")!,
       env: getEnvDict(),
     }),
@@ -61,7 +61,7 @@ function createReconfigureTask(buildDir: string, sourceDir: string) {
     { type: "meson", mode: "reconfigure" },
     "Reconfigure",
     "Meson",
-    new vscode.ShellExecution(extensionConfiguration("mesonPath"), args),
+    new vscode.ProcessExecution(extensionConfiguration("mesonPath"), args),
   );
 }
 
@@ -71,14 +71,14 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       { type: "meson", mode: "build" },
       "Build all targets",
       "Meson",
-      new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", "-C", buildDir]),
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile", "-C", buildDir]),
       "$meson-gcc",
     );
     const defaultTestTask = new vscode.Task(
       { type: "meson", mode: "test" },
       "Run all tests",
       "Meson",
-      new vscode.ShellExecution(
+      new vscode.ProcessExecution(
         extensionConfiguration("mesonPath"),
         ["test", ...extensionConfiguration("testOptions")],
         { cwd: buildDir },
@@ -88,7 +88,7 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       { type: "meson", mode: "benchmark" },
       "Run all benchmarks",
       "Meson",
-      new vscode.ShellExecution(
+      new vscode.ProcessExecution(
         extensionConfiguration("mesonPath"),
         ["test", "--benchmark", ...extensionConfiguration("benchmarkOptions")],
         { cwd: buildDir },
@@ -99,13 +99,13 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       { type: "meson", mode: "install" },
       "Run install",
       "Meson",
-      new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["install"], { cwd: buildDir }),
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["install"], { cwd: buildDir }),
     );
     const defaultCleanTask = new vscode.Task(
       { type: "meson", mode: "clean" },
       "Clean",
       "Meson",
-      new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: buildDir }),
+      new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile", "--clean"], { cwd: buildDir }),
     );
     defaultBuildTask.group = vscode.TaskGroup.Build;
     defaultTestTask.group = vscode.TaskGroup.Test;
@@ -146,7 +146,7 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
               def,
               `Build ${targetName}`,
               "Meson",
-              new vscode.ShellExecution(extensionConfiguration("mesonPath"), ["compile", targetName], {
+              new vscode.ProcessExecution(extensionConfiguration("mesonPath"), ["compile", targetName], {
                 cwd: buildDir,
               }),
               "$meson-gcc",
