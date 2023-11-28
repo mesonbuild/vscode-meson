@@ -96,9 +96,13 @@ export async function askSelectRootDir(): Promise<boolean> {
 }
 
 export async function selectRootDir(rootDirs: string[]): Promise<string | undefined> {
-  // TODO: What label to use when there is more than one workspace?
-  const root = vscode.workspace.rootPath ?? "";
-  const items = rootDirs.map((file, index) => ({ index: index, label: path.relative(root, file) }));
+  // Append meson.build to directories otherwise asRelativePath() returns the
+  // absolute path when the path is the root of a workspace. Even if we fix that,
+  // it would leaves us with an empty string which is not better.
+  const items = rootDirs.map((file, index) => ({
+    index: index,
+    label: vscode.workspace.asRelativePath(path.join(file, "meson.build")),
+  }));
   items.sort((a, b) => {
     const aComponents = a.label.split(path.sep).length;
     const bComponents = b.label.split(path.sep).length;
