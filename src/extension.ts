@@ -51,7 +51,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.selectRootDir", async () => {
-      let newRootDir = await selectRootDir(rootDirs);
+      let newRootDir = await selectRootDir(await mesonRootDirs());
       if (newRootDir && newRootDir != rootDir) {
         await workspaceState.update("mesonbuild.sourceDir", newRootDir);
         vscode.commands.executeCommand("workbench.action.reloadWindow");
