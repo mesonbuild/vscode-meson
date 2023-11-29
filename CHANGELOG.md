@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.19.1
 
 - Fix extension not calling Meson correctly in some circumstances like Cygwin
 
