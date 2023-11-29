@@ -2,6 +2,8 @@
 
 ## next
 
+- Also check for root `meson.build` files which are symlinks
+
 ## 1.19.1
 
 - Fix extension not calling Meson correctly in some circumstances like Cygwin
