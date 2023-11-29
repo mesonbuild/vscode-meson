@@ -135,9 +135,36 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const compileCommandsFile = `${buildDir}/compile_commands.json`;
   whenFileExists(ctx, compileCommandsFile, async () => {
+    const conf = vscode.workspace.getConfiguration();
     if (shouldModifySetting("ms-vscode.cpptools")) {
       const conf = vscode.workspace.getConfiguration("C_Cpp");
-      conf.update("default.compileCommands", compileCommandsFile, vscode.ConfigurationTarget.Workspace);
+      conf.update("C_Cpp.default.compileCommands", compileCommandsFile, vscode.ConfigurationTarget.Workspace);
+    }
+    if (shouldModifySetting("llvm-vs-code-extensions.vscode-clangd")) {
+      let args = undefined;
+      const wanted = `--compile-commands-dir=${buildDir}`;
+      const current = conf.get("clangd.arguments");
+      if (current && Array.isArray(current)) {
+        // if wanted is already in current, leave args undefined to prevent a config update
+        if (!current.includes(wanted)) {
+          const found = current.findIndex((arg) => arg.startsWith("--compile-commands-dir="));
+          if (found !== -1) {
+            current[found] = wanted;
+            args = current;
+          } else {
+            args = [...current, wanted];
+          }
+        }
+      } else {
+        args = [wanted];
+      }
+
+      if (args) {
+        conf.update("clangd.arguments", args, vscode.ConfigurationTarget.Workspace).then(
+          () => vscode.commands.executeCommand("clangd.restart"),
+          () => {},
+        );
+      }
     }
   });
 

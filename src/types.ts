@@ -9,7 +9,10 @@ export type LinterConfiguration = {
 };
 
 export type LanguageServer = "Swift-MesonLSP" | null;
-export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
+export type ModifiableExtension =
+  | "ms-vscode.cpptools"
+  | "llvm-vs-code-extensions.vscode-clangd"
+  | "rust-lang.rust-analyzer";
 
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
