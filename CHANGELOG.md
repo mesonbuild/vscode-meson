@@ -2,6 +2,8 @@
 
 ## next
 
+- Fix extension not calling Meson correctly in some circumstances like Cygwin
+
 ## 1.19.0
 
 - Bump Swift-MesonLSP to v3.1.3
