@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.19.2
 
 - Also check for root `meson.build` files which are symlinks
 
