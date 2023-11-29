@@ -198,11 +198,11 @@ export async function mesonRootDirs(): Promise<string[]> {
     let hasMesonFile: boolean = false;
     let subdirs: vscode.Uri[] = [];
     for (const [name, type] of await vscode.workspace.fs.readDirectory(d)) {
-      if ((type === vscode.FileType.File || type === vscode.FileType.SymbolicLink) && name == "meson.build") {
+      if (type & vscode.FileType.File && name == "meson.build") {
         rootDirs.push(d.fsPath);
         hasMesonFile = true;
         break;
-      } else if (type === vscode.FileType.Directory) {
+      } else if (type & vscode.FileType.Directory) {
         subdirs.push(vscode.Uri.joinPath(d, name));
       }
     }
