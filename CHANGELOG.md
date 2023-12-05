@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.20.0
 
 - Allow disabling automatic setup of various extensions like rust-analyzer and
   the Microsoft C/C++ extension.
