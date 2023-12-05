@@ -33,6 +33,8 @@ export interface ExtensionConfiguration {
   languageServerPath: string;
   downloadLanguageServer: boolean | "ask";
   selectRootDir: boolean;
+  setupCppTools: boolean;
+  setupRustAnalyzer: boolean;
 }
 
 export interface TaskQuickPickItem extends vscode.QuickPickItem {
@@ -131,4 +133,6 @@ export enum SettingsKey {
   languageServer = "languageServer",
   configureOnOpen = "configureOnOpen",
   selectRootDir = "selectRootDir",
+  setupCppTools = "setupCppTools",
+  setupRustAnalyzer = "setupRustAnalyzer",
 }

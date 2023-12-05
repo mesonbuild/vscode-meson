@@ -233,6 +233,16 @@
           ],
           "description": "Have VSCode download the language server automatically (MacOS/Windows only for Swift-MesonLSP)"
         },
+        "mesonbuild.setupCppTools": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Setup the [Microsoft C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) to work with Meson"
+        },
+        "mesonbuild.setupRustAnalyzer": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Setup the [rust-analyzer extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) to work with Meson"
+        },
         "mesonbuild.Swift-MesonLSP.others.ignoreDiagnosticsFromSubprojects": {
           "type": [
             "boolean",
