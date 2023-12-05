@@ -9,6 +9,7 @@ export type LinterConfiguration = {
 };
 
 export type LanguageServer = "Swift-MesonLSP" | null;
+export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
 
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
@@ -33,8 +34,7 @@ export interface ExtensionConfiguration {
   languageServerPath: string;
   downloadLanguageServer: boolean | "ask";
   selectRootDir: boolean;
-  setupCppTools: boolean;
-  setupRustAnalyzer: boolean;
+  modifySettings: boolean | ModifiableExtension[];
 }
 
 export interface TaskQuickPickItem extends vscode.QuickPickItem {
@@ -133,6 +133,5 @@ export enum SettingsKey {
   languageServer = "languageServer",
   configureOnOpen = "configureOnOpen",
   selectRootDir = "selectRootDir",
-  setupCppTools = "setupCppTools",
-  setupRustAnalyzer = "setupRustAnalyzer",
+  modifySettings = "modifySettings",
 }

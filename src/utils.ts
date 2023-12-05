@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import * as which from "which";
 
 import { createHash, BinaryLike } from "crypto";
-import { ExtensionConfiguration, Target } from "./types";
+import { ExtensionConfiguration, Target, SettingsKey, ModifiableExtension } from "./types";
 import { getMesonBuildOptions } from "./introspection";
 import { extensionPath, workspaceState } from "./extension";
 
@@ -121,6 +121,13 @@ export function extensionConfigurationSet<K extends keyof ExtensionConfiguration
   target = vscode.ConfigurationTarget.Global,
 ) {
   return getConfiguration().update(key, value, target);
+}
+
+export function shouldModifySetting(key: ModifiableExtension) {
+  const modifySettings = extensionConfiguration(SettingsKey.modifySettings);
+  if (typeof modifySettings == "boolean") return modifySettings;
+  if (modifySettings.includes(key)) return true;
+  return false;
 }
 
 export function arrayIncludes<T>(array: T[], value: T) {
