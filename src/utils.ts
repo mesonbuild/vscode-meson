@@ -167,20 +167,6 @@ export function getEnvDict() {
   return _envDict;
 }
 
-export async function useCompileCommands(buildDir: string) {
-  const filePath = path.join(buildDir, "compile_commands.json");
-  if (fs.existsSync(filePath)) {
-    // Since we have compile_commands.json, make sure we use it.
-    try {
-      const relFilePath = path.relative(vscode.workspace.rootPath!, filePath);
-      const conf = vscode.workspace.getConfiguration("C_Cpp");
-      conf.update("default.compileCommands", relFilePath, vscode.ConfigurationTarget.Workspace);
-    } catch {
-      // Ignore, C/C++ extension might not be installed
-    }
-  }
-}
-
 // meson setup --reconfigure is needed if and only if coredata.dat exists.
 // Note: With Meson >= 1.1.0 we can always pass --reconfigure even if it was
 // not already configured.
