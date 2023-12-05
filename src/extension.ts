@@ -11,6 +11,7 @@ import {
   getBuildDirectory,
   whenFileExists,
   mesonRootDirs,
+  shouldModifySetting,
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
@@ -134,7 +135,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const compileCommandsFile = `${buildDir}/compile_commands.json`;
   whenFileExists(ctx, compileCommandsFile, async () => {
-    if (extensionConfiguration("setupCppTools")) {
+    if (shouldModifySetting("ms-vscode.cpptools")) {
       const conf = vscode.workspace.getConfiguration("C_Cpp");
       conf.update("default.compileCommands", compileCommandsFile, vscode.ConfigurationTarget.Workspace);
     }
@@ -142,7 +143,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const rustProjectFile = `${buildDir}/rust-project.json`;
   whenFileExists(ctx, rustProjectFile, async () => {
-    if (extensionConfiguration("setupRustAnalyzer")) {
+    if (shouldModifySetting("rust-lang.rust-analyzer")) {
       const conf = vscode.workspace.getConfiguration("rust-analyzer");
       conf.update("linkedProjects", [rustProjectFile], vscode.ConfigurationTarget.Workspace);
     }
