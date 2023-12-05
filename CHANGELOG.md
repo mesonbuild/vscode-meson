@@ -2,6 +2,9 @@
 
 ## next
 
+- Allow disabling automatic setup of various extensions like rust-analyzer and
+  the Microsoft C/C++ extension.
+
 ## 1.19.3
 
 - Actually fix the symlink issue

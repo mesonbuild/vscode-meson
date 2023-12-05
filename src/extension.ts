@@ -134,21 +134,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const compileCommandsFile = `${buildDir}/compile_commands.json`;
   whenFileExists(ctx, compileCommandsFile, async () => {
-    try {
+    if (extensionConfiguration("setupCppTools")) {
       const conf = vscode.workspace.getConfiguration("C_Cpp");
       conf.update("default.compileCommands", compileCommandsFile, vscode.ConfigurationTarget.Workspace);
-    } catch {
-      // Ignore, C/C++ extension might not be installed
     }
   });
 
   const rustProjectFile = `${buildDir}/rust-project.json`;
   whenFileExists(ctx, rustProjectFile, async () => {
-    try {
+    if (extensionConfiguration("setupRustAnalyzer")) {
       const conf = vscode.workspace.getConfiguration("rust-analyzer");
       conf.update("linkedProjects", [rustProjectFile], vscode.ConfigurationTarget.Workspace);
-    } catch {
-      // Ignore, rust-analyzer extension might not be installed
     }
   });
 
