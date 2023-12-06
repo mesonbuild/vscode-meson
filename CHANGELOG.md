@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.21.0
 
 - Remove `mesonbuild.setupRustAnalyzer` and `mesonbuild.setupCppTools` in favor
   of `mesonbuild.modifySettings`.
