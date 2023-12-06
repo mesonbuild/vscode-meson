@@ -2,6 +2,9 @@
 
 ## next
 
+- Remove `mesonbuild.setupRustAnalyzer` and `mesonbuild.setupCppTools` in favor
+  of `mesonbuild.modifySettings`.
+
 ## 1.20.0
 
 - Allow disabling automatic setup of various extensions like rust-analyzer and
