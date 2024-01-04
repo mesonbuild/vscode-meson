@@ -14,6 +14,7 @@ export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyze
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
   configureOptions: string[];
+  configureEnvironment: { [key: string]: string };
   setupOptions: string[];
   testOptions: string[];
   benchmarkOptions: string[];
