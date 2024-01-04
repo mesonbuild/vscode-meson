@@ -15,7 +15,15 @@ export interface ExecResult {
   error?: cp.ExecFileException;
 }
 
-export async function exec(command: string, args: string[], options: cp.ExecFileOptions = { shell: true }) {
+export async function exec(
+  command: string,
+  args: string[],
+  extraEnv: { [key: string]: string } | undefined = undefined,
+  options: cp.ExecFileOptions = { shell: true },
+) {
+  if (extraEnv) {
+    options.env = { ...(options.env ?? process.env), ...extraEnv };
+  }
   return new Promise<ExecResult>((resolve, reject) => {
     cp.execFile(command, args, options, (error, stdout, stderr) => {
       if (error) {

@@ -13,7 +13,7 @@ async function introspectMeson<T>(buildDir: string, filename: string, introspect
     return parsed;
   }
 
-  const { stdout } = await exec(extensionConfiguration("mesonPath"), ["introspect", introspectSwitch], {
+  const { stdout } = await exec(extensionConfiguration("mesonPath"), ["introspect", introspectSwitch], undefined, {
     cwd: buildDir,
   });
 
