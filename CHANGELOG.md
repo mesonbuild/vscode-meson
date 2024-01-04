@@ -2,6 +2,9 @@
 
 ## next
 
+- Add `mesonbuild.configureEnvironment` to set additional environment
+  variables during setup
+
 ## 1.21.0
 
 - Remove `mesonbuild.setupRustAnalyzer` and `mesonbuild.setupCppTools` in favor

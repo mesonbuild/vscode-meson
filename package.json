@@ -129,6 +129,14 @@
           "default": [],
           "description": "Specify the list of options used for Meson setup."
         },
+        "mesonbuild.configureEnvironment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Specify the list of additional environment variables used for setup."
+        },
         "mesonbuild.setupOptions": {
           "type": "array",
           "default": [],

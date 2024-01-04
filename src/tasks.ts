@@ -58,11 +58,13 @@ function createReconfigureTask(meson: string, buildDir: string, sourceDir: strin
   const setupOpts = extensionConfiguration("setupOptions");
   const reconfigureOpts = checkMesonIsConfigured(buildDir) ? ["--reconfigure"] : [];
   const args = ["setup", ...reconfigureOpts, ...configureOpts, ...setupOpts, buildDir, sourceDir];
+  const env = extensionConfiguration("configureEnvironment");
+  const options = env ? { env } : {};
   return new vscode.Task(
     { type: "meson", mode: "reconfigure" },
     "Reconfigure",
     "Meson",
-    new vscode.ProcessExecution(meson, args),
+    new vscode.ProcessExecution(meson, args, options),
   );
 }
 
