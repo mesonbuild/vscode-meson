@@ -148,6 +148,14 @@
           "default": [],
           "description": "Specify the list of options used for running tests."
         },
+        "mesonbuild.testEnvironment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Specify the list of additional environment variables used for running tests."
+        },
         "mesonbuild.benchmarkOptions": {
           "type": "array",
           "default": [
