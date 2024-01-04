@@ -39,7 +39,11 @@ export async function testRunHandler(
     run.started(test);
     let starttime = Date.now();
     try {
-      await exec(extensionConfiguration("mesonPath"), ["test", "-C", buildDir, "--print-errorlog", test.id]);
+      await exec(
+        extensionConfiguration("mesonPath"),
+        ["test", "-C", buildDir, "--print-errorlog", test.id],
+        extensionConfiguration("testEnvironment"),
+      );
       let duration = Date.now() - starttime;
       run.passed(test, duration);
     } catch (e) {

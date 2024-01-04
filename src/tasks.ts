@@ -82,7 +82,10 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
       { type: "meson", mode: "test" },
       "Run all tests",
       "Meson",
-      new vscode.ProcessExecution(meson, ["test", ...extensionConfiguration("testOptions")], { cwd: buildDir }),
+      new vscode.ProcessExecution(meson, ["test", ...extensionConfiguration("testOptions")], {
+        cwd: buildDir,
+        env: extensionConfiguration("testEnvironment"),
+      }),
     );
     const defaultBenchmarkTask = new vscode.Task(
       { type: "meson", mode: "benchmark" },

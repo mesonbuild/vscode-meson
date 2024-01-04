@@ -2,8 +2,10 @@
 
 ## next
 
-- Add `mesonbuild.configureEnvironment` to set additional environment
-  variables during setup
+- Add `mesonbuild.configureEnvironment` to set additional environment variables
+  during setup
+- Add `mesonbuild.testEnvironment` to set additional environment variables while
+  running tests
 
 ## 1.21.0
 
