@@ -606,6 +606,11 @@ undici-types@~5.25.1:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.25.3.tgz#e044115914c85f0bcbb229f346ab739f064998c3"
   integrity sha512-Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==
 
+vscode-cpptools@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-6.1.0.tgz#d89bb225f91da45dbee6acbf45f6940aa3926df1"
+  integrity sha512-+40xMmzSlvaMwWEDIjhHl9+W1RH9xaEbiFAAgLWgyL1FXxQWBguWRHgS91qBJbuFAB9H4UBuK94iFMs+7BFclA==
+
 vscode-jsonrpc@8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/vscode-jsonrpc/-/vscode-jsonrpc-8.2.0.tgz#f43dfa35fb51e763d17cd94dcca0c9458f35abf9"
