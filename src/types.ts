@@ -103,14 +103,23 @@ export interface BuildOption<T extends OptionType> {
   desciption: string;
   type: T;
   value: OptionTypeMap[T];
+  machine: OptionTypeMap[T];
 }
 
 export interface Dependency {
   name: string;
   required: boolean;
+  compile_args: string[];
   conditional: boolean;
   has_fallback: boolean;
 }
+
+export interface CompilerDesc {
+  id: string;
+  exelist: string[];
+}
+
+export type Compiler = Record<string, CompilerDesc>;
 
 export interface Test {
   name: string;
@@ -126,6 +135,7 @@ export interface Test {
 export type Targets = Target[];
 export type BuildOptions = BuildOption<any>[];
 export type Dependencies = Dependency[];
+export type Compilers = Record<string, Compiler>;
 export type Tests = Test[];
 
 export enum SettingsKey {

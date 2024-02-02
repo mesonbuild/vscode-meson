@@ -1,6 +1,6 @@
 import * as path from "path";
 import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils";
-import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo } from "./types";
+import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types";
 
 async function introspectMeson<T>(buildDir: string, filename: string, introspectSwitch: string) {
   getOutputChannel().appendLine(`Read introspection file ${filename}`);
@@ -38,6 +38,10 @@ export async function getMesonProjectInfo(buildDir: string) {
 
 export async function getMesonDependencies(buildDir: string) {
   return introspectMeson<Dependencies>(buildDir, "intro-dependencies.json", "--dependencies");
+}
+
+export async function getMesonCompilers(buildDir: string) {
+  return introspectMeson<Compilers>(buildDir, "intro-compilers.json", "--compilers");
 }
 
 export async function getMesonTests(buildDir: string) {
