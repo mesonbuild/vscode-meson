@@ -2,9 +2,13 @@ import * as path from "path";
 import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils";
 import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types";
 
+export function getIntrospectionFile(buildDir: string, filename: string) {
+  return path.join(buildDir, path.join("meson-info", filename));
+}
+
 async function introspectMeson<T>(buildDir: string, filename: string, introspectSwitch: string) {
   getOutputChannel().appendLine(`Read introspection file ${filename}`);
-  const parsed = await parseJSONFileIfExists<T>(path.join(buildDir, path.join("meson-info", filename)));
+  const parsed = await parseJSONFileIfExists<T>(getIntrospectionFile(buildDir, filename));
   if (parsed) {
     return parsed;
   }
