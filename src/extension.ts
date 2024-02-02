@@ -15,6 +15,7 @@ import {
 } from "./utils";
 import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
 import { DebugConfigurationProviderLldb } from "./debug/lldb";
+import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
@@ -25,6 +26,7 @@ import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDi
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
 let explorer: MesonProjectExplorer;
+let cpptools: CpptoolsProvider;
 let watcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
 
@@ -69,6 +71,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const buildDir = getBuildDirectory(sourceDir);
   workspaceState.update("mesonbuild.buildDir", buildDir);
   workspaceState.update("mesonbuild.sourceDir", sourceDir);
+  cpptools = new CpptoolsProvider(buildDir);
+  registerCppToolsProvider(ctx, cpptools);
 
   explorer = new MesonProjectExplorer(ctx, sourceDir, buildDir);
 
