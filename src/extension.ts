@@ -22,6 +22,7 @@ import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
 import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDir, selectRootDir } from "./dialogs";
+import { getIntrospectionFile } from "./introspection";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
@@ -151,6 +152,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
       const conf = vscode.workspace.getConfiguration("rust-analyzer");
       conf.update("linkedProjects", [rustProjectFile], vscode.ConfigurationTarget.Workspace);
     }
+  });
+
+  const mesonInfoFile = getIntrospectionFile(buildDir, "meson-info.json");
+  whenFileExists(ctx, mesonInfoFile, async () => {
+    cpptools.refresh(buildDir);
   });
 
   ctx.subscriptions.push(

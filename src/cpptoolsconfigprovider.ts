@@ -22,6 +22,7 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
         const interval = setInterval(() => {
           if (this.buildDir !== "") {
             clearInterval(interval);
+            this.refresh(this.buildDir);
             resolve(true);
           }
         }, 100);
@@ -101,6 +102,13 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
   }
 
   dispose() {}
+
+  refresh(buildDir: string) {
+    this.buildDir = buildDir;
+    this.cppToolsAPI?.notifyReady(this);
+    this.cppToolsAPI?.didChangeCustomConfiguration(this);
+    this.cppToolsAPI?.didChangeCustomBrowseConfiguration(this);
+  }
 }
 
 // Official implementation from https://classic.yarnpkg.com/en/package/vscode-cpptools
