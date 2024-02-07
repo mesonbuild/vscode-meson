@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import * as cpptools from "vscode-cpptools";
 import { getMesonBuildOptions, getMesonCompilers, getMesonDependencies } from "./introspection";
+import { getOutputChannel } from "./utils";
+import { Compiler, Dependencies } from "./types";
 
 export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
   cppToolsAPI?: cpptools.CppToolsApi;
@@ -41,24 +43,16 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
     };
 
     const dependencies = await getMesonDependencies(this.buildDir);
-    for (const dep of dependencies) {
-      if (dep.compile_args) {
-        for (const arg of dep.compile_args) {
-          if (arg.startsWith("-I")) {
-            browseConfig.browsePath.push(arg.slice(2));
-          }
-        }
-      }
-    }
-    // The cpptools API requires at least one browse path, even when we provide a compiler path.
-    if (browseConfig.browsePath.length === 0) {
-      browseConfig.browsePath.push("");
-    }
+    browseConfig = Object.assign(browseConfig, { browsePath: this.getDependenciesIncludeDirs(dependencies) });
 
     let machine = "";
     const buildOptions = await getMesonBuildOptions(this.buildDir);
     for (const option of buildOptions) {
       if (option.name === "cpp_std") {
+        browseConfig = Object.assign({}, browseConfig, { standard: option.value });
+        machine = option.machine;
+      } else if (machine === "" && option.name === "c_std") {
+        // C++ takes precedence
         browseConfig = Object.assign({}, browseConfig, { standard: option.value });
         machine = option.machine;
       }
@@ -67,13 +61,45 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
     const compilers = await getMesonCompilers(this.buildDir);
     const compiler = compilers[machine];
     if (compiler && compiler["cpp"]) {
-      const compilerDesc = compiler["cpp"];
+      browseConfig = this.setCompilerArgs(compiler, "cpp", browseConfig);
+    } else if (compiler && compiler["c"]) {
+      browseConfig = this.setCompilerArgs(compiler, "c", browseConfig);
+    }
+
+    return browseConfig;
+  }
+
+  private getDependenciesIncludeDirs(dependencies: Dependencies) {
+    let includeDirs: string[] = [];
+    for (const dep of dependencies) {
+      if (dep.compile_args) {
+        for (const arg of dep.compile_args) {
+          if (arg.startsWith("-I")) {
+            includeDirs.push(arg.slice(2));
+          }
+        }
+      }
+    }
+    // The cpptools API requires at least one browse path, even when we provide a compiler path.
+    if (includeDirs.length === 0) {
+      includeDirs.push("");
+    }
+    return includeDirs;
+  }
+
+  private setCompilerArgs(
+    compiler: Compiler,
+    standard: string,
+    browseConfig: cpptools.WorkspaceBrowseConfiguration,
+  ): cpptools.WorkspaceBrowseConfiguration {
+    if (compiler[standard]) {
+      const compilerDesc = compiler[standard];
       browseConfig = Object.assign({}, browseConfig, {
         compilerPath: compilerDesc.exelist[0],
         compilerArgs: compilerDesc.exelist.slice(1),
       });
+      getOutputChannel().appendLine(`Providing cpptools configuration with ${compilerDesc.exelist[0]}`);
     }
-
     return browseConfig;
   }
 
