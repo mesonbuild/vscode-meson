@@ -157,6 +157,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const mesonInfoFile = getIntrospectionFile(buildDir, "meson-info.json");
   whenFileExists(ctx, mesonInfoFile, async () => {
     cpptools.refresh(buildDir);
+    if (shouldModifySetting("ms-vscode.cpptools")) {
+      const conf = vscode.workspace.getConfiguration("C_Cpp");
+      conf.update("default.configurationProvider", "mesonbuild.mesonbuild", vscode.ConfigurationTarget.Workspace);
+    }
   });
 
   ctx.subscriptions.push(
