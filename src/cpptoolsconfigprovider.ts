@@ -37,9 +37,8 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
   ): Promise<cpptools.WorkspaceBrowseConfiguration | null> {
     let browseConfig: cpptools.WorkspaceBrowseConfiguration = {
       browsePath: [],
-      compilerPath: "",
+      compilerPath: "${default}",
       compilerArgs: [],
-      standard: "c++17",
     };
 
     const dependencies = await getMesonDependencies(this.buildDir);
@@ -49,23 +48,30 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
     const buildOptions = await getMesonBuildOptions(this.buildDir);
     for (const option of buildOptions) {
       if (option.name === "cpp_std") {
-        browseConfig = Object.assign({}, browseConfig, { standard: option.value });
+        if (option.value != "none") browseConfig = Object.assign({}, browseConfig, { standard: option.value });
         machine = option.machine;
       } else if (machine === "" && option.name === "c_std") {
         // C++ takes precedence
-        browseConfig = Object.assign({}, browseConfig, { standard: option.value });
+        if (option.value != "none") browseConfig = Object.assign({}, browseConfig, { standard: option.value });
         machine = option.machine;
       }
     }
 
-    const compilers = await getMesonCompilers(this.buildDir);
-    const compiler = compilers[machine];
-    if (compiler && compiler["cpp"]) {
-      browseConfig = this.setCompilerArgs(compiler, "cpp", browseConfig);
-    } else if (compiler && compiler["c"]) {
-      browseConfig = this.setCompilerArgs(compiler, "c", browseConfig);
+    try {
+      const compilers = await getMesonCompilers(this.buildDir);
+      const compiler = compilers[machine];
+      if (compiler && compiler["cpp"]) {
+        browseConfig = this.setCompilerArgs(compiler, "cpp", browseConfig);
+      } else if (compiler && compiler["c"]) {
+        browseConfig = this.setCompilerArgs(compiler, "c", browseConfig);
+      }
+    } catch (e) {
+      getOutputChannel().appendLine(
+        `Could not introspect a specific compiler, the default one will be used: ${JSON.stringify(e)}`,
+      );
     }
 
+    getOutputChannel().appendLine(`Providing cpptools configuration: ${JSON.stringify(browseConfig)}`);
     return browseConfig;
   }
 
@@ -98,7 +104,6 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
         compilerPath: compilerDesc.exelist[0],
         compilerArgs: compilerDesc.exelist.slice(1),
       });
-      getOutputChannel().appendLine(`Providing cpptools configuration with ${compilerDesc.exelist[0]}`);
     }
     return browseConfig;
   }
