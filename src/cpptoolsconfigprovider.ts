@@ -44,13 +44,13 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
     const dependencies = await getMesonDependencies(this.buildDir);
     browseConfig = Object.assign(browseConfig, { browsePath: this.getDependenciesIncludeDirs(dependencies) });
 
-    let machine = "";
+    let machine: string | undefined;
     const buildOptions = await getMesonBuildOptions(this.buildDir);
     for (const option of buildOptions) {
       if (option.name === "cpp_std") {
         if (option.value != "none") browseConfig = Object.assign({}, browseConfig, { standard: option.value });
         machine = option.machine;
-      } else if (machine === "" && option.name === "c_std") {
+      } else if (machine === undefined && option.name === "c_std") {
         // C++ takes precedence
         if (option.value != "none") browseConfig = Object.assign({}, browseConfig, { standard: option.value });
         machine = option.machine;
@@ -59,11 +59,13 @@ export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
 
     try {
       const compilers = await getMesonCompilers(this.buildDir);
-      const compiler = compilers[machine];
-      if (compiler && compiler["cpp"]) {
-        browseConfig = this.setCompilerArgs(compiler, "cpp", browseConfig);
-      } else if (compiler && compiler["c"]) {
-        browseConfig = this.setCompilerArgs(compiler, "c", browseConfig);
+      if (machine !== undefined && compilers[machine] !== undefined) {
+        const compiler = compilers[machine];
+        if (compiler && compiler["cpp"]) {
+          browseConfig = this.setCompilerArgs(compiler, "cpp", browseConfig);
+        } else if (compiler && compiler["c"]) {
+          browseConfig = this.setCompilerArgs(compiler, "c", browseConfig);
+        }
       }
     } catch (e) {
       getOutputChannel().appendLine(
