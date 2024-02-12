@@ -122,12 +122,12 @@
         "mesonbuild.buildFolder": {
           "type": "string",
           "default": "builddir",
-          "description": "Specify in which folder Meson build configure and build the project. Changing this value will reload the VS Code window."
+          "description": "Specify in which folder Meson configures and builds the project. Changing this value will reload the VS Code window."
         },
         "mesonbuild.configureOptions": {
           "type": "array",
           "default": [],
-          "description": "Specify the list of options used for Meson setup."
+          "description": "Specify the list of options used for setup."
         },
         "mesonbuild.configureEnvironment": {
           "type": "object",
@@ -140,7 +140,7 @@
         "mesonbuild.setupOptions": {
           "type": "array",
           "default": [],
-          "description": "Specify the list of options used for Meson setup. Can be used to specify a cross file (use --cross-file=FILE).",
+          "description": "Specify the list of options used for setup. Can be used to specify a cross file (use --cross-file=FILE).",
           "deprecationMessage": "--cross-file and --native-file should be in configureOptions too."
         },
         "mesonbuild.testOptions": {
