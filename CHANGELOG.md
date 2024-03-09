@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.22.0
 
 - Add `mesonbuild.configureEnvironment` to set additional environment variables
   during setup
