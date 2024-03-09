@@ -525,9 +525,9 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
+    "vscode-cpptools": "^6.1.0",
     "vscode-languageclient": "^9.0.1",
-    "which": "^4.0.0",
-    "vscode-cpptools": "^6.1.0"
+    "which": "^4.0.0"
   },
   "prettier": {
     "proseWrap": "always"
