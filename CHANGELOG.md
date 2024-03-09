@@ -6,6 +6,7 @@
   during setup
 - Add `mesonbuild.testEnvironment` to set additional environment variables while
   running tests
+- Add custom configuration provider for cpptools
 
 ## 1.21.0
 
