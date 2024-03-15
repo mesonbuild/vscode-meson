@@ -27,6 +27,7 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
   static override repoURL: string = "https://github.com/JCWasmx86/mesonlsp";
   static override setupURL: string = "https://github.com/JCWasmx86/mesonlsp/tree/main/docs";
   static override version: string = "4.1.0";
+  static override executableNames: string[] = ["mesonlsp"];
 
   get runExe(): Executable {
     return {

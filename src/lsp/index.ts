@@ -33,6 +33,7 @@ export abstract class LanguageServerClient {
   static readonly repoURL: string;
   static readonly setupURL: string;
   static readonly version: string;
+  static readonly executableNames: string[];
 
   protected abstract get debugExe(): Executable;
   protected abstract get runExe(): Executable;
