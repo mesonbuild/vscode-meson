@@ -219,9 +219,11 @@
             "string",
             "null"
           ],
-          "default": "Swift-MesonLSP",
+          "default": "mesonlsp",
           "enum": [
+            "Swift-MesonLSP-legacy",
             "Swift-MesonLSP",
+            "mesonlsp",
             null
           ],
           "description": "Select which language server to use"

@@ -221,7 +221,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   const server = extensionConfiguration(SettingsKey.languageServer);
   let client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
-  if (client !== null && server == "Swift-MesonLSP") {
+  // Basically every server supports formatting...
+  const serverSupportsFormatting =
+    server == "mesonlsp" || server == "Swift-MesonLSP" || server == "Swift-MesonLSP-legacy";
+  if (client !== null && serverSupportsFormatting) {
     ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration(`mesonbuild.${server}`)) {
@@ -235,7 +238,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     client.start();
     await client.reloadConfig();
 
-    getOutputChannel().appendLine("Not enabling the muon linter/formatter because Swift-MesonLSP is active.");
+    getOutputChannel().appendLine(
+      "Not enabling the muon linter/formatter because a language server supporting formatting is active.",
+    );
   } else {
     activateLinters(sourceDir, ctx);
     activateFormatters(sourceDir, ctx);
