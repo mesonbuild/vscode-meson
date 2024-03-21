@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import { getMesonTargets, getMesonTests, getMesonBenchmarks } from "./introspection";
-import { extensionConfiguration, getOutputChannel, getTargetName, getEnvDict } from "./utils";
+import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
 import { Test, Target } from "./types";
 import { checkMesonIsConfigured } from "./utils";
-import { workspaceState } from "./extension";
 import { mesonProgram } from "./utils";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
@@ -33,7 +32,7 @@ function createTestTask(meson: string, t: Test, buildDir: string, isBenchmark: b
   return testTask;
 }
 
-function createRunTask(t: Target, targetName: string) {
+function createRunTask(meson: string, t: Target, targetName: string, buildDir: string) {
   const targetDisplayName = targetName.split(":")[0];
   let runTask = new vscode.Task(
     {
@@ -44,9 +43,8 @@ function createRunTask(t: Target, targetName: string) {
     },
     `Run ${targetDisplayName}`,
     "Meson",
-    new vscode.ProcessExecution(t.filename[0], {
-      cwd: workspaceState.get<string>("mesonbuild.sourceDir")!,
-      env: getEnvDict(),
+    new vscode.ProcessExecution(meson, ["devenv", t.filename[0]], {
+      cwd: buildDir,
     }),
   );
   runTask.group = vscode.TaskGroup.Test;
@@ -157,7 +155,7 @@ export async function getMesonTasks(buildDir: string, sourceDir: string) {
               // Create run tasks for executables that are not tests,
               // both installed and uninstalled (eg: examples)
               if (!tests.some((test) => test.name === t.name)) {
-                return [buildTask, createRunTask(t, targetName)];
+                return [buildTask, createRunTask(meson, t, targetName, buildDir)];
               }
             }
             return buildTask;
