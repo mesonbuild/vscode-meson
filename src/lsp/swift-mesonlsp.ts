@@ -27,7 +27,6 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
   static override repoURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP";
   static override setupURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP/tree/main/Docs";
   static override version: string = "3.1.3";
-  static override executableNames: string[] = ["Swift-MesonLSP"];
 
   get runExe(): Executable {
     return {
@@ -44,7 +43,7 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
   }
 
   constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("Swift-MesonLSP", languageServerPath, context, referenceVersion);
+    super("Swift-MesonLSP", languageServerPath, context, referenceVersion, ["Swift-MesonLSP"]);
   }
 
   static override artifact(): { url: string; hash: string } | null {

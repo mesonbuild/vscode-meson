@@ -28,12 +28,12 @@ export abstract class LanguageServerClient {
 
   protected languageServerPath: vscode.Uri | null;
   protected referenceVersion: string;
+  protected readonly executableNames: string[];
   readonly server: LanguageServer;
 
   static readonly repoURL: string;
   static readonly setupURL: string;
   static readonly version: string;
-  static readonly executableNames: string[];
 
   protected abstract get debugExe(): Executable;
   protected abstract get runExe(): Executable;
@@ -43,20 +43,33 @@ export abstract class LanguageServerClient {
     languageServerPath: vscode.Uri,
     context: vscode.ExtensionContext,
     referenceVersion: string,
+    executableNames: string[],
   ) {
     this.server = server;
     this.languageServerPath = languageServerPath;
     this.context = context;
     this.referenceVersion = referenceVersion;
+    this.executableNames = executableNames;
   }
 
-  private static cachedLanguageServer(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
-    const uri = vscode.Uri.joinPath(
+  private static cachedLanguageServer(
+    server: LanguageServer,
+    executableNames: string[],
+    context: vscode.ExtensionContext,
+  ): vscode.Uri | null {
+    let uri = vscode.Uri.joinPath(
       storage.uri(storage.Location.LSP, context),
       `${server}${os.platform() === "win32" ? ".exe" : ""}`,
     );
-
-    return fs.existsSync(uri.fsPath) ? uri : null;
+    if (fs.existsSync(uri.fsPath)) return uri;
+    for (let alternative of executableNames) {
+      uri = vscode.Uri.joinPath(
+        storage.uri(storage.Location.LSP, context),
+        `${alternative}${os.platform() === "win32" ? ".exe" : ""}`,
+      );
+      if (fs.existsSync(uri.fsPath)) return uri;
+    }
+    return null;
   }
 
   private static async computeFileHash(filePath: string): Promise<string> {
@@ -108,6 +121,7 @@ export abstract class LanguageServerClient {
   static async download(
     server: LanguageServer,
     version: string,
+    executableNames: string[],
     context: vscode.ExtensionContext,
   ): Promise<vscode.Uri | null> {
     const lspDir = storage.uri(storage.Location.LSP, context).fsPath;
@@ -132,12 +146,24 @@ export abstract class LanguageServerClient {
       const zip = new Admzip(tmpPath);
       zip.extractAllTo(lspDir);
       const binary = path.join(lspDir, server!);
-      if (os.platform() != "win32") fs.chmodSync(binary, 0o755);
+      let existing = binary;
+      if (os.platform() != "win32" && fs.existsSync(binary)) {
+        fs.chmodSync(binary, 0o755);
+      }
+      for (let alternative of executableNames) {
+        const altPath = path.join(lspDir, alternative);
+        if (fs.existsSync(altPath)) {
+          existing = altPath;
+          if (os.platform() != "win32") {
+            fs.chmodSync(altPath, 0o755);
+          }
+        }
+      }
       const versionFile = path.join(lspDir, "version");
       fs.writeFileSync(versionFile, version);
 
       vscode.window.showInformationMessage("Language server was downloaded.");
-      uri = vscode.Uri.from({ scheme: "file", path: binary });
+      uri = vscode.Uri.from({ scheme: "file", path: existing });
       fs.unlinkSync(tmpPath);
       return uri;
     } catch (err) {
@@ -147,7 +173,11 @@ export abstract class LanguageServerClient {
     return uri;
   }
 
-  static resolveLanguageServerPath(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
+  static resolveLanguageServerPath(
+    server: LanguageServer,
+    executableNames: string[],
+    context: vscode.ExtensionContext,
+  ): vscode.Uri | null {
     const config = vscode.workspace.getConfiguration("mesonbuild");
 
     const configLanguageServerPath = config["languageServerPath"];
@@ -159,7 +189,7 @@ export abstract class LanguageServerClient {
       return vscode.Uri.from({ scheme: "file", path: configLanguageServerPath });
     }
 
-    const cached = LanguageServerClient.cachedLanguageServer(server, context);
+    const cached = LanguageServerClient.cachedLanguageServer(server, executableNames, context);
     if (cached !== null) return cached;
 
     const binary = which.sync(server!, { nothrow: true });
@@ -185,7 +215,11 @@ export abstract class LanguageServerClient {
 
   async restart(): Promise<void> {
     await this.dispose();
-    this.languageServerPath = LanguageServerClient.resolveLanguageServerPath(this.server, this.context);
+    this.languageServerPath = LanguageServerClient.resolveLanguageServerPath(
+      this.server,
+      this.executableNames,
+      this.context,
+    );
     if (this.languageServerPath === null) {
       vscode.window.showErrorMessage(
         "Failed to restart the language server because a binary was not found and could not be downloaded",
@@ -231,7 +265,7 @@ export abstract class LanguageServerClient {
 
     vscode.window.showInformationMessage(`Updating language server to ${this.referenceVersion}`);
     this.dispose();
-    await serverToClass(this.server).download(this.server, this.referenceVersion, context);
+    await serverToClass(this.server).download(this.server, this.referenceVersion, this.executableNames, context);
     await this.restart();
   }
 }

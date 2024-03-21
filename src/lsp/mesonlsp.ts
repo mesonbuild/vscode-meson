@@ -7,27 +7,26 @@ import { LanguageServerClient } from "../lsp";
 export class MesonLSPLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
     "win32-x64": {
-      name: "mesonlsp-windows.zip",
-      hash: "6fecf30778763dc40fa7aa48ba4fcca2dccfeaa4b343a210c2c9429fa80d70c2",
+      name: "mesonlsp-x86_64-pc-windows-gnu.zip",
+      hash: "81133a14b018d35e874d08c17a680781014f67c3599ed9ff54f8b5a368f8651e",
     },
     "darwin-x64": {
-      name: "mesonlsp-macos-13.zip",
-      hash: "8c1ba7848727a6c723d148331b04f49778e3bcb55ebf7365b89e30394f59e6b4",
+      name: "mesonlsp-x86_64-apple-darwin.zip",
+      hash: "6c66263255a6110b2bcf9a6d9c80a8562e7cbad39f55d7f556df4027bebef6e5",
     },
     "darwin-arm64": {
-      name: "mesonlsp-macos-14.zip",
-      hash: "1db7e47b4f2aed6def0c37cbe11c9fcfc597961e5b165eb840e35013a717a354",
+      name: "mesonlsp-aarch64-apple-darwin.zip",
+      hash: "651aff60cc58b4e6f7c06435364a4e8c749eb4854921119ca428a710256d0474",
     },
     "linux-x64": {
-      name: "mesonlsp-alpine-static.zip",
-      hash: "be556658e8d7802fee712679d35de90c53e01bbf9a126fb2836d55070992e21b",
+      name: "mesonlsp-x86_64-unknown-linux-musl.zip",
+      hash: "ec073841562e544296694b3c7d54d141098faaa05529dbad45561d26c325705a",
     },
   };
 
   static override repoURL: string = "https://github.com/JCWasmx86/mesonlsp";
   static override setupURL: string = "https://github.com/JCWasmx86/mesonlsp/tree/main/docs";
-  static override version: string = "4.1.0";
-  static override executableNames: string[] = ["mesonlsp"];
+  static override version: string = "4.1.2";
 
   get runExe(): Executable {
     return {
@@ -44,7 +43,7 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
   }
 
   constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("mesonlsp", languageServerPath, context, referenceVersion);
+    super("mesonlsp", languageServerPath, context, referenceVersion, ["mesonlsp"]);
   }
 
   static override artifact(): { url: string; hash: string } | null {
