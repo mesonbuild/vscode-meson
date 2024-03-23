@@ -50,10 +50,11 @@ export abstract class LanguageServerClient {
   }
 
   private static cachedLanguageServer(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
-    let uri = vscode.Uri.joinPath(
+    const uri = vscode.Uri.joinPath(
       storage.uri(storage.Location.LSP, context),
       `${server}${os.platform() === "win32" ? ".exe" : ""}`,
     );
+
     return fs.existsSync(uri.fsPath) ? uri : null;
   }
 
@@ -130,9 +131,7 @@ export abstract class LanguageServerClient {
       const zip = new Admzip(tmpPath);
       zip.extractAllTo(lspDir);
       const binary = path.join(lspDir, server!);
-      if (os.platform() != "win32") {
-        fs.chmodSync(binary, 0o755);
-      }
+      if (os.platform() != "win32") fs.chmodSync(binary, 0o755);
       const versionFile = path.join(lspDir, "version");
       fs.writeFileSync(versionFile, version);
 

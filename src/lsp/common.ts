@@ -27,6 +27,7 @@ export async function createLanguageServerClient(
     vscode.window.showErrorMessage("The configured language server does not support the current system.");
     return null;
   }
+
   let languageServerPath = LanguageServerClient.resolveLanguageServerPath(server, context);
   if (languageServerPath === null) {
     if (klass.artifact() == null) {
