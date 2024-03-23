@@ -222,8 +222,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const server = extensionConfiguration(SettingsKey.languageServer);
   let client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
   // Basically every server supports formatting...
-  const serverSupportsFormatting =
-    server == "mesonlsp" || server == "Swift-MesonLSP" || server == "Swift-MesonLSP-legacy";
+  const serverSupportsFormatting = server == "mesonlsp" || server == "Swift-MesonLSP";
   if (client !== null && serverSupportsFormatting) {
     ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {

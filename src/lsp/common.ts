@@ -2,13 +2,10 @@ import * as vscode from "vscode";
 import { LanguageServerClient } from ".";
 import { LanguageServer } from "../types";
 import { MesonLSPLanguageClient } from "./mesonlsp";
-import { SwiftMesonLspLanguageClient } from "./swift-mesonlsp";
 import { Uri } from "vscode";
 
 export function serverToClass(server: LanguageServer): any {
   switch (server) {
-    case "Swift-MesonLSP-legacy":
-      return SwiftMesonLspLanguageClient;
     case "Swift-MesonLSP":
     case "mesonlsp":
       return MesonLSPLanguageClient;
