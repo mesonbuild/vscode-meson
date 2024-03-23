@@ -27,9 +27,7 @@ export async function createLanguageServerClient(
     vscode.window.showErrorMessage("The configured language server does not support the current system.");
     return null;
   }
-  // HACK, not sure how to solve this mess...
-  const executableNames = new klass("", context, klass.version).executableNames;
-  let languageServerPath = LanguageServerClient.resolveLanguageServerPath(server, executableNames, context);
+  let languageServerPath = LanguageServerClient.resolveLanguageServerPath(server, context);
   if (languageServerPath === null) {
     if (klass.artifact() == null) {
       enum Options {
@@ -45,7 +43,7 @@ export async function createLanguageServerClient(
       return null;
     }
     if (download) {
-      languageServerPath = await klass.download(server, klass.version, executableNames, context);
+      languageServerPath = await klass.download(server, klass.version, context);
       if (languageServerPath === null) {
         vscode.window.showErrorMessage("Failed to download the language server.");
         return null;

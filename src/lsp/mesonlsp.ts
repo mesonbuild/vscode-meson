@@ -43,7 +43,7 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
   }
 
   constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("mesonlsp", languageServerPath, context, referenceVersion, ["mesonlsp"]);
+    super("mesonlsp", languageServerPath, context, referenceVersion);
   }
 
   static override artifact(): { url: string; hash: string } | null {
