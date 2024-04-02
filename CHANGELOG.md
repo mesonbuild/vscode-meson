@@ -2,6 +2,9 @@
 
 ## next
 
+⚠️⚠️ It's important to update, as it contains a version of mesonlsp that is not
+vulnerable to CVE-2024-30254. ⚠️⚠️
+
 - Replace `Swift-MesonLSP` by `mesonlsp`. This requires migrating your settings
   from `mesonbuild.Swift-MesonLSP.*` to `mesonbuild.mesonlsp.*`.
 - Add `mesonbuild.mesonlsp.others.defaultFormattingConfig` to set the default
