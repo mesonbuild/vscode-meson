@@ -2,6 +2,24 @@
 
 ## next
 
+⚠️⚠️ It's important to update, as it contains a version of mesonlsp that is not
+vulnerable to CVE-2024-30254. ⚠️⚠️
+
+- Replace `Swift-MesonLSP` by `mesonlsp`. This requires migrating your settings
+  from `mesonbuild.Swift-MesonLSP.*` to `mesonbuild.mesonlsp.*`.
+- Add `mesonbuild.mesonlsp.others.defaultFormattingConfig` to set the default
+  formatting configuration.
+- Add `mesonbuild.mesonlsp.others.removeDefaultTypesInInlayHints` to reduce
+  clutter in inlay hints.
+- Add `mesonbuild.mesonlsp.others.disablePosargInlayHints` to disable inlay
+  hints for positional arguments.
+- Add `mesonbuild.mesonlsp.others.useCustomParser` to allow switching between
+  the handwritten parse and the tree-sitter based parser.
+- Add `mesonbuild.mesonlsp.linting.disableUnusedVariableCheck` to disable
+  diagnostics for unused variables.
+- Add `mesonbuild.mesonlsp.linting.disableArgTypeChecking` to disable validation
+  for argument types.
+
 ## 1.22.0
 
 - Add `mesonbuild.configureEnvironment` to set additional environment variables

@@ -1,32 +1,32 @@
 import * as os from "os";
 import * as vscode from "vscode";
 
-import { LanguageServerClient } from "../lsp";
 import { Executable } from "vscode-languageclient/node";
+import { LanguageServerClient } from "../lsp";
 
-export class SwiftMesonLspLanguageClient extends LanguageServerClient {
+export class MesonLSPLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
     "win32-x64": {
-      name: "Swift-MesonLSP-win64.zip",
-      hash: "393c4e7c1ed588e61940cdca5201e115e223727fcb578627b15e719b9783e08f",
+      name: "mesonlsp-x86_64-pc-windows-gnu.zip",
+      hash: "307078efdc91ead3bb86850c4438547dd94f98d2403937d9aab47d318421e866",
     },
     "darwin-x64": {
-      name: "Swift-MesonLSP-macos12.zip",
-      hash: "f94e0e51806e7630e94f9dee21240a94f0269f75ebbf44a5a72e064c50cd8155",
+      name: "mesonlsp-x86_64-apple-darwin.zip",
+      hash: "c93129b5a331e1ee29e2241e262564808ed523e43bc2b00d1512ff04ca9c77e7",
     },
     "darwin-arm64": {
-      name: "Swift-MesonLSP-macos12.zip",
-      hash: "f94e0e51806e7630e94f9dee21240a94f0269f75ebbf44a5a72e064c50cd8155",
+      name: "mesonlsp-aarch64-apple-darwin.zip",
+      hash: "12ec62cb5c2a852b9f99e2844fc350a22d62519d4aab1b757e99f116a0b84680",
     },
     "linux-x64": {
-      name: "Swift-MesonLSP.zip",
-      hash: "aef1f6b386e517ac31e58286b25c6bd828ad1fc1e6958a18d5cd52a868bdf1aa",
+      name: "mesonlsp-x86_64-unknown-linux-musl.zip",
+      hash: "055ab2d2fa0328c9d5c41f918b4a8c44b196232a1eef22384ef8073d81be945b",
     },
   };
 
-  static override repoURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP";
-  static override setupURL: string = "https://github.com/JCWasmx86/Swift-MesonLSP/tree/main/Docs";
-  static override version: string = "3.1.3";
+  static override repoURL: string = "https://github.com/JCWasmx86/mesonlsp";
+  static override setupURL: string = "https://github.com/JCWasmx86/mesonlsp/tree/main/docs";
+  static override version: string = "4.1.8";
 
   get runExe(): Executable {
     return {
@@ -43,7 +43,7 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
   }
 
   constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("Swift-MesonLSP", languageServerPath, context, referenceVersion);
+    super("mesonlsp", languageServerPath, context, referenceVersion);
   }
 
   static override artifact(): { url: string; hash: string } | null {
@@ -53,9 +53,9 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
 
     if (arch !== "x64" && slug != "darwin-arm64") return null;
 
-    const artifact = SwiftMesonLspLanguageClient.artifacts[slug];
+    const artifact = MesonLSPLanguageClient.artifacts[slug];
     return {
-      url: `${SwiftMesonLspLanguageClient.repoURL}/releases/download/v${SwiftMesonLspLanguageClient.version}/${artifact.name}`,
+      url: `${MesonLSPLanguageClient.repoURL}/releases/download/v${MesonLSPLanguageClient.version}/${artifact.name}`,
       hash: artifact.hash,
     };
   }
@@ -67,7 +67,7 @@ export class SwiftMesonLspLanguageClient extends LanguageServerClient {
     const platform = os.platform();
     switch (platform) {
       case "darwin":
-        // x64 and ARM are supported thanks to universal binaries.
+        // x64 and ARM are supported.
         return true;
       case "linux":
       case "win32":

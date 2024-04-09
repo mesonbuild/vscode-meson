@@ -38,7 +38,7 @@ extension on the store, and only that one is released from this repository.
 
 [^0]:
     Requires an installation of
-    [Swift-MesonLSP](https://github.com/JCWasmx86/Swift-MesonLSP) or
+    [mesonlsp](https://github.com/JCWasmx86/mesonlsp) or
     [muon](https://muon.build).
 
 [^1]: Requires an installation of muon.
