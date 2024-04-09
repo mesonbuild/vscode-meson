@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.23.0
 
 ⚠️⚠️ It's important to update, as it contains a version of mesonlsp that is not
