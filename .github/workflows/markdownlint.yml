@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - "**.md"
+  merge_group:
 
 permissions:
   contents: read
