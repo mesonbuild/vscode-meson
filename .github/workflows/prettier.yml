@@ -8,6 +8,7 @@ on:
       - "**.ts"
       - "**.yml"
       - "**.json"
+  merge_group:
 
 permissions:
   contents: read
