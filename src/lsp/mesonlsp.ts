@@ -8,25 +8,25 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
     "win32-x64": {
       name: "mesonlsp-x86_64-pc-windows-gnu.zip",
-      hash: "307078efdc91ead3bb86850c4438547dd94f98d2403937d9aab47d318421e866",
+      hash: "06eca4e3d3d90899653c7753d03a6ec2145cc176e4c84f203c4c4b636fa29d7b",
     },
     "darwin-x64": {
       name: "mesonlsp-x86_64-apple-darwin.zip",
-      hash: "c93129b5a331e1ee29e2241e262564808ed523e43bc2b00d1512ff04ca9c77e7",
+      hash: "cc09759c747d43df2caa2e9388836f399c1e24778c56865f21d0af9069612b07",
     },
     "darwin-arm64": {
       name: "mesonlsp-aarch64-apple-darwin.zip",
-      hash: "12ec62cb5c2a852b9f99e2844fc350a22d62519d4aab1b757e99f116a0b84680",
+      hash: "5b18d33c406d22dd526ba4efa5fa4e950cd488e59a8b109799fecd231cd884ea",
     },
     "linux-x64": {
       name: "mesonlsp-x86_64-unknown-linux-musl.zip",
-      hash: "055ab2d2fa0328c9d5c41f918b4a8c44b196232a1eef22384ef8073d81be945b",
+      hash: "f5d1178721cd35575d3d94164de112a8925a10cc25eb6b4567913b197d92d601",
     },
   };
 
   static override repoURL: string = "https://github.com/JCWasmx86/mesonlsp";
   static override setupURL: string = "https://github.com/JCWasmx86/mesonlsp/tree/main/docs";
-  static override version: string = "4.1.8";
+  static override version: string = "4.2.2";
 
   get runExe(): Executable {
     return {

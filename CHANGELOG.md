@@ -2,6 +2,8 @@
 
 ## next
 
+- Bump mesonlsp to v4.2.2
+
 ## 1.23.0
 
 ⚠️⚠️ It's important to update, as it contains a version of mesonlsp that is not
