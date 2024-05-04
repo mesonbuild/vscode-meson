@@ -3,6 +3,7 @@
 ## next
 
 - Bump mesonlsp to v4.2.2
+- Add experimental mesonlsp support for Linux on AArch64.
 
 ## 1.23.0
 
