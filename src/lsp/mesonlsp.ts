@@ -22,6 +22,10 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
       name: "mesonlsp-x86_64-unknown-linux-musl.zip",
       hash: "f5d1178721cd35575d3d94164de112a8925a10cc25eb6b4567913b197d92d601",
     },
+    "linux-arm64": {
+      name: "mesonlsp-aarch64-unknown-linux-musl.zip",
+      hash: "ca74a2eb883a5d69d415e9a58eba2a5305c1d511e109994461f8d7f59715658f",
+    },
   };
 
   static override repoURL: string = "https://github.com/JCWasmx86/mesonlsp";
@@ -51,7 +55,7 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
     const platform = os.platform();
     const slug = `${platform}-${arch}`;
 
-    if (arch !== "x64" && slug != "darwin-arm64") return null;
+    if (arch !== "x64" && slug != "darwin-arm64" && slug != "linux-arm64") return null;
 
     const artifact = MesonLSPLanguageClient.artifacts[slug];
     return {
@@ -66,12 +70,12 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
 
     const platform = os.platform();
     switch (platform) {
+      case "linux":
       case "darwin":
         // x64 and ARM are supported.
         return true;
-      case "linux":
       case "win32":
-        // Currently no support for ARM on other operating systems.
+        // Currently no support for ARM Windows.
         return arch == "x64";
       default:
         return false;
