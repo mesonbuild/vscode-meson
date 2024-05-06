@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.24.0
 
 - Bump mesonlsp to v4.2.2
 - Add experimental mesonlsp support for Linux on AArch64.
