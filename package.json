@@ -39,7 +39,9 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "workspaceContains:**/meson.build",
+    "workspaceContains:meson.build",
+    "workspaceContains:*/meson.build",
+    "workspaceContains:*/*/meson.build",
     "onDebugDynamicConfigurations",
     "onDebugDynamicConfigurations:cppdbg",
     "onDebugDynamicConfigurations:lldb"
