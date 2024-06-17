@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration } from "./utils";
-import { Tests } from "./types";
+import { Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
 
@@ -128,16 +128,39 @@ export async function testDebugHandler(
     let args = [...test.cmd];
     args.shift();
 
+    let debugEnvironmentConfiguration: DebugEnvironmentConfiguration;
+    /* cppdbg uses 'environment' key, all others use 'env' key */
+    if (debugType == "cppdbg") {
+      const debugEnv = [];
+      if (test.env instanceof Object) {
+        /* convert from dict of key = value to array of {name: key, value: value} */
+        for (const [key, val] of Object.entries(test.env)) {
+          debugEnv.push({ name: key, value: val });
+        }
+      }
+      debugEnvironmentConfiguration = {
+        environment: debugEnv,
+      };
+    } else {
+      debugEnvironmentConfiguration = {
+        env: test.env,
+      };
+    }
+
     let debugConfiguration = {
       name: `meson-debug-${test.name}`,
       type: debugType,
       request: "launch",
       cwd: test.workdir || sourceDir,
-      env: test.env,
       program: test.cmd[0],
       args: args,
     };
-    await vscode.debug.startDebugging(undefined, { ...debugConfiguration, ...configDebugOptions });
+    const configuration = {
+      ...debugConfiguration,
+      ...debugEnvironmentConfiguration,
+      ...configDebugOptions,
+    };
+    await vscode.debug.startDebugging(undefined, configuration);
   }
 
   run.end();
