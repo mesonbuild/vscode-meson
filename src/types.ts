@@ -134,6 +134,14 @@ export interface Test {
   depends: string[];
 }
 
+interface StdDebugEnvironmentConfiguration {
+  env: { [key: string]: string };
+}
+interface CppDebugEnvironmentConfiguration {
+  environment: { name: string; value: string }[];
+}
+export type DebugEnvironmentConfiguration = StdDebugEnvironmentConfiguration | CppDebugEnvironmentConfiguration;
+
 export type Targets = Target[];
 export type BuildOptions = BuildOption<any>[];
 export type Dependencies = Dependency[];
