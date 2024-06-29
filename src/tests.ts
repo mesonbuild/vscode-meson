@@ -4,18 +4,73 @@ import { Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
 
+function addMesonTestsToController(
+  controller: vscode.TestController,
+  tests: Tests,
+): WeakMap<vscode.TestItem, boolean> | null {
+  /* returns a WeakMap (value True) for TestItems with corresponding Meson
+   * tests. If a TestItem is not in the WeakMap, then the TestItem is outdated.
+   * If 0 existing TestItems, then there is nothing outdated, returns null.
+   */
+  const testsVisited = new WeakMap<vscode.TestItem, boolean>();
+  const emptyController = controller.items.size == 0;
+  for (const test of tests) {
+    if (test.suite == undefined || test.suite.length == 0) {
+      const testItem = controller.createTestItem(test.name, test.name);
+      controller.items.add(testItem);
+      if (!emptyController) {
+        testsVisited.set(testItem, true);
+      }
+    } else {
+      /* if test suite(s) are defined, create TestItems as children */
+      for (const suiteLabel of test.suite) {
+        let suite = controller.items.get(suiteLabel);
+        if (suite == undefined) {
+          suite = controller.createTestItem(suiteLabel, suiteLabel);
+          controller.items.add(suite);
+        }
+        if (!emptyController) {
+          testsVisited.set(suite, true);
+        }
+        let testItem = suite.children.get(test.name);
+        if (testItem == undefined) {
+          testItem = controller.createTestItem(test.name, test.name);
+          suite.children.add(testItem);
+        }
+        if (!emptyController) {
+          testsVisited.set(testItem, true);
+        }
+      }
+    }
+  }
+  return emptyController ? null : testsVisited;
+}
+
+function deleteTestsFromControllerNotVisited(
+  controller: vscode.TestController,
+  testsVisited: WeakMap<vscode.TestItem, boolean>,
+) {
+  for (const [test_id, test] of controller.items) {
+    if (testsVisited.get(test) == undefined) {
+      for (const [child_id] of test.children) {
+        test.children.delete(child_id);
+      }
+      controller.items.delete(test_id);
+    } else {
+      for (const [child_id, child] of test.children) {
+        if (testsVisited.get(child) == undefined) {
+          test.children.delete(child_id);
+        }
+      }
+    }
+  }
+}
+
 export async function rebuildTests(controller: vscode.TestController) {
   let tests = await getMesonTests(workspaceState.get<string>("mesonbuild.buildDir")!);
-
-  controller.items.forEach((item) => {
-    if (!tests.some((test) => item.id == test.name)) {
-      controller.items.delete(item.id);
-    }
-  });
-
-  for (let testDescr of tests) {
-    let testItem = controller.createTestItem(testDescr.name, testDescr.name);
-    controller.items.add(testItem);
+  const testsVisited = addMesonTestsToController(controller, tests);
+  if (testsVisited != null) {
+    deleteTestsFromControllerNotVisited(controller, testsVisited);
   }
 }
 
@@ -38,10 +93,21 @@ export async function testRunHandler(
   for (let test of queue) {
     run.started(test);
     let starttime = Date.now();
+    let suite = "";
+    let testcase = "";
+    if (test.children.size > 0) {
+      suite = `--suite="${test.id}"`;
+    } else if (test.parent != undefined) {
+      suite = `--suite="${test.parent.id}"`;
+      testcase = `"${test.id}"`;
+    } else {
+      testcase = `"${test.id}"`;
+    }
+
     try {
       await exec(
         extensionConfiguration("mesonPath"),
-        ["test", "-C", buildDir, "--print-errorlog", test.id],
+        ["test", "-C", buildDir, "--print-errorlog", suite, testcase],
         extensionConfiguration("testEnvironment"),
       );
       let duration = Date.now() - starttime;
