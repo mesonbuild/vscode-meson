@@ -2,9 +2,10 @@
 
 ## next
 
+- Fix running tests with spaces in the names
+
 ## 1.25.0
 
-- Fix running tests with spaces in the names
 - Fix passing environment variables with some debug adapters
 - Limit the search depth for meson.build files when trying to activate the
   extension
