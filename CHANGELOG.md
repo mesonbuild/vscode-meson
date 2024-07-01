@@ -2,6 +2,13 @@
 
 ## next
 
+- Fix running tests with spaces in the names
+- Fix passing environment variables with some debug adapters
+- Limit the search depth for meson.build files when trying to activate the
+  extension
+  - This should help in the case of large monorepos
+  - This also matches the behavior of the CMake extension
+
 ## 1.24.0
 
 - Bump mesonlsp to v4.2.2
