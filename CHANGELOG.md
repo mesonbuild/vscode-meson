@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.25.0
 
 - Fix running tests with spaces in the names
 - Fix passing environment variables with some debug adapters
