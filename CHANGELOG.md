@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.25.1
 
 - Fix running tests with spaces in the names
 
