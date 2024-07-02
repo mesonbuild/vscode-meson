@@ -50,16 +50,16 @@ function deleteTestsFromControllerNotVisited(
   controller: vscode.TestController,
   testsVisited: WeakMap<vscode.TestItem, boolean>,
 ) {
-  for (const [test_id, test] of controller.items) {
+  for (const [testId, test] of controller.items) {
     if (testsVisited.get(test) == undefined) {
-      for (const [child_id] of test.children) {
-        test.children.delete(child_id);
+      for (const [ChildId] of test.children) {
+        test.children.delete(ChildId);
       }
-      controller.items.delete(test_id);
+      controller.items.delete(testId);
     } else {
-      for (const [child_id, child] of test.children) {
+      for (const [ChildId, child] of test.children) {
         if (testsVisited.get(child) == undefined) {
-          test.children.delete(child_id);
+          test.children.delete(ChildId);
         }
       }
     }
@@ -67,7 +67,7 @@ function deleteTestsFromControllerNotVisited(
 }
 
 export async function rebuildTests(controller: vscode.TestController) {
-  let tests = await getMesonTests(workspaceState.get<string>("mesonbuild.buildDir")!);
+  const tests = await getMesonTests(workspaceState.get<string>("mesonbuild.buildDir")!);
   const testsVisited = addMesonTestsToController(controller, tests);
   if (testsVisited != null) {
     deleteTestsFromControllerNotVisited(controller, testsVisited);
@@ -94,20 +94,20 @@ export async function testRunHandler(
     run.started(test);
     let starttime = Date.now();
     let suite = "";
-    let testcase = "";
+    let testCase = "";
     if (test.children.size > 0) {
       suite = `--suite="${test.id}"`;
     } else if (test.parent != undefined) {
       suite = `--suite="${test.parent.id}"`;
-      testcase = `"${test.id}"`;
+      testCase = `"${test.id}"`;
     } else {
-      testcase = `"${test.id}"`;
+      testCase = `"${test.id}"`;
     }
 
     try {
       await exec(
         extensionConfiguration("mesonPath"),
-        ["test", "-C", buildDir, "--print-errorlog", suite, testcase],
+        ["test", "-C", buildDir, "--print-errorlog", suite, testCase],
         extensionConfiguration("testEnvironment"),
       );
       let duration = Date.now() - starttime;
