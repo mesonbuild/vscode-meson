@@ -1,5 +1,7 @@
 # Change Log
 
+- Bump mesonlsp to v4.3.0
+
 ## 1.25.1
 
 - Fix running tests with spaces in the names
