@@ -1,6 +1,6 @@
 # Change Log
 
-- Bump mesonlsp to v4.3.1
+- Bump mesonlsp to v4.3.2
 
 ## 1.25.1
 
