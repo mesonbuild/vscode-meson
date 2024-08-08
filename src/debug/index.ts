@@ -4,27 +4,28 @@ import { getMesonTargets } from "../introspection";
 import { Target } from "../types";
 import { extensionConfiguration, getTargetName } from "../utils";
 
-export abstract class MesonDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+export enum DebuggerType {
+  cppvsdbg = "cppvsdbg",
+  cppdbg = "cppdbg",
+  lldb = "lldb",
+}
+
+enum MIMode {
+  gdb = "gdb",
+  lldb = "lldb",
+}
+
+export class MesonDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+  readonly type: DebuggerType;
   private readonly path: string;
 
-  abstract type: string;
-
-  constructor(path: string) {
+  constructor(type: DebuggerType, path: string) {
+    this.type = type;
     this.path = path;
   }
 
   async createDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
-    const targetName = await getTargetName(target);
-    const name = this.type;
-    return {
-      type: name,
-      name: `Debug ${target.name} (${name})`,
-      request: "launch",
-      cwd: path.dirname(this.path),
-      program: target.filename[0],
-      args: [],
-      preLaunchTask: `Meson: Build ${targetName}`,
-    };
+    return await this.createDebugConfigurationForType(target, this.type);
   }
 
   async provideDebugConfigurations(
@@ -60,5 +61,42 @@ export abstract class MesonDebugConfigurationProvider implements vscode.DebugCon
     token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
     return debugConfiguration;
+  }
+
+  async createDebugConfigurationForType(target: Target, type: DebuggerType): Promise<vscode.DebugConfiguration> {
+    const targetName = await getTargetName(target);
+    const name = type.toString();
+    let debugConfig: vscode.DebugConfiguration = {
+      type: name,
+      name: `Debug ${target.name} (${name})`,
+      request: "launch",
+      cwd: path.dirname(this.path),
+      program: target.filename[0],
+      args: [],
+      preLaunchTask: `Meson: Build ${targetName}`,
+    };
+
+    if (type === DebuggerType.cppdbg) {
+      let miMode;
+      if (
+        target.target_sources?.some((source) => source.compiler != null && ["cc", "clang"].includes(source.compiler[0]))
+      ) {
+        miMode = MIMode.lldb;
+      } else {
+        miMode = MIMode.gdb;
+      }
+      debugConfig["MIMode"] = miMode.toString();
+
+      if (miMode === MIMode.gdb) {
+        debugConfig["setupCommands"] = [
+          {
+            description: "Enable pretty-printing for gdb",
+            text: "-enable-pretty-printing",
+            ignoreFailures: true,
+          },
+        ];
+      }
+    }
+    return debugConfig;
   }
 }
