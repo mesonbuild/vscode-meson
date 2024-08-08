@@ -78,12 +78,19 @@ export async function activate(ctx: vscode.ExtensionContext) {
   explorer = new MesonProjectExplorer(ctx, sourceDir, buildDir);
 
   let providers = [];
-  if (os.platform() === "win32") {
-    providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppvsdbg, buildDir));
-  } else {
-    providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppdbg, buildDir));
+  // Install lldb provider if CodeLLDB extension is installed
+  if (vscode.extensions.getExtension("vadimcn.vscode-lldb")) {
+    providers.push(new MesonDebugConfigurationProvider(DebuggerType.lldb, buildDir));
   }
-  providers.push(new MesonDebugConfigurationProvider(DebuggerType.lldb, buildDir));
+
+  // Install cppdbg or cppvsdbg provider if C/C++ extension is installed
+  if (vscode.extensions.getExtension("ms-vscode.cpptools")) {
+    if (os.platform() === "win32") {
+      providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppvsdbg, buildDir));
+    } else {
+      providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppdbg, buildDir));
+    }
+  }
   providers.forEach((p) => {
     ctx.subscriptions.push(
       vscode.debug.registerDebugConfigurationProvider(
