@@ -1,3 +1,4 @@
+import * as os from "os";
 import * as vscode from "vscode";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
@@ -13,8 +14,7 @@ import {
   mesonRootDirs,
   shouldModifySetting,
 } from "./utils";
-import { DebugConfigurationProviderCppdbg } from "./debug/cppdbg";
-import { DebugConfigurationProviderLldb } from "./debug/lldb";
+import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
 import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
 import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
@@ -77,11 +77,20 @@ export async function activate(ctx: vscode.ExtensionContext) {
 
   explorer = new MesonProjectExplorer(ctx, sourceDir, buildDir);
 
-  const providers = [DebugConfigurationProviderCppdbg, DebugConfigurationProviderLldb];
-  providers.forEach((provider) => {
-    const p = new provider(buildDir);
+  let providers = [];
+  if (os.platform() === "win32") {
+    providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppvsdbg, buildDir));
+  } else {
+    providers.push(new MesonDebugConfigurationProvider(DebuggerType.cppdbg, buildDir));
+  }
+  providers.push(new MesonDebugConfigurationProvider(DebuggerType.lldb, buildDir));
+  providers.forEach((p) => {
     ctx.subscriptions.push(
-      vscode.debug.registerDebugConfigurationProvider(p.type, p, vscode.DebugConfigurationProviderTriggerKind.Dynamic),
+      vscode.debug.registerDebugConfigurationProvider(
+        p.type.toString(),
+        p,
+        vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+      ),
     );
   });
 
