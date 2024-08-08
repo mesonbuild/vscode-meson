@@ -11,9 +11,11 @@ export class DebugConfigurationProviderCppdbg extends MesonDebugConfigurationPro
 
   override async createDebugConfiguration(target: Target): Promise<vscode.DebugConfiguration> {
     let debugConfiguration = null;
-    if (target.target_sources?.some((source) => ["cl"].includes(source.compiler[0]))) {
+    if (target.target_sources?.some((source) => source.compiler != null && ["cl"].includes(source.compiler[0]))) {
       debugConfiguration = await this.createMSVCDebugConfiguration(target);
-    } else if (target.target_sources?.some((source) => ["cc", "clang"].includes(source.compiler[0]))) {
+    } else if (
+      target.target_sources?.some((source) => source.compiler != null && ["cc", "clang"].includes(source.compiler[0]))
+    ) {
       debugConfiguration = await this.createLLDBDebugConfiguration(target);
     } else {
       debugConfiguration = await this.createGDBDebugConfiguration(target);
