@@ -1,3 +1,4 @@
+import * as os from "os";
 import * as vscode from "vscode";
 import * as path from "path";
 import { getMesonTargets } from "../introspection";
@@ -78,9 +79,7 @@ export class MesonDebugConfigurationProvider implements vscode.DebugConfiguratio
 
     if (type === DebuggerType.cppdbg) {
       let miMode;
-      if (
-        target.target_sources?.some((source) => source.compiler != null && ["cc", "clang"].includes(source.compiler[0]))
-      ) {
+      if (os.platform() === "darwin") {
         miMode = MIMode.lldb;
       } else {
         miMode = MIMode.gdb;
