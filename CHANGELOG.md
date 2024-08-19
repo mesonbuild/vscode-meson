@@ -1,6 +1,6 @@
 # Change Log
 
-# next
+# 1.26.0
 
 - Bump mesonlsp to v4.3.3
 - Fix debug providers
