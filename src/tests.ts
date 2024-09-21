@@ -26,55 +26,69 @@ export async function testRunHandler(
   token: vscode.CancellationToken,
 ) {
   const run = controller.createTestRun(request, undefined, false);
-  const queue: vscode.TestItem[] = [];
-
-  if (request.include) {
-    request.include.forEach((test) => queue.push(test));
-  } else {
-    controller.items.forEach((test) => queue.push(test));
-  }
-
-  // This way the total number of runs shows up from the beginning,
-  // instead of incrementing as individual runs finish
-  for (const test of queue) {
-    run.enqueued(test);
-  }
+  const parallelTests: vscode.TestItem[] = [];
+  const sequentialTests: vscode.TestItem[] = [];
 
   const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
+  const mesonTests = await getMesonTests(buildDir);
+
+  // Look up the meson test for a given vscode test,
+  // put it in the parallel or sequential queue,
+  // and tell vscode about the enqueued test.
+  const testAdder = (test: vscode.TestItem) => {
+    const mesonTest = mesonTests.find((mesonTest) => {
+      return mesonTest.name == test.id;
+    })!;
+    if (mesonTest.is_parallel) {
+      parallelTests.push(test);
+    } else {
+      sequentialTests.push(test);
+    }
+    // This way the total number of runs shows up from the beginning,
+    // instead of incrementing as individual runs finish
+    run.enqueued(test);
+  };
+  if (request.include) {
+    request.include.forEach(testAdder);
+  } else {
+    controller.items.forEach(testAdder);
+  }
+
+  const dispatchTest = (test: vscode.TestItem) => {
+    run.started(test);
+    return exec(
+      extensionConfiguration("mesonPath"),
+      ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
+      extensionConfiguration("testEnvironment"),
+    ).then(
+      (onfulfilled) => {
+        run.passed(test, onfulfilled.timeMs);
+      },
+      (onrejected) => {
+        const execResult = onrejected as ExecResult;
+
+        let stdout = execResult.stdout;
+        if (os.platform() != "win32") {
+          stdout = stdout.replace(/\n/g, "\r\n");
+        }
+        run.appendOutput(stdout, undefined, test);
+        if (execResult.error?.code == 125) {
+          vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
+          run.errored(test, new vscode.TestMessage(execResult.stderr));
+        } else {
+          run.failed(test, new vscode.TestMessage(execResult.stderr), execResult.timeMs);
+        }
+      },
+    );
+  };
 
   const runningTests: Promise<void>[] = [];
   const maxRunning = os.cpus().length;
 
-  for (const test of queue) {
-    run.started(test);
-    const runningTest = exec(
-      extensionConfiguration("mesonPath"),
-      ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
-      extensionConfiguration("testEnvironment"),
-    )
-      .then(
-        (onfulfilled) => {
-          run.passed(test, onfulfilled.timeMs);
-        },
-        (onrejected) => {
-          const execResult = onrejected as ExecResult;
-
-          let stdout = execResult.stdout;
-          if (os.platform() != "win32") {
-            stdout = stdout.replace(/\n/g, "\r\n");
-          }
-          run.appendOutput(stdout, undefined, test);
-          if (execResult.error?.code == 125) {
-            vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
-            run.errored(test, new vscode.TestMessage(execResult.stderr));
-          } else {
-            run.failed(test, new vscode.TestMessage(execResult.stderr), execResult.timeMs);
-          }
-        },
-      )
-      .finally(() => {
-        runningTests.splice(runningTests.indexOf(runningTest), 1);
-      });
+  for (const test of parallelTests) {
+    const runningTest = dispatchTest(test).finally(() => {
+      runningTests.splice(runningTests.indexOf(runningTest), 1);
+    });
 
     runningTests.push(runningTest);
 
@@ -83,6 +97,10 @@ export async function testRunHandler(
     }
   }
   await Promise.all(runningTests);
+
+  for (const test of sequentialTests) {
+    await dispatchTest(test);
+  }
 
   run.end();
 }
