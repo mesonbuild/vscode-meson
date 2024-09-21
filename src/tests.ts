@@ -1,3 +1,4 @@
+import * as os from "os";
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration } from "./utils";
 import { Tests, DebugEnvironmentConfiguration } from "./types";
@@ -33,32 +34,51 @@ export async function testRunHandler(
     controller.items.forEach((test) => queue.push(test));
   }
 
+  // this way the total number of runs shows up from the beginning,
+  // instead of incrementing as individual runs finish
+  for (const test of queue) {
+    run.enqueued(test);
+  }
+
   const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
 
-  for (let test of queue) {
-    run.started(test);
-    let starttime = Date.now();
-    try {
-      await exec(
-        extensionConfiguration("mesonPath"),
-        ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
-        extensionConfiguration("testEnvironment"),
-      );
-      let duration = Date.now() - starttime;
-      run.passed(test, duration);
-    } catch (e) {
-      const execResult = e as ExecResult;
+  const running_tests: Promise<void>[] = [];
+  const max_running = os.cpus().length;
 
-      run.appendOutput(execResult.stdout);
-      let duration = Date.now() - starttime;
-      if (execResult.error?.code == 125) {
-        vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
-        run.errored(test, new vscode.TestMessage(execResult.stderr));
-      } else {
-        run.failed(test, new vscode.TestMessage(execResult.stderr), duration);
-      }
+  for (const test of queue) {
+    run.started(test);
+    const running_test = exec(
+      extensionConfiguration("mesonPath"),
+      ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
+      extensionConfiguration("testEnvironment"),
+    )
+      .then(
+        (onfulfilled) => {
+          run.passed(test, onfulfilled.time_ms);
+        },
+        (onrejected) => {
+          const execResult = onrejected as ExecResult;
+
+          run.appendOutput(execResult.stdout, undefined, test);
+          if (execResult.error?.code == 125) {
+            vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
+            run.errored(test, new vscode.TestMessage(execResult.stderr));
+          } else {
+            run.failed(test, new vscode.TestMessage(execResult.stderr), execResult.time_ms);
+          }
+        },
+      )
+      .finally(() => {
+        running_tests.splice(running_tests.indexOf(running_test), 1);
+      });
+
+    running_tests.push(running_test);
+
+    if (running_tests.length >= max_running) {
+      await Promise.race(running_tests);
     }
   }
+  await Promise.all(running_tests);
 
   run.end();
 }
