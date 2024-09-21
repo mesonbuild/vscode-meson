@@ -1,12 +1,40 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration } from "./utils";
-import { Tests, DebugEnvironmentConfiguration } from "./types";
+import { Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
 
+// This is far from complete, but should suffice for the
+// "test is made of a single executable is made of a single source file" usecase.
+function findSourceOfTest(test: Test, targets: Targets): vscode.Uri | undefined {
+  const testExe = test.cmd.at(0);
+  if (!testExe) {
+    return undefined;
+  }
+
+  // The meson target such that it is of meson type executable()
+  // and produces the binary that the test() executes.
+  const testDependencyTarget = targets.find((target) => {
+    const depend = test.depends.find((depend) => {
+      return depend == target.id && target.type == "executable";
+    });
+    return depend && testExe == target.filename.at(0);
+  });
+
+  // The first source file belonging to the target.
+  const path = testDependencyTarget?.target_sources
+    ?.find((elem) => {
+      return elem.sources;
+    })
+    ?.sources?.at(0);
+  return path ? vscode.Uri.file(path) : undefined;
+}
+
 export async function rebuildTests(controller: vscode.TestController) {
-  let tests = await getMesonTests(workspaceState.get<string>("mesonbuild.buildDir")!);
+  const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
+  const tests = await getMesonTests(buildDir);
+  const targets = await getMesonTargets(buildDir);
 
   controller.items.forEach((item) => {
     if (!tests.some((test) => item.id == test.name)) {
@@ -15,7 +43,8 @@ export async function rebuildTests(controller: vscode.TestController) {
   });
 
   for (let testDescr of tests) {
-    let testItem = controller.createTestItem(testDescr.name, testDescr.name);
+    const testSourceFile = findSourceOfTest(testDescr, targets);
+    const testItem = controller.createTestItem(testDescr.name, testDescr.name, testSourceFile);
     controller.items.add(testItem);
   }
 }
