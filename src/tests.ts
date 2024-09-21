@@ -59,7 +59,11 @@ export async function testRunHandler(
         (onrejected) => {
           const execResult = onrejected as ExecResult;
 
-          run.appendOutput(execResult.stdout, undefined, test);
+          let stdout = execResult.stdout;
+          if (os.platform() != "win32") {
+            stdout = stdout.replace(/\n/g, "\r\n");
+          }
+          run.appendOutput(stdout, undefined, test);
           if (execResult.error?.code == 125) {
             vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
             run.errored(test, new vscode.TestMessage(execResult.stderr));
