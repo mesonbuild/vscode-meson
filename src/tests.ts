@@ -1,6 +1,6 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import { ExecResult, exec, extensionConfiguration } from "./utils";
+import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils";
 import { Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
@@ -160,8 +160,8 @@ export async function testDebugHandler(
   );
 
   let args = ["compile", "-C", buildDir];
-  requiredTargets.forEach((target) => {
-    args.push(target.name);
+  requiredTargets.forEach(async (target) => {
+    args.push(await getTargetName(target));
   });
 
   try {
