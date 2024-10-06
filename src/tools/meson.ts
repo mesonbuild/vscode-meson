@@ -12,10 +12,14 @@ export async function format(meson: Tool, root: string, document: vscode.TextDoc
   if (config_path) {
     args.push("-c", config_path);
   }
+
+  //TODO: this doesn't work, we have file a bug report upstream, that "-" (or any other notation for stdin) should be supported
+  // or use hacky way and use "/dev/stdin" or "/dev/fd/0" as file
   args.push("-");
 
   const { stdout, stderr, error } = await execFeed(meson.path, args, { cwd: root }, originalDocumentText);
   if (error) {
+    //TODO: file a bug report, meson prints error on stdout :(
     getOutputChannel().appendLine(`Failed to format document with meson: ${stderr}`);
     getOutputChannel().show(true);
     return [];
