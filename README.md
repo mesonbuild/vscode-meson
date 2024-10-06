@@ -28,8 +28,6 @@ the [Material Design Icons](https://materialdesignicons.com/) project.
   introspection files:
   `"C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"`
 
-\* - requires an installation of [muon](https://muon.build).
-
 ## New Extension ID
 
 If you come from a previous installation, please make sure you are on the
@@ -41,4 +39,4 @@ extension on the store, and only that one is released from this repository.
     [mesonlsp](https://github.com/JCWasmx86/mesonlsp) or
     [muon](https://muon.build).
 
-[^1]: Requires an installation of muon.
+[^1]: Requires an installation of muon or meson >= 1.5.0
