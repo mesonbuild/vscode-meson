@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import * as which from "which";
 
 import { createHash, BinaryLike } from "crypto";
-import { ExtensionConfiguration, Target, SettingsKey, ModifiableExtension } from "./types";
+import { ExtensionConfiguration, Target, SettingsKey, ModifiableExtension, type Version } from "./types";
 import { getMesonBuildOptions } from "./introspection";
 import { extensionPath, workspaceState } from "./extension";
 
@@ -208,4 +208,23 @@ export function whenFileExists(ctx: vscode.ExtensionContext, file: string, liste
 
 export function mesonProgram(): string {
   return which.sync(extensionConfiguration("mesonPath"));
+}
+
+/** This compares two versions
+ *  - if the first one is bigger, a value > 0 is returned
+ *  - if they are the same, 0 is returned
+ *  - if the first one is smaller, a value < 0 is returned
+ * @param version1
+ * @param version2
+ */
+export function versionCompare([major1, minor1, patch1]: Version, [major2, minor2, patch2]: Version): number {
+  if (major1 !== major2) {
+    return major1 - major2;
+  }
+
+  if (minor1 !== minor2) {
+    return minor1 - minor2;
+  }
+
+  return patch1 - patch2;
 }

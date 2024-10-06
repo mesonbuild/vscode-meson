@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
-import { Tool } from "../types";
+import { Tool, type Version } from "../types";
 
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stderr } = await execFeed(
@@ -98,7 +98,7 @@ export async function check(): Promise<{ tool?: Tool; error?: string }> {
       }
 
       return Number.parseInt(s);
-    }) as [number, number, number];
+    }) as Version;
 
   return { tool: { path: muon_path, version: ver } };
 }
