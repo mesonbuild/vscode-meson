@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 
 type Dict<T> = { [x: string]: T };
-export type Tool = { path: string; version: [number, number, number] };
+export type Version = [number, number, number];
+export type Tool = { path: string; version: Version };
 export type ToolCheckFunc = () => Promise<{ tool?: Tool; error?: string }>;
 
 export type LinterConfiguration = {
@@ -10,6 +11,8 @@ export type LinterConfiguration = {
 
 export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | null;
 export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
+
+export type FormattingProvider = "muon" | "meson";
 
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
@@ -28,8 +31,9 @@ export interface ExtensionConfiguration {
   };
   formatting: {
     enabled: boolean;
-    provider: "muon";
+    provider: FormattingProvider;
     muonConfig: string | null;
+    mesonConfig: string | null;
   };
   debugOptions: object;
   languageServer: LanguageServer;
