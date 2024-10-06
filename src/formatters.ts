@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import { extensionConfiguration, getOutputChannel } from "./utils";
-import { ToolCheckFunc, Tool } from "./types";
+import { ToolCheckFunc, Tool, type FormattingProvider } from "./types";
 import * as muon from "./tools/muon";
+import * as meson from "./tools/meson";
 
 type FormatterFunc = (tool: Tool, root: string, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
 
@@ -10,10 +11,14 @@ type FormatterDefinition = {
   check: ToolCheckFunc;
 };
 
-const formatters: Record<string, FormatterDefinition> = {
+const formatters: Record<FormattingProvider, FormatterDefinition> = {
   muon: {
     format: muon.format,
     check: muon.check,
+  },
+  meson: {
+    format: meson.format,
+    check: meson.check,
   },
 };
 

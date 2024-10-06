@@ -194,7 +194,8 @@
           "type": "string",
           "default": "muon",
           "enum": [
-            "muon"
+            "muon",
+            "meson"
           ],
           "description": "Select which formatting provider to use"
         },
@@ -202,6 +203,11 @@
           "type": "string",
           "default": null,
           "description": "Path to muon formatter config.ini"
+        },
+        "mesonbuild.formatting.mesonConfig": {
+          "type": "string",
+          "default": null,
+          "description": "Path to meson format config 'meson.format'"
         },
         "mesonbuild.debugOptions": {
           "type": "object",
