@@ -109,7 +109,17 @@ export async function testRunHandler(
   }
 
   const running_tests: Promise<void>[] = [];
-  const max_running = os.cpus().length;
+  const max_running: number = (() => {
+    const jobs_config = extensionConfiguration("testJobs");
+    switch (jobs_config) {
+      case -1:
+        return os.cpus().length;
+      case 0:
+        return Number.MAX_SAFE_INTEGER;
+      default:
+        return jobs_config;
+    }
+  })();
 
   for (const test of parallelTests) {
     const running_test = dispatchTest(test).finally(() => {
