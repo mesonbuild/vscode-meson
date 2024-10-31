@@ -12,6 +12,7 @@ import { extensionPath, workspaceState } from "./extension";
 export interface ExecResult {
   stdout: string;
   stderr: string;
+  time_ms: number; // runtime in milliseconds
   error?: cp.ExecFileException;
 }
 
@@ -25,11 +26,13 @@ export async function exec(
     options.env = { ...(options.env ?? process.env), ...extraEnv };
   }
   return new Promise<ExecResult>((resolve, reject) => {
+    let time_ms = Date.now();
     cp.execFile(command, args, options, (error, stdout, stderr) => {
+      time_ms = Date.now() - time_ms;
       if (error) {
-        reject({ error, stdout, stderr });
+        reject({ stdout, stderr, time: time_ms, error });
       } else {
-        resolve({ stdout, stderr });
+        resolve({ stdout, stderr, time_ms });
       }
     });
   });
@@ -42,8 +45,10 @@ export async function execFeed(
   stdin: string,
 ) {
   return new Promise<ExecResult>((resolve) => {
+    let time = Date.now();
     const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
-      resolve({ stdout, stderr, error: error ? error : undefined });
+      time = Date.now() - time;
+      resolve({ stdout, stderr, time_ms: time, error: error ?? undefined });
     });
 
     p.stdin?.write(stdin);
