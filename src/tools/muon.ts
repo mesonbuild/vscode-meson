@@ -3,15 +3,22 @@ import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } 
 import { Tool } from "../types";
 
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
-  const { stderr } = await execFeed(
+  const { stdout, stderr } = await execFeed(
     muon.path,
     ["analyze", "-l", "-O", document.uri.fsPath],
     { cwd: root },
     document.getText(),
   );
 
+  var out;
+  if (muon.version[0] == 0 && muon.version[1] <= 3) {
+    out = stderr;
+  } else {
+    out = stdout;
+  }
+
   let diagnostics: vscode.Diagnostic[] = [];
-  stderr.split("\n").forEach((line) => {
+  out.split("\n").forEach((line) => {
     const parts = line.split(":");
     if (parts.length < 4) {
       return;
