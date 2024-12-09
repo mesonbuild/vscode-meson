@@ -57,11 +57,11 @@ export async function getMesonBenchmarks(buildDir: string) {
 }
 
 export async function getMesonVersion(): Promise<[number, number, number]> {
-  const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/g;
+  const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/;
 
   const { stdout } = await exec(extensionConfiguration("mesonPath"), ["--version"]);
   const match = stdout.trim().match(MESON_VERSION_REGEX);
-  if (match) {
-    return match.slice(1, 3).map((s) => Number.parseInt(s)) as [number, number, number];
+  if (match && match.length >= 4) {
+    return match.slice(1, 4).map((s) => Number.parseInt(s)) as [number, number, number];
   } else throw new Error("Meson version doesn't match expected output: " + stdout.trim());
 }
