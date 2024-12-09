@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
-import { Tool } from "../types";
+import { Tool, type ToolCheckResult } from "../types";
+import { Version, type VersionArray } from "../version";
 
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stdout, stderr } = await execFeed(
@@ -10,8 +11,9 @@ export async function lint(muon: Tool, root: string, document: vscode.TextDocume
     document.getText(),
   );
 
-  var out;
-  if (muon.version[0] == 0 && muon.version[1] <= 3) {
+  let out: string;
+  // if (muonVersion < 0.4.0)
+  if (muon.version.compare([0, 4, 0]) < 0) {
     out = stderr;
   } else {
     out = stdout;
@@ -54,7 +56,8 @@ export async function format(muon: Tool, root: string, document: vscode.TextDocu
 
   let args = ["fmt"];
 
-  if (muon.version[0] == 0 && muon.version[1] == 0) {
+  // if (muonVersion < 0.1.0)
+  if (muon.version.compare([0, 1, 0]) < 0) {
     args = ["fmt_unstable"];
   }
 
@@ -79,7 +82,7 @@ export async function format(muon: Tool, root: string, document: vscode.TextDocu
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<{ tool?: Tool; error?: string }> {
+export async function check(): Promise<ToolCheckResult> {
   const muon_path = extensionConfiguration("muonPath");
   let stdout: string, stderr: string;
 
@@ -105,7 +108,7 @@ export async function check(): Promise<{ tool?: Tool; error?: string }> {
       }
 
       return Number.parseInt(s);
-    }) as [number, number, number];
+    }) as VersionArray;
 
-  return { tool: { path: muon_path, version: ver } };
+  return { tool: { path: muon_path, version: new Version(ver) } };
 }
