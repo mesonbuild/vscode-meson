@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { extensionConfiguration, getOutputChannel } from "./utils";
+import { checkHasError, extensionConfiguration, getOutputChannel } from "./utils";
 import { ExtensionConfiguration, LinterConfiguration, ToolCheckFunc, Tool } from "./types";
 import * as muon from "./tools/muon";
 
@@ -38,14 +38,14 @@ async function reloadLinters(
     }
 
     const props = linters[name];
-    const { tool, error } = await props.check();
-    if (error) {
-      getOutputChannel().appendLine(`Failed to enable linter ${name}: ${error}`);
+    const checkResult = await props.check();
+    if (checkHasError(checkResult)) {
+      getOutputChannel().appendLine(`Failed to enable linter ${name}: ${checkResult.error}`);
       getOutputChannel().show(true);
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => await props.lint(tool!, sourceRoot, document);
+    const linter = async (document: vscode.TextDocument) => await props.lint(checkResult.tool, sourceRoot, document);
     enabledLinters.push(linter);
   }
 

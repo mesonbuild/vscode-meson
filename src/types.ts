@@ -1,8 +1,21 @@
 import * as vscode from "vscode";
+import type { Version } from "./version";
 
 type Dict<T> = { [x: string]: T };
-export type Tool = { path: string; version: [number, number, number] };
-export type ToolCheckFunc = () => Promise<{ tool?: Tool; error?: string }>;
+
+export type Tool = { path: string; version: Version };
+
+export type ToolCheckSuccessResult = {
+  tool: Tool;
+  error?: undefined;
+};
+export type ToolCheckErrorResult = {
+  tool?: undefined;
+  error: string;
+};
+
+export type ToolCheckResult = ToolCheckSuccessResult | ToolCheckErrorResult;
+export type ToolCheckFunc = () => Promise<ToolCheckResult>;
 
 export type LinterConfiguration = {
   enabled: boolean;
