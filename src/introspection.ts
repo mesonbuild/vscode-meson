@@ -1,6 +1,7 @@
 import * as path from "path";
 import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils";
 import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types";
+import { type VersionArray, Version } from "./version";
 
 export function getIntrospectionFile(buildDir: string, filename: string) {
   return path.join(buildDir, path.join("meson-info", filename));
@@ -23,7 +24,8 @@ async function introspectMeson<T>(buildDir: string, filename: string, introspect
 export async function getMesonTargets(buildDir: string) {
   const parsed = await introspectMeson<Targets>(buildDir, "intro-targets.json", "--targets");
 
-  if ((await getMesonVersion())[1] < 50) {
+  // if (mesonVersion < 0.50.0)
+  if ((await getMesonVersion()).compare([0, 50, 0]) < 0) {
     return parsed.map((t) => {
       if (typeof t.filename === "string") t.filename = [t.filename]; // Old versions would directly pass a string with only 1 filename on the target
       return t;
@@ -56,12 +58,12 @@ export async function getMesonBenchmarks(buildDir: string) {
   return introspectMeson<Tests>(buildDir, "intro-benchmarks.json", "--benchmarks");
 }
 
-export async function getMesonVersion(): Promise<[number, number, number]> {
+export async function getMesonVersion(): Promise<Version> {
   const MESON_VERSION_REGEX = /^(\d+)\.(\d+)\.(\d+)/;
 
   const { stdout } = await exec(extensionConfiguration("mesonPath"), ["--version"]);
   const match = stdout.trim().match(MESON_VERSION_REGEX);
   if (match && match.length >= 4) {
-    return match.slice(1, 4).map((s) => Number.parseInt(s)) as [number, number, number];
+    return new Version(match.slice(1, 4).map((s) => Number.parseInt(s)) as VersionArray);
   } else throw new Error("Meson version doesn't match expected output: " + stdout.trim());
 }

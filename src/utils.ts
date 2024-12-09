@@ -5,7 +5,14 @@ import * as vscode from "vscode";
 import * as which from "which";
 
 import { createHash, BinaryLike } from "crypto";
-import { ExtensionConfiguration, Target, SettingsKey, ModifiableExtension } from "./types";
+import {
+  ExtensionConfiguration,
+  Target,
+  SettingsKey,
+  ModifiableExtension,
+  type ToolCheckResult,
+  type ToolCheckErrorResult,
+} from "./types";
 import { getMesonBuildOptions } from "./introspection";
 import { extensionPath, workspaceState } from "./extension";
 
