@@ -1,8 +1,60 @@
 import * as vscode from "vscode";
+import type { Version } from "./version";
 
 type Dict<T> = { [x: string]: T };
-export type Tool = { path: string; version: [number, number, number] };
-export type ToolCheckFunc = () => Promise<{ tool?: Tool; error?: string }>;
+
+export type Tool = { path: string; version: Version };
+
+export type ToolCheckSuccessResult = {
+  tool: Tool;
+  error?: undefined;
+};
+export type ToolCheckErrorResult = {
+  tool?: undefined;
+  error: string;
+};
+
+type ResultImpl = ToolCheckSuccessResult | ToolCheckErrorResult;
+
+export class ToolCheckResult {
+  private readonly result: ResultImpl;
+
+  private constructor(result: ResultImpl) {
+    this.result = result;
+  }
+
+  static newError(error: string) {
+    return new ToolCheckResult({ error });
+  }
+
+  static newTool(tool: Tool) {
+    return new ToolCheckResult({ tool });
+  }
+
+  private hasErrorImpl(result: ResultImpl): result is ToolCheckErrorResult {
+    return !!result.error;
+  }
+
+  isError(): boolean {
+    return this.hasErrorImpl(this.result);
+  }
+
+  get error(): string {
+    if (!this.hasErrorImpl(this.result)) {
+      throw new Error("Wrong invocation of getter for 'error', check the state first");
+    }
+    return this.result.error;
+  }
+
+  get tool(): Tool {
+    if (this.hasErrorImpl(this.result)) {
+      throw new Error("Wrong invocation of getter for 'tool', check the state first");
+    }
+    return this.result.tool;
+  }
+}
+
+export type ToolCheckFunc = () => Promise<ToolCheckResult>;
 
 export type LinterConfiguration = {
   enabled: boolean;
