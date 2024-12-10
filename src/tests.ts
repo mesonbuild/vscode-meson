@@ -1,11 +1,40 @@
+import * as os from "os";
 import * as vscode from "vscode";
-import { ExecResult, exec, extensionConfiguration } from "./utils";
-import { Tests, DebugEnvironmentConfiguration } from "./types";
+import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils";
+import { Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
 
+// this is far from complete, but should suffice for the
+// "test is made of a single executable is made of a single source file" usecase.
+function findSourceOfTest(test: Test, targets: Targets): vscode.Uri | undefined {
+  const test_exe = test.cmd.at(0);
+  if (!test_exe) {
+    return undefined;
+  }
+
+  // the meson target such that it is of meson type executable()
+  // and produces the binary that the test() executes.
+  const testDependencyTarget = targets.find((target) => {
+    const depend = test.depends.find((depend) => {
+      return depend == target.id && target.type == "executable";
+    });
+    return depend && test_exe == target.filename.at(0);
+  });
+
+  // the first source file belonging to the target.
+  const path = testDependencyTarget?.target_sources
+    ?.find((elem) => {
+      return elem.sources;
+    })
+    ?.sources?.at(0);
+  return path ? vscode.Uri.file(path) : undefined;
+}
+
 export async function rebuildTests(controller: vscode.TestController) {
-  let tests = await getMesonTests(workspaceState.get<string>("mesonbuild.buildDir")!);
+  const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
+  const tests = await getMesonTests(buildDir);
+  const targets = await getMesonTargets(buildDir);
 
   controller.items.forEach((item) => {
     if (!tests.some((test) => item.id == test.name)) {
@@ -14,7 +43,8 @@ export async function rebuildTests(controller: vscode.TestController) {
   });
 
   for (let testDescr of tests) {
-    let testItem = controller.createTestItem(testDescr.name, testDescr.name);
+    const testSourceFile = findSourceOfTest(testDescr, targets);
+    const testItem = controller.createTestItem(testDescr.name, testDescr.name, testSourceFile);
     controller.items.add(testItem);
   }
 }
@@ -25,39 +55,87 @@ export async function testRunHandler(
   token: vscode.CancellationToken,
 ) {
   const run = controller.createTestRun(request, undefined, false);
-  const queue: vscode.TestItem[] = [];
-
-  if (request.include) {
-    request.include.forEach((test) => queue.push(test));
-  } else {
-    controller.items.forEach((test) => queue.push(test));
-  }
+  const parallelTests: vscode.TestItem[] = [];
+  const sequentialTests: vscode.TestItem[] = [];
 
   const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
+  const mesonTests = await getMesonTests(buildDir);
 
-  for (let test of queue) {
-    run.started(test);
-    let starttime = Date.now();
-    try {
-      await exec(
-        extensionConfiguration("mesonPath"),
-        ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
-        extensionConfiguration("testEnvironment"),
-      );
-      let duration = Date.now() - starttime;
-      run.passed(test, duration);
-    } catch (e) {
-      const execResult = e as ExecResult;
-
-      run.appendOutput(execResult.stdout);
-      let duration = Date.now() - starttime;
-      if (execResult.error?.code == 125) {
-        vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
-        run.errored(test, new vscode.TestMessage(execResult.stderr));
-      } else {
-        run.failed(test, new vscode.TestMessage(execResult.stderr), duration);
-      }
+  function testAdder(test: vscode.TestItem) {
+    const mesonTest = mesonTests.find((mesonTest) => {
+      return mesonTest.name == test.id;
+    })!;
+    if (mesonTest.is_parallel) {
+      parallelTests.push(test);
+    } else {
+      sequentialTests.push(test);
     }
+    // this way the total number of runs shows up from the beginning,
+    // instead of incrementing as individual runs finish
+    run.enqueued(test);
+  }
+  if (request.include) {
+    request.include.forEach(testAdder);
+  } else {
+    controller.items.forEach(testAdder);
+  }
+
+  function dispatchTest(test: vscode.TestItem) {
+    run.started(test);
+    return exec(
+      extensionConfiguration("mesonPath"),
+      ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
+      extensionConfiguration("testEnvironment"),
+    ).then(
+      (onfulfilled) => {
+        run.passed(test, onfulfilled.time_ms);
+      },
+      (onrejected) => {
+        const execResult = onrejected as ExecResult;
+
+        let stdout = execResult.stdout;
+        if (os.platform() != "win32") {
+          stdout = stdout.replace(/\n/g, "\r\n");
+        }
+        run.appendOutput(stdout, undefined, test);
+        if (execResult.error?.code == 125) {
+          vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
+          run.errored(test, new vscode.TestMessage(execResult.stderr));
+        } else {
+          run.failed(test, new vscode.TestMessage(execResult.stderr), execResult.time_ms);
+        }
+      },
+    );
+  }
+
+  const running_tests: Promise<void>[] = [];
+  const max_running: number = (() => {
+    const jobs_config = extensionConfiguration("testJobs");
+    switch (jobs_config) {
+      case -1:
+        return os.cpus().length;
+      case 0:
+        return Number.MAX_SAFE_INTEGER;
+      default:
+        return jobs_config;
+    }
+  })();
+
+  for (const test of parallelTests) {
+    const running_test = dispatchTest(test).finally(() => {
+      running_tests.splice(running_tests.indexOf(running_test), 1);
+    });
+
+    running_tests.push(running_test);
+
+    if (running_tests.length >= max_running) {
+      await Promise.race(running_tests);
+    }
+  }
+  await Promise.all(running_tests);
+
+  for (const test of sequentialTests) {
+    await dispatchTest(test);
   }
 
   run.end();
@@ -88,9 +166,9 @@ export async function testDebugHandler(
     relevantTests.some((test) => test.depends.some((dep) => dep == target.id)),
   );
 
-  var args = ["compile", "-C", buildDir];
-  requiredTargets.forEach((target) => {
-    args.push(target.name);
+  let args = ["compile", "-C", buildDir];
+  requiredTargets.forEach(async (target) => {
+    args.push(await getTargetName(target));
   });
 
   try {
