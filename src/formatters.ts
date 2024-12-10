@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { checkHasError, extensionConfiguration, getOutputChannel } from "./utils";
+import { extensionConfiguration, getOutputChannel } from "./utils";
 import { ToolCheckFunc, Tool } from "./types";
 import * as muon from "./tools/muon";
 
@@ -28,7 +28,7 @@ async function reloadFormatters(sourceRoot: string, context: vscode.ExtensionCon
   const props = formatters[name];
 
   const checkResult = await props.check();
-  if (checkHasError(checkResult)) {
+  if (checkResult.isError()) {
     getOutputChannel().appendLine(`Failed to enable formatter ${name}: ${checkResult.error}`);
     getOutputChannel().show(true);
     return disposables;

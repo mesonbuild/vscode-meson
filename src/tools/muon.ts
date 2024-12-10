@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
-import { Tool, type ToolCheckResult } from "../types";
+import { Tool, ToolCheckResult } from "../types";
 import { Version, type VersionArray } from "../version";
 
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
@@ -91,12 +91,12 @@ export async function check(): Promise<ToolCheckResult> {
   } catch (e) {
     const { error, stdout, stderr } = e as ExecResult;
     console.log(error);
-    return { error: error!.message };
+    return ToolCheckResult.newError(error!.message);
   }
 
   const line1 = stdout.split("\n")[0].split(" ");
   if (line1.length !== 2) {
-    return { error: `Invalid version string: ${line1}` };
+    return ToolCheckResult.newError(`Invalid version string: ${line1}`);
   }
 
   const ver = line1[1]
@@ -110,5 +110,5 @@ export async function check(): Promise<ToolCheckResult> {
       return Number.parseInt(s);
     }) as VersionArray;
 
-  return { tool: { path: muon_path, version: new Version(ver) } };
+  return ToolCheckResult.newTool({ path: muon_path, version: new Version(ver) });
 }

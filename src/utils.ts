@@ -216,7 +216,3 @@ export function whenFileExists(ctx: vscode.ExtensionContext, file: string, liste
 export function mesonProgram(): string {
   return which.sync(extensionConfiguration("mesonPath"));
 }
-
-export function checkHasError(result: ToolCheckResult): result is ToolCheckErrorResult {
-  return !!result.error;
-}
