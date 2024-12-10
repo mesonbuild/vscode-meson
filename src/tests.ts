@@ -88,7 +88,7 @@ export async function testDebugHandler(
     relevantTests.some((test) => test.depends.some((dep) => dep == target.id)),
   );
 
-  var args = ["compile", "-C", buildDir];
+  let args = ["compile", "-C", buildDir];
   requiredTargets.forEach((target) => {
     args.push(target.name);
   });
