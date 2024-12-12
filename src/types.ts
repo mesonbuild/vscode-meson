@@ -63,6 +63,8 @@ export type LinterConfiguration = {
 export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | null;
 export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
 
+export type FormattingProvider = "muon" | "meson";
+
 export interface ExtensionConfiguration {
   configureOnOpen: boolean | "ask";
   configureOptions: string[];
@@ -80,8 +82,9 @@ export interface ExtensionConfiguration {
   };
   formatting: {
     enabled: boolean;
-    provider: "muon";
+    provider: FormattingProvider;
     muonConfig: string | null;
+    mesonConfig: string | null;
   };
   debugOptions: object;
   languageServer: LanguageServer;
