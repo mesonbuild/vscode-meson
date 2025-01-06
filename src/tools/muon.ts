@@ -1,4 +1,8 @@
+//# #if HAVE_VSCODE
 import * as vscode from "vscode";
+//# #elif HAVE_COC_NVIM
+//# import * as vscode from "coc.nvim";
+//# #endif
 import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
 import { Tool, ToolCheckResult } from "../types";
 import { Version, type VersionArray } from "../version";
@@ -6,7 +10,11 @@ import { Version, type VersionArray } from "../version";
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stdout, stderr } = await execFeed(
     muon.path,
+//# #if HAVE_VSCODE
     ["analyze", "-l", "-O", document.uri.fsPath],
+//# #elif HAVE_COC_NVIM
+//# ["analyze", "-l", "-O", vscode.Uri.parse(document.uri).fsPath],
+//# #endif
     { cwd: root },
     document.getText(),
   );
@@ -31,11 +39,19 @@ export async function lint(muon: Tool, root: string, document: vscode.TextDocume
     const col = Number(parts[2]);
     const fullmsg = parts.slice(3).join(":").trim();
 
+//# #if HAVE_VSCODE
     if (file != document.uri.fsPath) {
+//# #elif HAVE_COC_NVIM
+//# if (file != vscode.Uri.parse(document.uri).fsPath) {
+//# #endif
       return;
     }
 
+//# #if HAVE_VSCODE
     const range = new vscode.Range(line_no - 1, col, line_no - 1, col);
+//# #elif HAVE_COC_NVIM
+//# const range = /* new  */vscode.Range.create(line_no - 1, col, line_no - 1, col);
+//# #endif
 
     let severity: vscode.DiagnosticSeverity = vscode.DiagnosticSeverity.Error;
     if (fullmsg.startsWith("warn")) {
@@ -44,14 +60,22 @@ export async function lint(muon: Tool, root: string, document: vscode.TextDocume
 
     const msg = fullmsg.slice(fullmsg.indexOf(" ") + 1);
 
+//# #if HAVE_VSCODE
     const diagnostic = new vscode.Diagnostic(range, msg, severity);
+//# #elif HAVE_COC_NVIM
+//# const diagnostic = /* new  */vscode.Diagnostic.create(range, msg, severity);
+//# #endif
     diagnostics.push(diagnostic);
   });
 
   return diagnostics;
 }
 
+//# #if HAVE_VSCODE
 export async function format(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+//# #elif HAVE_COC_NVIM
+//# export async function format(muon: Tool, root: string, document: vscode.LinesTextDocument): Promise<vscode.TextEdit[]> {
+//# #endif
   const originalDocumentText = document.getText();
 
   let args = ["fmt"];
@@ -74,12 +98,20 @@ export async function format(muon: Tool, root: string, document: vscode.TextDocu
     return [];
   }
 
+//# #if HAVE_VSCODE
   const documentRange = new vscode.Range(
+//# #elif HAVE_COC_NVIM
+//#  const documentRange = /* new  */vscode.Range.create(
+//# #endif
     document.lineAt(0).range.start,
     document.lineAt(document.lineCount - 1).rangeIncludingLineBreak.end,
   );
 
+//# #if HAVE_VSCODE
   return [new vscode.TextEdit(documentRange, stdout)];
+//# #elif HAVE_COC_NVIM
+//#  return [/* new  */vscode.TextEdit.replace(documentRange, stdout)];
+//# #endif
 }
 
 export async function check(): Promise<ToolCheckResult> {
