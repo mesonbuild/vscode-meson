@@ -17,7 +17,10 @@ export async function format(meson: Tool, root: string, document: vscode.TextDoc
 
   const { stdout, stderr, error } = await execFeed(meson.path, args, { cwd: root }, originalDocumentText);
   if (error) {
-    getOutputChannel().appendLine(`Failed to format document with meson: ${stderr}`);
+    //TODO: file a bug report, meson prints some errors on stdout :(
+    const errorString = stderr.trim().length > 0 ? stderr : stdout;
+
+    getOutputChannel().appendLine(`Failed to format document with meson: ${errorString}`);
     getOutputChannel().show(true);
     return [];
   }
@@ -31,6 +34,7 @@ export async function format(meson: Tool, root: string, document: vscode.TextDoc
 }
 
 const formattingSupportedSinceVersion = new Version([1, 5, 0]);
+const formattingWithStdinSupportedSinceVersion = new Version([1, 7, 0]);
 
 export async function check(): Promise<ToolCheckResult> {
   const meson_path = mesonProgram();
@@ -49,6 +53,13 @@ export async function check(): Promise<ToolCheckResult> {
   if (mesonVersion.compareWithOther(formattingSupportedSinceVersion) < 0) {
     ToolCheckResult.newError(
       `Meson supports formatting only since version ${formattingSupportedSinceVersion}, but you have version ${mesonVersion}`,
+    );
+  }
+
+  // using "-" as stdin is only supported since 1.7.0 (see https://github.com/mesonbuild/meson/pull/13793)
+  if (mesonVersion.compareWithOther(formattingWithStdinSupportedSinceVersion) < 0) {
+    return ToolCheckResult.newError(
+      `Meson supports formatting from stdin only since version ${formattingWithStdinSupportedSinceVersion}, but you have version ${mesonVersion}`,
     );
   }
 
