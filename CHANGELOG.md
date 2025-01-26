@@ -1,6 +1,10 @@
 # Change Log
 
-# 1.26.0
+## next
+
+- Add support for meson as formatter
+
+## 1.26.0
 
 - Bump mesonlsp to v4.3.3
 - Fix debug providers
