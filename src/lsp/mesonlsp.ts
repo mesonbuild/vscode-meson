@@ -1,7 +1,11 @@
 import * as os from "os";
+//# #if HAVE_VSCODE
 import * as vscode from "vscode";
-
 import { Executable } from "vscode-languageclient/node";
+//# #elif HAVE_COC_NVIM
+//# import * as vscode from "coc.nvim";
+//# import { Executable } from "coc.nvim";
+//# #endif
 import { LanguageServerClient } from "../lsp";
 
 export class MesonLSPLanguageClient extends LanguageServerClient {

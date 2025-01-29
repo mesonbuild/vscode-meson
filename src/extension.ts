@@ -1,8 +1,16 @@
+//# #if HAVE_VSCODE
 import * as os from "os";
 import * as vscode from "vscode";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
 import { MesonProjectExplorer } from "./treeview";
 import { TargetNode } from "./treeview/nodes/targets";
+import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
+import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
+import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
+import { getIntrospectionFile } from "./introspection";
+//# #elif HAVE_COC_NVIM
+//# import * as vscode from "coc.nvim";
+//# #endif
 import {
   extensionConfiguration,
   genEnvFile,
@@ -14,22 +22,20 @@ import {
   mesonRootDirs,
   shouldModifySetting,
 } from "./utils";
-import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
-import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
-import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
 import { createLanguageServerClient } from "./lsp/common";
 import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDir, selectRootDir } from "./dialogs";
-import { getIntrospectionFile } from "./introspection";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;
+let watcher: vscode.FileSystemWatcher;
+//# #if HAVE_VSCODE
 let explorer: MesonProjectExplorer;
 let cpptools: CpptoolsProvider;
-let watcher: vscode.FileSystemWatcher;
 let controller: vscode.TestController;
+//# #endif
 
 export async function activate(ctx: vscode.ExtensionContext) {
   extensionPath = ctx.extensionPath;
@@ -64,14 +70,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 
   getOutputChannel().appendLine(`Meson project root: ${rootDir}`);
+  //# #if HAVE_VSCODE
   vscode.commands.executeCommand("setContext", "mesonbuild.hasProject", rootDir !== undefined);
   vscode.commands.executeCommand("setContext", "mesonbuild.hasMultipleProjects", rootDirs.length > 1);
+  //# #endif
   if (!rootDir) return;
 
   const sourceDir = rootDir;
   const buildDir = getBuildDirectory(sourceDir);
   workspaceState.update("mesonbuild.buildDir", buildDir);
   workspaceState.update("mesonbuild.sourceDir", sourceDir);
+  //# #if HAVE_VSCODE
   cpptools = new CpptoolsProvider(buildDir);
   registerCppToolsProvider(ctx, cpptools);
 
@@ -234,6 +243,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   } else {
     await rebuildTests(controller);
   }
+  //# #endif
 
   const server = extensionConfiguration(SettingsKey.languageServer);
   let client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
@@ -278,6 +288,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     }),
   );
 
+  //# #if HAVE_VSCODE
   async function pickTask(mode: string) {
     const picker = vscode.window.createQuickPick<TaskQuickPickItem>();
     picker.busy = true;
@@ -321,4 +332,5 @@ export async function activate(ctx: vscode.ExtensionContext) {
       runTask(taskItem.task);
     }
   }
+  //# #endif
 }

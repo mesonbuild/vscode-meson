@@ -1,8 +1,13 @@
+//# #if HAVE_VSCODE
 import * as vscode from "vscode";
+import { Uri } from "vscode";
+//# #elif HAVE_COC_NVIM
+//# import * as vscode from "coc.nvim";
+//# import { Uri } from "coc.nvim";
+//# #endif
 import { LanguageServerClient } from ".";
 import { LanguageServer } from "../types";
 import { MesonLSPLanguageClient } from "./mesonlsp";
-import { Uri } from "vscode";
 
 export function serverToClass(server: LanguageServer): any {
   switch (server) {
@@ -38,9 +43,11 @@ export async function createLanguageServerClient(
         "This language server supports your systen, but provides no artifacts for automatic setup",
         ...Object.values(Options),
       );
+      //# #if HAVE_VSCODE
       if (response == Options.open) {
         vscode.env.openExternal(Uri.parse(klass.setupURL));
       }
+      //# #endif
       return null;
     }
     if (download) {

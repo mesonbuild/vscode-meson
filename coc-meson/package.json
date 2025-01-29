@@ -1,0 +1,567 @@
+{
+  "name": "coc-meson",
+  "displayName": "Meson",
+  "description": "Meson language support for Visual Studio Code",
+  "icon": "graphics/icon.png",
+  "version": "1.22.0",
+  "license": "Apache-2.0",
+  "publisher": "mesonbuild",
+  "author": {
+    "name": "The Meson Project"
+  },
+  "contributors": [
+    {
+      "name": "Ali Sabil"
+    },
+    {
+      "name": "Nathan Graule",
+      "email": "solarliner@gmail.com",
+      "url": "https://solarliner.me"
+    },
+    {
+      "name": "Dylan Baker",
+      "email": "dylan@pnwbakers.com",
+      "url": "https://recursiveascent.blogspot.com/"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mesonbuild/vscode-meson.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mesonbuild/vscode-meson/issues"
+  },
+  "homepage": "https://github.com/mesonbuild/vscode-meson/blob/master/README.md",
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:meson",
+    "onDebugDynamicConfigurations",
+    "onDebugDynamicConfigurations:cppdbg",
+    "onDebugDynamicConfigurations:lldb"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mesonbuild.openBuildFile",
+        "title": "Open meson.build",
+        "icon": "$(preferences-open-settings)"
+      },
+      {
+        "command": "mesonbuild.reconfigure",
+        "title": "Meson: Reconfigure",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
+      },
+      {
+        "command": "mesonbuild.clean",
+        "title": "Meson: Clean"
+      },
+      {
+        "command": "mesonbuild.build",
+        "title": "Meson: Build"
+      },
+      {
+        "command": "mesonbuild.test",
+        "title": "Meson: Run Unit Tests"
+      },
+      {
+        "command": "mesonbuild.run",
+        "title": "Meson: Run Executable"
+      },
+      {
+        "command": "mesonbuild.install",
+        "title": "Meson: Install"
+      },
+      {
+        "command": "mesonbuild.benchmark",
+        "title": "Meson: Run Benchmarks"
+      },
+      {
+        "command": "mesonbuild.restartLanguageServer",
+        "title": "Meson: Restart Language Server"
+      },
+      {
+        "command": "mesonbuild.selectRootDir",
+        "title": "Meson: Select Project Root Directory"
+      }
+    ],
+    "configuration": {
+      "title": "Meson build configuration",
+      "properties": {
+        "mesonbuild.selectRootDir": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask to select a Meson project root directory when more than one project is detected."
+        },
+        "mesonbuild.configureOnOpen": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "default": "ask",
+          "enum": [
+            true,
+            false,
+            "ask"
+          ],
+          "enumDescriptions": [
+            "Automatically configure on open",
+            "Never configure on open",
+            "Ask every time"
+          ],
+          "description": "Have VS Code run Meson configure on opening a folder."
+        },
+        "mesonbuild.buildFolder": {
+          "type": "string",
+          "default": "builddir",
+          "description": "Specify in which folder Meson configures and builds the project. Changing this value will reload the VS Code window."
+        },
+        "mesonbuild.configureOptions": {
+          "type": "array",
+          "default": [],
+          "description": "Specify the list of options used for setup."
+        },
+        "mesonbuild.configureEnvironment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Specify the list of additional environment variables used for setup."
+        },
+        "mesonbuild.setupOptions": {
+          "type": "array",
+          "default": [],
+          "description": "Specify the list of options used for setup. Can be used to specify a cross file (use --cross-file=FILE).",
+          "deprecationMessage": "--cross-file and --native-file should be in configureOptions too."
+        },
+        "mesonbuild.testOptions": {
+          "type": "array",
+          "default": [],
+          "description": "Specify the list of options used for running tests."
+        },
+        "mesonbuild.testEnvironment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Specify the list of additional environment variables used for running tests."
+        },
+        "mesonbuild.benchmarkOptions": {
+          "type": "array",
+          "default": [
+            "--verbose"
+          ],
+          "description": "Specify the list of options used for running benchmarks. --benchmark is implicit."
+        },
+        "mesonbuild.mesonPath": {
+          "type": "string",
+          "default": "meson",
+          "description": "Specify the meson executable to use"
+        },
+        "mesonbuild.muonPath": {
+          "type": "string",
+          "default": "muon",
+          "description": "Specify the muon executable to use"
+        },
+        "mesonbuild.linting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Globally enable/disable linting"
+        },
+        "mesonbuild.linter.muon.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable muon linter"
+        },
+        "mesonbuild.formatting.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Globally enable/disable formatting"
+        },
+        "mesonbuild.formatting.provider": {
+          "type": "string",
+          "default": "muon",
+          "enum": [
+            "muon"
+          ],
+          "description": "Select which formatting provider to use"
+        },
+        "mesonbuild.formatting.muonConfig": {
+          "type": "string",
+          "default": null,
+          "description": "Path to muon formatter config.ini"
+        },
+        "mesonbuild.debugOptions": {
+          "type": "object",
+          "default": {
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ]
+          },
+          "description": "Give an object that's merged into the debug configuration provider"
+        },
+        "mesonbuild.languageServer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "mesonlsp",
+          "enum": [
+            "Swift-MesonLSP",
+            "mesonlsp",
+            null
+          ],
+          "description": "Select which language server to use. Swift-MesonLSP is a legacy alias for mesonlsp."
+        },
+        "mesonbuild.languageServerPath": {
+          "type": "string",
+          "description": "Binary name or path to language server",
+          "default": "mesonlsp"
+        },
+        "mesonbuild.downloadLanguageServer": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "default": "ask",
+          "enum": [
+            true,
+            false,
+            "ask"
+          ],
+          "enumDescriptions": [
+            "Download the language server",
+            "Do not download the language server",
+            "Ask every time to download the language server"
+          ],
+          "description": "Have VSCode download the language server automatically (MacOS/Windows only for Swift-MesonLSP)"
+        },
+        "mesonbuild.modifySettings": {
+          "type": [
+            "boolean",
+            "array"
+          ],
+          "items": {
+            "enum": [
+              "ms-vscode.cpptools",
+              "rust-lang.rust-analyzer"
+            ]
+          },
+          "default": true,
+          "markdownDescription": "Automatically setup other extensions to use files generated by Meson. Set it to `false` if for example `.vscode/settings.json` is committed into git and should not be modified. It can also be an array of extension IDs of the following:\n- [`ms-vscode.cpptools`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)\n- [`rust-lang.rust-analyzer`](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)."
+        },
+        "mesonbuild.mesonlsp.others.defaultFormattingConfig": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "default": null,
+          "description": "Default muon config to use for formatting"
+        },
+        "mesonbuild.mesonlsp.others.ignoreDiagnosticsFromSubprojects": {
+          "type": [
+            "boolean",
+            "array"
+          ],
+          "default": false,
+          "description": "Ignore diagnostics from either all subprojects (if true) or from selected subprojects (if the value is an array)"
+        },
+        "mesonbuild.mesonlsp.others.disableInlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable inlay hints"
+        },
+        "mesonbuild.mesonlsp.others.removeDefaultTypesInInlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reduce clutter in inlay hints by removing any|dict(any)|list(any)"
+        },
+        "mesonbuild.mesonlsp.others.disablePosargInlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable inlay hints for arguments"
+        },
+        "mesonbuild.mesonlsp.others.useCustomParser": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, a custom faster parser is used with better diagnostics, set to `false` it will fall back to the tree-sitter based parser"
+        },
+        "mesonbuild.mesonlsp.others.muonPath": {
+          "type": "string",
+          "default": null,
+          "description": "Set path to muon that will be used for formatting"
+        },
+        "mesonbuild.mesonlsp.linting.disableNameLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking variable names for snake_case"
+        },
+        "mesonbuild.mesonlsp.linting.disableAllIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Shortcut for all other `mesonbuild.mesonlsp.linting.disableXXXIdLinting` options"
+        },
+        "mesonbuild.mesonlsp.linting.disableCompilerIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_id()`"
+        },
+        "mesonbuild.mesonlsp.linting.disableCompilerArgumentIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_argument_syntax()`"
+        },
+        "mesonbuild.mesonlsp.linting.disableLinkerIdLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known id, if comparing it with the result of `compiler.get_linker_id()`"
+        },
+        "mesonbuild.mesonlsp.linting.disableCpuFamilyLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known CPU family, if comparing it with the result of `XXX_machine.cpu_family()`"
+        },
+        "mesonbuild.mesonlsp.linting.disableOsFamilyLinting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a string literal is a known system, if comparing it with the result of `XXX_machine.system()`"
+        },
+        "mesonbuild.mesonlsp.linting.disableUnusedVariableCheck": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether a variable is unused"
+        },
+        "mesonbuild.mesonlsp.linting.disableArgTypeChecking": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable checking whether the types of arguments passed to a method or function are correct"
+        }
+      }
+    },
+    "taskDefinitions": [
+      {
+        "type": "meson",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The Meson target. The full name, including path and type, is mandatory (e.g. relative/path/to/targetname:shared_library)",
+            "default": "all",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "build",
+                  "test"
+                ]
+              }
+            }
+          },
+          "filename": {
+            "type": "string",
+            "description": "Filename to run as part of the target",
+            "dependencies": {
+              "mode": {
+                "enum": [
+                  "run"
+                ]
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "description": "Specify the kind of task to perform",
+            "enum": [
+              "build",
+              "run",
+              "test",
+              "reconfigure",
+              "clean",
+              "install"
+            ],
+            "default": "build"
+          }
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "meson",
+        "aliases": [
+          "Meson",
+          "meson",
+          "mesonbuild"
+        ],
+        "filenames": [
+          "meson.build",
+          "meson_options.txt",
+          "meson.options"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "res/meson_32.svg",
+          "light": "res/meson_32.svg"
+        }
+      },
+      {
+        "id": "ini",
+        "filenamePatterns": [
+          "**/subprojects/*.wrap"
+        ],
+        "aliases": [
+          "Meson Wrap"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "meson",
+        "scopeName": "source.meson",
+        "path": "./syntaxes/meson.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "meson",
+        "path": "./snippets/meson.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "meson-sidebar",
+          "title": "Meson",
+          "icon": "res/meson_32.svg"
+        }
+      ]
+    },
+    "views": {
+      "meson-sidebar": [
+        {
+          "id": "meson-project",
+          "name": "Current project",
+          "when": "mesonbuild.hasProject"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "view == meson-project && viewItem == meson-target",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "mesonbuild.reconfigure",
+          "when": "view == meson-project",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mesonbuild.openBuildFile",
+          "when": "false"
+        },
+        {
+          "command": "mesonbuild.reconfigure",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.clean",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.build",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.test",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.run",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.install",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.benchmark",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.restartLanguageServer",
+          "when": "mesonbuild.hasProject"
+        },
+        {
+          "command": "mesonbuild.selectRootDir",
+          "when": "mesonbuild.hasMultipleProjects"
+        }
+      ]
+    },
+    "problemMatchers": [
+      {
+        "name": "meson-gcc",
+        "source": "gcc",
+        "owner": "meson",
+        "fileLocation": [
+          "autoDetect",
+          "${workspaceFolder}/${config:mesonbuild.buildFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "patch": "scripts/patch.sh ../src/**.ts",
+    "compile": "tsc -p ./",
+    "prepack": "npm run patch && npm run compile",
+    "markdownlint:check": "markdownlint-cli2 **.md",
+    "prettier:check": "prettier --check **.md **.ts **.yml **.json",
+    "vscode:prepublish": "npm run compile",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.1",
+    "@types/node": "^16.11.7",
+    "@types/which": "^3.0.0",
+    "coc.nvim": "^0.0.83-next.18",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "markdownlint-cli2": "^0.10.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "which": "^4.0.0"
+  },
+  "prettier": {
+    "proseWrap": "always"
+  }
+}

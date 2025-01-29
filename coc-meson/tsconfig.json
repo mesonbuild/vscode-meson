@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "outDir": "out",
+    "rootDir": "src",
+    "strict": false,
+    "allowSyntheticDefaultImports": true,
+  },
+  "exclude": [
+    "src/cpptoolsconfigprovider.ts",
+    "src/debug/index.ts",
+    "src/tasks.ts",
+    "src/tests.ts",
+    "src/treeview/*"
+  ]
+}
