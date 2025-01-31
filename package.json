@@ -192,12 +192,13 @@
         },
         "mesonbuild.formatting.provider": {
           "type": "string",
-          "default": "muon",
+          "default": "auto",
           "enum": [
-            "muon",
-            "meson"
+            "auto",
+            "meson",
+            "muon"
           ],
-          "description": "Select which formatting provider to use"
+          "description": "Select which formatting provider to use. If set to 'auto', the best available one is picked"
         },
         "mesonbuild.formatting.muonConfig": {
           "type": "string",

@@ -3,6 +3,8 @@
 ## next
 
 - Add support for meson as formatter
+- Use meson as default formatter
+- Add auto select capability for formatting provider preference
 
 ## 1.26.0
 

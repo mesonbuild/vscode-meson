@@ -9,18 +9,71 @@ type FormatterFunc = (tool: Tool, root: string, document: vscode.TextDocument) =
 type FormatterDefinition = {
   format: FormatterFunc;
   check: ToolCheckFunc;
+  priority: number;
 };
 
+//NOTE: the highest priority number means it is tested first, the lowest is tested last
 const formatters: Record<FormattingProvider, FormatterDefinition> = {
   muon: {
     format: muon.format,
     check: muon.check,
+    priority: 0,
   },
   meson: {
     format: meson.format,
     check: meson.check,
+    priority: 1,
   },
 };
+
+type FormatterError = { provider: FormattingProvider; error: string };
+
+type BestTool = {
+  provider: FormattingProvider;
+  tool: Tool;
+};
+
+type BestFormatterResult = BestTool | FormatterError[];
+
+async function getBestAvailableFormatter(provider: FormattingProvider | "auto"): Promise<BestFormatterResult> {
+  if (provider !== "auto") {
+    const props = formatters[provider];
+
+    const checkResult = await props.check();
+    if (checkResult.isError()) {
+      return [{ provider, error: checkResult.error }];
+    }
+
+    return { provider, tool: checkResult.tool };
+  }
+
+  // sort the available providers by priority
+  const providerPriority: FormattingProvider[] = (Object.keys(formatters) as FormattingProvider[]).sort(
+    (provider1: FormattingProvider, provider2: FormattingProvider) => {
+      return formatters[provider2].priority - formatters[provider1].priority;
+    },
+  );
+
+  const errors: FormatterError[] = [];
+
+  for (const providerName of providerPriority) {
+    const props = formatters[providerName];
+
+    const checkResult = await props.check();
+    if (checkResult.isError()) {
+      errors.push({ provider: providerName, error: checkResult.error });
+      continue;
+    }
+
+    return { provider: providerName, tool: checkResult.tool };
+  }
+
+  return errors;
+}
+
+function isFormaterErrors(input: BestFormatterResult): input is FormatterError[] {
+  return Array.isArray(input);
+}
 
 async function reloadFormatters(sourceRoot: string, context: vscode.ExtensionContext): Promise<vscode.Disposable[]> {
   let disposables: vscode.Disposable[] = [];
@@ -29,19 +82,30 @@ async function reloadFormatters(sourceRoot: string, context: vscode.ExtensionCon
     return disposables;
   }
 
-  const name = extensionConfiguration("formatting").provider;
-  const props = formatters[name];
+  const providerName = extensionConfiguration("formatting").provider;
 
-  const checkResult = await props.check();
-  if (checkResult.isError()) {
-    getOutputChannel().appendLine(`Failed to enable formatter ${name}: ${checkResult.error}`);
+  const bestFormatter = await getBestAvailableFormatter(providerName);
+
+  if (isFormaterErrors(bestFormatter)) {
+    getOutputChannel().appendLine(`Failed to find an available formatter: The user preference was '${providerName}'`);
+    for (const { provider, error } of bestFormatter) {
+      getOutputChannel().appendLine(`Failed to enable formatter ${provider}: ${error}`);
+    }
     getOutputChannel().show(true);
     return disposables;
   }
 
+  const { tool, provider } = bestFormatter;
+
+  getOutputChannel().appendLine(
+    `The best formatter was determined to be ${provider}: The user preference was '${providerName}'`,
+  );
+
+  const props = formatters[provider];
+
   const sub = vscode.languages.registerDocumentFormattingEditProvider("meson", {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-      return await props.format(checkResult.tool, sourceRoot, document);
+      return await props.format(tool, sourceRoot, document);
     },
   });
 

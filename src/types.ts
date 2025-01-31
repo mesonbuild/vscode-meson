@@ -82,7 +82,7 @@ export interface ExtensionConfiguration {
   };
   formatting: {
     enabled: boolean;
-    provider: FormattingProvider;
+    provider: FormattingProvider | "auto";
     muonConfig: string | null;
     mesonConfig: string | null;
   };
