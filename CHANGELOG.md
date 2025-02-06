@@ -1,5 +1,7 @@
 # Change Log
 
+## next
+
 ## 1.27.0
 
 - Add support for meson as formatter
