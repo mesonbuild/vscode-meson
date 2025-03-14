@@ -203,7 +203,7 @@ export abstract class LanguageServerClient {
     const options = LanguageServerClient.clientOptions;
     options.initializationOptions = vscode.workspace.getConfiguration(`mesonbuild.${this.server}`);
     this.ls = new LanguageClient(
-      this.server!,
+      "mesonbuild",
       `Meson Language Server (${this.server})`,
       serverOptions,
       LanguageServerClient.clientOptions,
