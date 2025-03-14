@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { LanguageServerClient } from ".";
 import { LanguageServer } from "../types";
 import { MesonLSPLanguageClient } from "./mesonlsp";
+import { MuonLanguageClient } from "./muon";
 import { Uri } from "vscode";
 
 export function serverToClass(server: LanguageServer): any {
@@ -9,6 +10,8 @@ export function serverToClass(server: LanguageServer): any {
     case "Swift-MesonLSP":
     case "mesonlsp":
       return MesonLSPLanguageClient;
+    case "muon":
+      return MuonLanguageClient;
     default:
       return null;
   }
