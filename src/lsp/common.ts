@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { LanguageServerClient } from ".";
-import { LanguageServer } from "../types";
+import { LanguageServer, SettingsKey } from "../types";
 import { MesonLSPLanguageClient } from "./mesonlsp";
 import { MuonLanguageClient } from "./muon";
 import { Uri } from "vscode";
+import { extensionConfiguration } from "../utils";
 
 export function serverToClass(server: LanguageServer): any {
   switch (server) {
@@ -18,10 +19,11 @@ export function serverToClass(server: LanguageServer): any {
 }
 
 export async function createLanguageServerClient(
-  server: LanguageServer,
   download: boolean,
   context: vscode.ExtensionContext,
 ): Promise<LanguageServerClient | null> {
+  const server = extensionConfiguration(SettingsKey.languageServer);
+
   const klass = serverToClass(server);
   if (klass == null) {
     return null;
