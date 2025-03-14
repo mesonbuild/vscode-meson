@@ -99,6 +99,17 @@
     "configuration": {
       "title": "Meson build configuration",
       "properties": {
+        "mesonbuild.trace.server": {
+          "type": "string",
+          "default": "off",
+          "scope": "window",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "description": "Traces the communication between VS Code and the current Meson language server."
+        },
         "mesonbuild.selectRootDir": {
           "type": "boolean",
           "default": true,
