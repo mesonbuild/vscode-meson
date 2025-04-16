@@ -1,7 +1,7 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils";
-import { Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
+import { Target, Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
 import { getMesonTests, getMesonTargets } from "./introspection";
 import { workspaceState } from "./extension";
 
@@ -31,7 +31,59 @@ function findSourceOfTest(test: Test, targets: Targets): vscode.Uri | undefined 
   return path ? vscode.Uri.file(path) : undefined;
 }
 
-export async function rebuildTests(controller: vscode.TestController) {
+/**
+ * Ensures that the given test targets are up to date
+ * @param tests Tests to rebuild
+ * @param buildDir Meson buildDir
+ * @returns `ExecResult` of the `meson compile ...` invocation
+ */
+async function rebuildTests(tests: Test[], buildDir: string): Promise<ExecResult> {
+  // We need to ensure that all test dependencies are built before issuing tests,
+  // as otherwise each meson test ... invocation will lead to a rebuild on it's own
+  const dependencies: Set<string> = new Set(
+    tests.flatMap((test) => {
+      return test.depends;
+    }),
+  );
+
+  const mesonTargets = await getMesonTargets(buildDir);
+  const testDependencies: Set<Target> = new Set(
+    mesonTargets.filter((target) => {
+      return dependencies.has(target.id);
+    }),
+  );
+
+  return exec(extensionConfiguration("mesonPath"), [
+    "compile",
+    "-C",
+    buildDir,
+    ...[...testDependencies].map((test) => {
+      // `test.name` is not guaranteed to be the actual name that meson wants
+      // format is hash@@realname@type
+      return `"${/[^@]+@@(.+)@[^@]+/.exec(test.id)![1]}"`;
+    }),
+  ]);
+}
+
+/**
+ * Look up the meson tests that correspond to a given set of vscode TestItems
+ * @param vsCodeTests TestItems to look up
+ * @param mesonTests The set of all existing meson tests
+ * @returns Meson tests corresponding to the TestItems
+ */
+function vsCodeToMeson(vsCodeTests: readonly vscode.TestItem[], mesonTests: Tests): Test[] {
+  return vsCodeTests.map((test) => {
+    return mesonTests.find((mesonTest) => {
+      return mesonTest.name == test.id;
+    })!;
+  });
+}
+
+/**
+ * Regenerate the test view in vscode, adding new tests and deleting stale ones
+ * @param controller VSCode test controller
+ */
+export async function regenerateTests(controller: vscode.TestController) {
   const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
   const tests = await getMesonTests(buildDir);
   const targets = await getMesonTargets(buildDir);
@@ -65,9 +117,7 @@ export async function testRunHandler(
   // put it in the parallel or sequential queue,
   // and tell vscode about the enqueued test.
   const testAdder = (test: vscode.TestItem) => {
-    const mesonTest = mesonTests.find((mesonTest) => {
-      return mesonTest.name == test.id;
-    })!;
+    const mesonTest = vsCodeToMeson([test], mesonTests)[0];
     if (mesonTest.is_parallel) {
       parallelTests.push(test);
     } else {
@@ -83,11 +133,19 @@ export async function testRunHandler(
     controller.items.forEach(testAdder);
   }
 
+  // we need to ensure that all test dependencies are built before issuing tests,
+  // as otherwise each meson test ... invocation will lead to a rebuild on it's own
+  await rebuildTests(vsCodeToMeson(parallelTests.concat(sequentialTests), mesonTests), buildDir).catch((onrejected) => {
+    const execResult = onrejected as ExecResult;
+    vscode.window.showErrorMessage("Failed to build tests:\r\n" + execResult.stdout + "\r\n" + execResult.stderr);
+    run.end();
+  });
+
   const dispatchTest = (test: vscode.TestItem) => {
     run.started(test);
     return exec(
       extensionConfiguration("mesonPath"),
-      ["test", "-C", buildDir, "--print-errorlog", `"${test.id}"`],
+      ["test", "-C", buildDir, "--print-errorlog", "--no-rebuild", `"${test.id}"`],
       extensionConfiguration("testEnvironment"),
     ).then(
       (onfulfilled) => {
@@ -102,7 +160,7 @@ export async function testRunHandler(
         }
         run.appendOutput(stdout, undefined, test);
         if (execResult.error?.code == 125) {
-          vscode.window.showErrorMessage("Failed to build tests. Results will not be updated");
+          vscode.window.showErrorMessage("Failed to run tests. Results will not be updated");
           run.errored(test, new vscode.TestMessage(execResult.stderr));
         } else {
           run.failed(test, new vscode.TestMessage(execResult.stderr), execResult.timeMs);
