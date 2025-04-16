@@ -9,6 +9,7 @@ export enum DebuggerType {
   cppvsdbg = "cppvsdbg",
   cppdbg = "cppdbg",
   lldb = "lldb",
+  lldbDAP = "lldb-dap",
 }
 
 enum MIMode {

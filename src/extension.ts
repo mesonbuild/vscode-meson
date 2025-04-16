@@ -83,6 +83,10 @@ export async function activate(ctx: vscode.ExtensionContext) {
     providers.push(new MesonDebugConfigurationProvider(DebuggerType.lldb, buildDir));
   }
 
+  if (vscode.extensions.getExtension("llvm-vs-code-extensions.lldb-dap")) {
+    providers.push(new MesonDebugConfigurationProvider(DebuggerType.lldbDAP, buildDir));
+  }
+
   // Install cppdbg or cppvsdbg provider if C/C++ extension is installed
   if (vscode.extensions.getExtension("ms-vscode.cpptools")) {
     if (os.platform() === "win32") {

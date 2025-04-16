@@ -104,13 +104,14 @@ export async function testDebugHandler(
   let debugType = null;
 
   const cppTools = vscode.extensions.getExtension("ms-vscode.cpptools");
-  if (cppTools && cppTools.isActive) {
+  const codelldb = vscode.extensions.getExtension("vadimcn.vscode-lldb");
+  const lldbDAP = vscode.extensions.getExtension("llvm-vs-code-extensions.lldb-dap");
+  if (cppTools) {
     debugType = "cppdbg";
-  } else {
-    const codelldb = vscode.extensions.getExtension("vadimcn.vscode-lldb");
-    if (codelldb && codelldb.isActive) {
-      debugType = "lldb";
-    }
+  } else if (codelldb) {
+    debugType = "lldb";
+  } else if (lldbDAP) {
+    debugType = "lldb-dap";
   }
 
   if (!debugType) {
