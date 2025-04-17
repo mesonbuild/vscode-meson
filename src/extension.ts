@@ -239,14 +239,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
     await rebuildTests(controller);
   }
 
-  const server = extensionConfiguration(SettingsKey.languageServer);
-  let client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
-  // Basically every server supports formatting...
-  const serverSupportsFormatting = server == "mesonlsp" || server == "Swift-MesonLSP";
-  if (client !== null && serverSupportsFormatting) {
+  let client = await createLanguageServerClient(await askShouldDownloadLanguageServer(), ctx);
+  if (client !== null) {
     ctx.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration(`mesonbuild.${server}`)) {
+        if (e.affectsConfiguration(`mesonbuild.${client!.server}`)) {
           client?.reloadConfig();
         }
       }),
@@ -257,9 +254,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     client.start();
     await client.reloadConfig();
 
-    getOutputChannel().appendLine(
-      "Not enabling the muon linter/formatter because a language server supporting formatting is active.",
-    );
+    getOutputChannel().appendLine("Linters and formatters disabled because a language server is active.");
   } else {
     activateLinters(sourceDir, ctx);
     activateFormatters(sourceDir, ctx);
@@ -268,7 +263,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("mesonbuild.restartLanguageServer", async () => {
       if (client === null) {
-        client = await createLanguageServerClient(server, await askShouldDownloadLanguageServer(), ctx);
+        client = await createLanguageServerClient(await askShouldDownloadLanguageServer(), ctx);
         if (client !== null) {
           ctx.subscriptions.push(client);
           client.start();

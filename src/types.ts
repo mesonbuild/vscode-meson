@@ -60,7 +60,7 @@ export type LinterConfiguration = {
   enabled: boolean;
 };
 
-export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | null;
+export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | "muon" | null;
 export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
 
 export type FormattingProvider = "muon" | "meson";
