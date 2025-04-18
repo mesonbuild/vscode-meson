@@ -158,6 +158,12 @@
           "default": {},
           "description": "Specify the list of additional environment variables used for running tests."
         },
+        "mesonbuild.testJobs": {
+          "type": "integer",
+          "default": -1,
+          "minimum": -1,
+          "description": "Specify the maximum number of tests executed in parallel. -1 for number of CPUs, 0 for unlimited."
+        },
         "mesonbuild.benchmarkOptions": {
           "type": "array",
           "default": [

@@ -16,7 +16,7 @@ import {
 } from "./utils";
 import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
 import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
-import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
+import { testDebugHandler, testRunHandler, regenerateTests } from "./tests";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
@@ -136,7 +136,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const changeHandler = async () => {
     mesonTasks = null;
     clearCache();
-    await rebuildTests(controller);
+    await regenerateTests(controller);
     await genEnvFile(buildDir);
     explorer.refresh();
   };
@@ -236,7 +236,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   if (!checkMesonIsConfigured(buildDir)) {
     if (await askConfigureOnOpen()) runFirstTask("reconfigure");
   } else {
-    await rebuildTests(controller);
+    await regenerateTests(controller);
   }
 
   const server = extensionConfiguration(SettingsKey.languageServer);
