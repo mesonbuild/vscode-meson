@@ -2,8 +2,9 @@ import * as os from "os";
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils.js";
 import { Target, Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types.js";
-import { getMesonTests, getMesonTargets } from "./introspection.js";
+import { getMesonTests, getMesonTargets, getMesonBuildOptions } from "./introspection.js";
 import { workspaceState } from "./extension.js";
+import { getCoverage } from "./coverage.js";
 
 // This is far from complete, but should suffice for the
 // "test is made of a single executable is made of a single source file" usecase.
@@ -105,6 +106,7 @@ export async function testRunHandler(
   controller: vscode.TestController,
   request: vscode.TestRunRequest,
   token: vscode.CancellationToken,
+  coverage: boolean = false,
 ) {
   const run = controller.createTestRun(request, undefined, false);
   const parallelTests: vscode.TestItem[] = [];
@@ -112,6 +114,14 @@ export async function testRunHandler(
 
   const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
   const mesonTests = await getMesonTests(buildDir);
+
+  if (coverage) {
+    // Existing files should be cleaned so that with
+    // tests = A, B
+    // runTest(A); runTest(B);
+    // the coverage results of B won't include the results of A
+    await exec("ninja", ["-C", buildDir, "clean-gcda"]);
+  }
 
   // Look up the meson test for a given vscode test,
   // put it in the parallel or sequential queue,
@@ -199,7 +209,28 @@ export async function testRunHandler(
     await dispatchTest(test);
   }
 
+  if (coverage) {
+    for (const fileCoverage of await getCoverage(buildDir)) {
+      run.addCoverage(fileCoverage);
+    }
+  }
+
   run.end();
+}
+
+export async function testCoverageHandler(
+  controller: vscode.TestController,
+  request: vscode.TestRunRequest,
+  token: vscode.CancellationToken,
+) {
+  const buildDir = workspaceState.get<string>("mesonbuild.buildDir")!;
+  const hasCoverage = (await getMesonBuildOptions(buildDir)).find((option) => option.name == "b_coverage")
+    ?.value as boolean;
+  if (!hasCoverage) {
+    vscode.window.showErrorMessage("Coverage was not enabled. Reconfigure with -Db_coverage=true");
+    return;
+  }
+  return testRunHandler(controller, request, token, true);
 }
 
 export async function testDebugHandler(

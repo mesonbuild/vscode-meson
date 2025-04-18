@@ -594,6 +594,9 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
+    "domhandler": "^5.0.3",
+    "domutils": "^3.2.2",
+    "htmlparser2": "^10.0.0",
     "vscode-cpptools": "^7.0.0",
     "vscode-languageclient": "^9.0.1",
     "which": "^6.0.0"

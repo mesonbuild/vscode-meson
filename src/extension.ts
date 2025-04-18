@@ -16,7 +16,8 @@ import {
 } from "./utils.js";
 import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index.js";
 import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider.js";
-import { testDebugHandler, testRunHandler, regenerateTests } from "./tests.js";
+import { testDebugHandler, testRunHandler, regenerateTests, testCoverageHandler } from "./tests.js";
+import { loadDetailedCoverage } from "./coverage.js";
 import { activateLinters } from "./linters.js";
 import { activateFormatters } from "./formatters.js";
 import { SettingsKey, TaskQuickPickItem } from "./types.js";
@@ -118,6 +119,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
     (request, token) => testRunHandler(controller, request, token),
     true,
   );
+  controller.createRunProfile(
+    "Meson coverage",
+    vscode.TestRunProfileKind.Coverage,
+    (request, token) => testCoverageHandler(controller, request, token),
+    true,
+  ).loadDetailedCoverage = loadDetailedCoverage;
   ctx.subscriptions.push(controller);
 
   let mesonTasks: Thenable<vscode.Task[]> | null = null;
