@@ -72,6 +72,7 @@ export interface ExtensionConfiguration {
   setupOptions: string[];
   testOptions: string[];
   testEnvironment: { [key: string]: string };
+  testJobs: number;
   benchmarkOptions: string[];
   buildFolder: string;
   mesonPath: string;

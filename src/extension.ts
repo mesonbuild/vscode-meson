@@ -16,7 +16,8 @@ import {
 } from "./utils";
 import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
 import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
-import { testDebugHandler, testRunHandler, rebuildTests } from "./tests";
+import { testDebugHandler, testRunHandler, regenerateTests, testCoverageHandler } from "./tests";
+import { loadDetailedCoverage } from "./coverage";
 import { activateLinters } from "./linters";
 import { activateFormatters } from "./formatters";
 import { SettingsKey, TaskQuickPickItem } from "./types";
@@ -118,6 +119,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
     (request, token) => testRunHandler(controller, request, token),
     true,
   );
+  controller.createRunProfile(
+    "Meson coverage",
+    vscode.TestRunProfileKind.Coverage,
+    (request, token) => testCoverageHandler(controller, request, token),
+    true,
+  ).loadDetailedCoverage = loadDetailedCoverage;
   ctx.subscriptions.push(controller);
 
   let mesonTasks: Thenable<vscode.Task[]> | null = null;
@@ -136,7 +143,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const changeHandler = async () => {
     mesonTasks = null;
     clearCache();
-    await rebuildTests(controller);
+    await regenerateTests(controller);
     await genEnvFile(buildDir);
     explorer.refresh();
   };
@@ -236,7 +243,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   if (!checkMesonIsConfigured(buildDir)) {
     if (await askConfigureOnOpen()) runFirstTask("reconfigure");
   } else {
-    await rebuildTests(controller);
+    await regenerateTests(controller);
   }
 
   const server = extensionConfiguration(SettingsKey.languageServer);

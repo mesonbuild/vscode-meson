@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/mesonbuild/vscode-meson/blob/master/README.md",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.88.0"
   },
   "categories": [
     "Programming Languages"
@@ -157,6 +157,12 @@
           },
           "default": {},
           "description": "Specify the list of additional environment variables used for running tests."
+        },
+        "mesonbuild.testJobs": {
+          "type": "integer",
+          "default": -1,
+          "minimum": -1,
+          "description": "Specify the maximum number of tests executed in parallel. -1 for number of CPUs, 0 for unlimited."
         },
         "mesonbuild.benchmarkOptions": {
           "type": "array",
@@ -566,7 +572,7 @@
   "devDependencies": {
     "@types/adm-zip": "^0.5.1",
     "@types/node": "^16.11.7",
-    "@types/vscode": "^1.75.0",
+    "@types/vscode": "^1.88.0",
     "@types/which": "^3.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
@@ -577,6 +583,9 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
+    "domhandler": "^5.0.3",
+    "domutils": "^3.2.2",
+    "htmlparser2": "^10.0.0",
     "vscode-cpptools": "^6.1.0",
     "vscode-languageclient": "^9.0.1",
     "which": "^4.0.0"
