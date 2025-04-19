@@ -87,6 +87,7 @@ export interface ExtensionConfiguration {
     muonConfig: string | null;
     mesonConfig: string | null;
   };
+  debuggerExtension: "cpptools" | "vscode-lldb" | "lldb-dap" | "auto";
   debugOptions: object;
   languageServer: LanguageServer;
   languageServerPath: string;
