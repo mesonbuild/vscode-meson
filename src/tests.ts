@@ -240,21 +240,8 @@ export async function testDebugHandler(
     return;
   }
 
-  let debugType = null;
-
-  const cppTools = vscode.extensions.getExtension("ms-vscode.cpptools");
-  const codelldb = vscode.extensions.getExtension("vadimcn.vscode-lldb");
-  const lldbDAP = vscode.extensions.getExtension("llvm-vs-code-extensions.lldb-dap");
-  if (cppTools) {
-    debugType = "cppdbg";
-  } else if (codelldb) {
-    debugType = "lldb";
-  } else if (lldbDAP) {
-    debugType = "lldb-dap";
-  }
-
+  const debugType = resolveDebugger();
   if (!debugType) {
-    vscode.window.showErrorMessage("No debugger extension found. Please install one and try again");
     run.end();
     return;
   }
@@ -304,4 +291,55 @@ export async function testDebugHandler(
   }
 
   run.end();
+}
+
+function resolveDebugger(): string | undefined {
+  const chosenDebugger = extensionConfiguration("debuggerExtension");
+  const cppTools = vscode.extensions.getExtension("ms-vscode.cpptools");
+  const codelldb = vscode.extensions.getExtension("vadimcn.vscode-lldb");
+  const lldbDAP = vscode.extensions.getExtension("llvm-vs-code-extensions.lldb-dap");
+  let debugType = undefined;
+  switch (chosenDebugger) {
+    case "auto": {
+      if (cppTools) {
+        debugType = "cppdbg";
+      } else if (codelldb) {
+        debugType = "lldb";
+      } else if (lldbDAP) {
+        debugType = "lldb-dap";
+      } else {
+        vscode.window.showErrorMessage("No debugger extension found. Please install one and try again");
+      }
+
+      return debugType;
+    }
+    case "cpptools": {
+      if (!cppTools) {
+        vscode.window.showErrorMessage(`Chosen debugger extension ${chosenDebugger} is not available`);
+      } else {
+        debugType = "cppdbg";
+      }
+      return debugType;
+    }
+    case "vscode-lldb": {
+      if (!codelldb) {
+        vscode.window.showErrorMessage(`Chosen debugger extension ${chosenDebugger} is not available`);
+      } else {
+        debugType = "lldb";
+      }
+      return debugType;
+    }
+    case "lldb-dap": {
+      if (!lldbDAP) {
+        vscode.window.showErrorMessage(`Chosen debugger extension ${chosenDebugger} is not available`);
+      } else {
+        debugType = "lldb-dap";
+      }
+      return debugType;
+    }
+    default: {
+      vscode.window.showErrorMessage(`Chosen debugger extension ${chosenDebugger} is not supported`);
+      return debugType;
+    }
+  }
 }

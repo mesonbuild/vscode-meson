@@ -216,6 +216,23 @@
           "default": null,
           "description": "Path to meson format config 'meson.format'"
         },
+        "mesonbuild.debuggerExtension": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "cpptools",
+            "vscode-lldb",
+            "lldb-dap",
+            "auto"
+          ],
+          "enumDescriptions": [
+            "ms-vscode.cpptools",
+            "vadimcn.vscode-lldb",
+            "llvm-vs-code-extensions.lldb-dap",
+            "Selects the first installed extension"
+          ],
+          "description": "Debugger extension to use"
+        },
         "mesonbuild.debugOptions": {
           "type": "object",
           "default": {
