@@ -86,6 +86,7 @@ export interface ExtensionConfiguration {
     muonConfig: string | null;
     mesonConfig: string | null;
   };
+  debuggerExtension: string;
   debugOptions: object;
   languageServer: LanguageServer;
   languageServerPath: string;
