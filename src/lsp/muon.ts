@@ -7,18 +7,23 @@ export class MuonLanguageClient extends LanguageServerClient {
   get runExe(): Executable {
     return {
       command: this.languageServerPath!.fsPath,
-      args: ["analyze", "lsp"],
+      args: [...this.extraArgs, "analyze", "lsp"],
     };
   }
 
   get debugExe(): Executable {
     return {
       command: this.languageServerPath!.fsPath,
-      args: ["analyze", "lsp"],
+      args: [...this.extraArgs, "analyze", "lsp"],
     };
   }
 
-  constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("muon", languageServerPath, context, referenceVersion);
+  constructor(
+    languageServerPath: vscode.Uri,
+    extraArgs: string[],
+    context: vscode.ExtensionContext,
+    referenceVersion: string,
+  ) {
+    super("muon", languageServerPath, extraArgs, context, referenceVersion);
   }
 }
