@@ -3,11 +3,15 @@ import { extensionConfiguration, getOutputChannel } from "./utils.js";
 import { ExtensionConfiguration, LinterConfiguration, ToolCheckFunc, Tool } from "./types.js";
 import * as muon from "./tools/muon.js";
 
-type LinterFunc = (tool: Tool, sourceRoot: string, document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>;
+type LinterFunc = (
+  tool: Tool<muon.MuonOptions>,
+  sourceRoot: string,
+  document: vscode.TextDocument,
+) => Promise<vscode.Diagnostic[]>;
 
 type LinterDefinition = {
   lint: LinterFunc;
-  check: ToolCheckFunc;
+  check: ToolCheckFunc<muon.MuonOptions>;
 };
 
 const linters: Record<keyof ExtensionConfiguration["linter"], LinterDefinition> = {
@@ -45,7 +49,7 @@ async function reloadLinters(
       continue;
     }
 
-    const linter = async (document: vscode.TextDocument) => await props.lint(checkResult.tool, sourceRoot, document);
+    const linter = async (document: vscode.TextDocument) => await props.lint(checkResult.data, sourceRoot, document);
     enabledLinters.push(linter);
   }
 

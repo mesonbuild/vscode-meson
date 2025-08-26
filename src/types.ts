@@ -3,35 +3,35 @@ import type { Version } from "./version.js";
 
 type Dict<T> = { [x: string]: T };
 
-export type Tool = { path: string; version: Version };
+export type Tool<Options> = { path: string; version: Version; options: Options };
 
-export type ToolCheckSuccessResult = {
-  tool: Tool;
+export type CheckSuccessResult<Data> = {
+  data: Data;
   error?: undefined;
 };
-export type ToolCheckErrorResult = {
-  tool?: undefined;
+export type CheckErrorResult = {
+  data?: undefined;
   error: string;
 };
 
-type ResultImpl = ToolCheckSuccessResult | ToolCheckErrorResult;
+type ResultImpl<Data> = CheckSuccessResult<Data> | CheckErrorResult;
 
-export class ToolCheckResult {
-  private readonly result: ResultImpl;
+export class CheckResult<Data> {
+  private readonly result: ResultImpl<Data>;
 
-  private constructor(result: ResultImpl) {
+  private constructor(result: ResultImpl<Data>) {
     this.result = result;
   }
 
-  static newError(error: string) {
-    return new ToolCheckResult({ error });
+  static newError<D>(error: string): CheckResult<D> {
+    return new CheckResult<D>({ error });
   }
 
-  static newTool(tool: Tool) {
-    return new ToolCheckResult({ tool });
+  static newData<D>(data: D): CheckResult<D> {
+    return new CheckResult<D>({ data });
   }
 
-  private hasErrorImpl(result: ResultImpl): result is ToolCheckErrorResult {
+  private hasErrorImpl(result: ResultImpl<Data>): result is CheckErrorResult {
     return !!result.error;
   }
 
@@ -46,15 +46,15 @@ export class ToolCheckResult {
     return this.result.error;
   }
 
-  get tool(): Tool {
+  get data(): Data {
     if (this.hasErrorImpl(this.result)) {
-      throw new Error("Wrong invocation of getter for 'tool', check the state first");
+      throw new Error("Wrong invocation of getter for 'data', check the state first");
     }
-    return this.result.tool;
+    return this.result.data;
   }
 }
 
-export type ToolCheckFunc = () => Promise<ToolCheckResult>;
+export type ToolCheckFunc<D> = () => Promise<CheckResult<Tool<D>>>;
 
 export type LinterConfiguration = {
   enabled: boolean;

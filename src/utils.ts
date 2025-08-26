@@ -10,8 +10,8 @@ import {
   Target,
   SettingsKey,
   ModifiableExtension,
-  type ToolCheckResult,
-  type ToolCheckErrorResult,
+  type CheckResult,
+  type CheckErrorResult,
 } from "./types.js";
 import { getMesonBuildOptions } from "./introspection.js";
 import { extensionPath, workspaceState } from "./extension.js";
