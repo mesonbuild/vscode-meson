@@ -1,10 +1,20 @@
 import * as vscode from "vscode";
 import { execFeed, extensionConfiguration, getOutputChannel, mesonProgram } from "../utils.js";
-import { Tool, ToolCheckResult } from "../types.js";
+import { Tool, CheckResult } from "../types.js";
 import { getMesonVersion } from "../introspection.js";
 import { Version } from "../version.js";
 
-export async function format(meson: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+export interface MesonOptions {
+  supportsFileNameArgument: boolean;
+}
+
+export type MesonTool = Tool<MesonOptions>;
+
+export async function format(
+  meson: MesonTool,
+  root: string,
+  document: vscode.TextDocument,
+): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
 
   let args = ["format"];
@@ -14,6 +24,10 @@ export async function format(meson: Tool, root: string, document: vscode.TextDoc
     args.push("-c", config_path);
   }
   args.push("-");
+
+  if (meson.options.supportsFileNameArgument) {
+    args.push("--source-file-path", document.fileName);
+  }
 
   const { stdout, stderr, error } = await execFeed(meson.path, args, { cwd: root }, originalDocumentText);
   if (error) {
@@ -35,8 +49,9 @@ export async function format(meson: Tool, root: string, document: vscode.TextDoc
 
 const formattingSupportedSinceVersion = new Version([1, 5, 0]);
 const formattingWithStdinSupportedSinceVersion = new Version([1, 7, 0]);
+const formattingWithFileNameArgumentSinceVersion = new Version([1, 9, 0]);
 
-export async function check(): Promise<ToolCheckResult> {
+export async function check(): Promise<CheckResult<MesonTool>> {
   const meson_path = mesonProgram();
 
   let mesonVersion;
@@ -45,23 +60,29 @@ export async function check(): Promise<ToolCheckResult> {
   } catch (e) {
     const error = e as Error;
     console.log(error);
-    return ToolCheckResult.newError(error.message);
+    return CheckResult.newError<MesonTool>(error.message);
   }
 
   // meson format was introduced in 1.5.0
   // see https://mesonbuild.com/Commands.html#format
   if (mesonVersion.compareWithOther(formattingSupportedSinceVersion) < 0) {
-    ToolCheckResult.newError(
+    return CheckResult.newError<MesonTool>(
       `Meson supports formatting only since version ${formattingSupportedSinceVersion}, but you have version ${mesonVersion}`,
     );
   }
 
   // using "-" as stdin is only supported since 1.7.0 (see https://github.com/mesonbuild/meson/pull/13793)
   if (mesonVersion.compareWithOther(formattingWithStdinSupportedSinceVersion) < 0) {
-    return ToolCheckResult.newError(
+    return CheckResult.newError<MesonTool>(
       `Meson supports formatting from stdin only since version ${formattingWithStdinSupportedSinceVersion}, but you have version ${mesonVersion}`,
     );
   }
 
-  return ToolCheckResult.newTool({ path: meson_path, version: mesonVersion });
+  const supportsFileNameArgument = mesonVersion.compareWithOther(formattingWithFileNameArgumentSinceVersion) >= 0;
+
+  const options: MesonOptions = {
+    supportsFileNameArgument,
+  };
+
+  return CheckResult.newData<MesonTool>({ path: meson_path, version: mesonVersion, options });
 }

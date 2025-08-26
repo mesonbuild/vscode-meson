@@ -1,9 +1,13 @@
 import * as vscode from "vscode";
 import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils.js";
-import { Tool, ToolCheckResult } from "../types.js";
+import { Tool, CheckResult } from "../types.js";
 import { Version, type VersionArray } from "../version.js";
 
-export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
+export interface MuonOptions {}
+
+export type MuonTool = Tool<MuonOptions>;
+
+export async function lint(muon: MuonTool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stdout, stderr } = await execFeed(
     muon.path,
     ["analyze", "-l", "-O", document.uri.fsPath],
@@ -51,7 +55,7 @@ export async function lint(muon: Tool, root: string, document: vscode.TextDocume
   return diagnostics;
 }
 
-export async function format(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+export async function format(muon: MuonTool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
 
   let args = ["fmt"];
@@ -82,7 +86,7 @@ export async function format(muon: Tool, root: string, document: vscode.TextDocu
   return [new vscode.TextEdit(documentRange, stdout)];
 }
 
-export async function check(): Promise<ToolCheckResult> {
+export async function check(): Promise<CheckResult<MuonTool>> {
   const muon_path = extensionConfiguration("muonPath");
   let stdout: string, stderr: string;
 
@@ -91,12 +95,12 @@ export async function check(): Promise<ToolCheckResult> {
   } catch (e) {
     const { error, stdout, stderr } = e as ExecResult;
     console.log(error);
-    return ToolCheckResult.newError(error!.message);
+    return CheckResult.newError<MuonTool>(error!.message);
   }
 
   const line1 = stdout.split("\n")[0].split(" ");
   if (line1.length !== 2) {
-    return ToolCheckResult.newError(`Invalid version string: ${line1}`);
+    return CheckResult.newError<MuonTool>(`Invalid version string: ${line1}`);
   }
 
   const ver = line1[1]
@@ -110,5 +114,7 @@ export async function check(): Promise<ToolCheckResult> {
       return Number.parseInt(s);
     }) as VersionArray;
 
-  return ToolCheckResult.newTool({ path: muon_path, version: new Version(ver) });
+  const options: MuonOptions = {};
+
+  return CheckResult.newData<MuonTool>({ path: muon_path, version: new Version(ver), options });
 }

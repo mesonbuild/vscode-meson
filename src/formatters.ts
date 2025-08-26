@@ -4,33 +4,40 @@ import { ToolCheckFunc, Tool, type FormattingProvider } from "./types.js";
 import * as muon from "./tools/muon.js";
 import * as meson from "./tools/meson.js";
 
-type FormatterFunc = (tool: Tool, root: string, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
+type FormatterFunc<Options> = (
+  tool: Tool<Options>,
+  root: string,
+  document: vscode.TextDocument,
+) => Promise<vscode.TextEdit[]>;
 
-type FormatterDefinition = {
-  format: FormatterFunc;
-  check: ToolCheckFunc;
+type FormatterDefinition<Options> = {
+  format: FormatterFunc<Options>;
+  check: ToolCheckFunc<Options>;
   priority: number;
 };
 
 //NOTE: the highest priority number means it is tested first, the lowest is tested last
-const formatters: Record<FormattingProvider, FormatterDefinition> = {
+const formatters: Record<
+  FormattingProvider,
+  FormatterDefinition<muon.MuonOptions> | FormatterDefinition<meson.MesonOptions>
+> = {
   muon: {
     format: muon.format,
     check: muon.check,
     priority: 0,
-  },
+  } as FormatterDefinition<muon.MuonOptions>,
   meson: {
     format: meson.format,
     check: meson.check,
     priority: 1,
-  },
+  } as FormatterDefinition<meson.MesonOptions>,
 };
 
 type FormatterError = { provider: FormattingProvider; error: string };
 
 type BestTool = {
   provider: FormattingProvider;
-  tool: Tool;
+  tool: Tool<muon.MuonOptions> | Tool<meson.MesonOptions>;
 };
 
 type BestFormatterResult = BestTool | FormatterError[];
@@ -44,7 +51,7 @@ async function getBestAvailableFormatter(provider: FormattingProvider | "auto"):
       return [{ provider, error: checkResult.error }];
     }
 
-    return { provider, tool: checkResult.tool };
+    return { provider, tool: checkResult.data };
   }
 
   // sort the available providers by priority
@@ -65,7 +72,7 @@ async function getBestAvailableFormatter(provider: FormattingProvider | "auto"):
       continue;
     }
 
-    return { provider: providerName, tool: checkResult.tool };
+    return { provider: providerName, tool: checkResult.data };
   }
 
   return errors;
@@ -105,7 +112,7 @@ async function reloadFormatters(sourceRoot: string, context: vscode.ExtensionCon
 
   const sub = vscode.languages.registerDocumentFormattingEditProvider("meson", {
     async provideDocumentFormattingEdits(document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
-      return await props.format(tool, sourceRoot, document);
+      return await (props.format as FormatterFunc<unknown>)(tool as Tool<unknown>, sourceRoot, document);
     },
   });
 
