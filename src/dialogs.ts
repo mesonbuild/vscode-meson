@@ -16,7 +16,7 @@ export async function askConfigureOnOpen(): Promise<boolean> {
   }
 
   const response = await vscode.window.showInformationMessage(
-    "Meson project detected in this workspace but does not seems to be configured. Would you like VS Code to configure it?",
+    "Meson project detected in this workspace but does not seem to be configured. Would you like VS Code to configure it?",
     ...Object.values(Options),
   );
 
