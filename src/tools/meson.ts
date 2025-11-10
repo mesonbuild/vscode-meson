@@ -3,6 +3,7 @@ import { execFeed, extensionConfiguration, getOutputChannel, mesonProgram } from
 import { Tool, ToolCheckResult } from "../types";
 import { getMesonVersion } from "../introspection";
 import { Version } from "../version";
+import { extensionPath } from "../extension";
 
 export async function format(meson: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();
@@ -37,8 +38,6 @@ const formattingSupportedSinceVersion = new Version([1, 5, 0]);
 const formattingWithStdinSupportedSinceVersion = new Version([1, 7, 0]);
 
 export async function check(): Promise<ToolCheckResult> {
-  const meson_path = mesonProgram();
-
   let mesonVersion;
   try {
     mesonVersion = await getMesonVersion();
@@ -63,5 +62,5 @@ export async function check(): Promise<ToolCheckResult> {
     );
   }
 
-  return ToolCheckResult.newTool({ path: meson_path, version: mesonVersion });
+  return ToolCheckResult.newTool({ path: extensionConfiguration("mesonPath"), version: mesonVersion });
 }

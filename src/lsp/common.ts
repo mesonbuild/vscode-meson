@@ -1,24 +1,29 @@
 import * as vscode from "vscode";
 import { LanguageServerClient } from ".";
-import { LanguageServer } from "../types";
+import { LanguageServer, SettingsKey } from "../types";
 import { MesonLSPLanguageClient } from "./mesonlsp";
+import { MuonLanguageClient } from "./muon";
 import { Uri } from "vscode";
+import { extensionConfiguration } from "../utils";
 
 export function serverToClass(server: LanguageServer): any {
   switch (server) {
     case "Swift-MesonLSP":
     case "mesonlsp":
       return MesonLSPLanguageClient;
+    case "muon":
+      return MuonLanguageClient;
     default:
       return null;
   }
 }
 
 export async function createLanguageServerClient(
-  server: LanguageServer,
   download: boolean,
   context: vscode.ExtensionContext,
 ): Promise<LanguageServerClient | null> {
+  const server = extensionConfiguration(SettingsKey.languageServer);
+
   const klass = serverToClass(server);
   if (klass == null) {
     return null;
@@ -28,7 +33,7 @@ export async function createLanguageServerClient(
     return null;
   }
 
-  let languageServerPath = LanguageServerClient.resolveLanguageServerPath(server, context);
+  let [languageServerPath, args] = LanguageServerClient.resolveLanguageServerPath(server, context);
   if (languageServerPath === null) {
     if (klass.artifact() == null) {
       enum Options {
@@ -55,5 +60,5 @@ export async function createLanguageServerClient(
     }
   }
 
-  return new klass(languageServerPath, context, klass.version);
+  return new klass(languageServerPath, args, context, klass.version);
 }

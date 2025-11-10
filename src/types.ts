@@ -3,7 +3,7 @@ import type { Version } from "./version";
 
 type Dict<T> = { [x: string]: T };
 
-export type Tool = { path: string; version: Version };
+export type Tool = { path: string[]; version: Version };
 
 export type ToolCheckSuccessResult = {
   tool: Tool;
@@ -60,7 +60,7 @@ export type LinterConfiguration = {
   enabled: boolean;
 };
 
-export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | null;
+export type LanguageServer = "Swift-MesonLSP" | "mesonlsp" | "muon" | null;
 export type ModifiableExtension = "ms-vscode.cpptools" | "rust-lang.rust-analyzer";
 
 export type FormattingProvider = "muon" | "meson";
@@ -75,8 +75,8 @@ export interface ExtensionConfiguration {
   testJobs: number;
   benchmarkOptions: string[];
   buildFolder: string;
-  mesonPath: string;
-  muonPath: string;
+  mesonPath: string[];
+  muonPath: string[];
   linting: { enabled: boolean };
   linter: {
     muon: LinterConfiguration;
@@ -90,7 +90,7 @@ export interface ExtensionConfiguration {
   debuggerExtension: "cpptools" | "vscode-lldb" | "lldb-dap" | "auto";
   debugOptions: object;
   languageServer: LanguageServer;
-  languageServerPath: string;
+  languageServerPath: string[];
   downloadLanguageServer: boolean | "ask";
   selectRootDir: boolean;
   modifySettings: boolean | ModifiableExtension[];
