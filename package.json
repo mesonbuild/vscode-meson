@@ -582,7 +582,7 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.1",
-    "@types/node": "^16.11.7",
+    "@types/node": "^18.0.0",
     "@types/vscode": "^1.75.0",
     "@types/which": "^3.0.0",
     "husky": "^8.0.3",
