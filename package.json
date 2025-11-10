@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/mesonbuild/vscode-meson/blob/master/README.md",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.101.0"
   },
   "categories": [
     "Programming Languages"
@@ -574,29 +574,28 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
-    "markdownlint:check": "markdownlint-cli2 **.md",
-    "postinstall": "husky install",
+    "markdownlint:check": "npx -y markdownlint-cli2 **.md",
+    "postinstall": "husky",
     "prettier:check": "prettier --check **.md **.ts **.yml **.json",
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.1",
-    "@types/node": "^18.0.0",
-    "@types/vscode": "^1.75.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.101.0",
     "@types/which": "^3.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^14.0.1",
-    "markdownlint-cli2": "^0.10.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^16.0.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
     "vscode-textmate": "^9.0.0"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
-    "vscode-cpptools": "^6.1.0",
+    "vscode-cpptools": "^7.0.0",
     "vscode-languageclient": "^9.0.1",
-    "which": "^4.0.0"
+    "which": "^6.0.0"
   },
   "prettier": {
     "proseWrap": "always"
