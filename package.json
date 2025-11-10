@@ -454,18 +454,12 @@
         "id": "ini",
         "filenamePatterns": [
           "**/subprojects/*.wrap"
-        ],
-        "aliases": [
-          "Meson Wrap"
         ]
       },
       {
         "id": "ini",
         "filenamePatterns": [
           "meson.format"
-        ],
-        "aliases": [
-          "Meson Format Config"
         ]
       }
     ],
