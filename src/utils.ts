@@ -37,9 +37,9 @@ export async function exec(
     cp.execFile(command, args, options, (error, stdout, stderr) => {
       const timeMs = Date.now() - timeStart;
       if (error) {
-        reject({ stdout, stderr, timeMs, error });
+        reject({ stdout: stdout.toString(), stderr: stderr.toString(), timeMs, error });
       } else {
-        resolve({ stdout, stderr, timeMs });
+        resolve({ stdout: stdout.toString(), stderr: stderr.toString(), timeMs });
       }
     });
   });
@@ -55,7 +55,7 @@ export async function execFeed(
     const timeStart = Date.now();
     const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
       const timeMs = Date.now() - timeStart;
-      resolve({ stdout, stderr, timeMs, error: error ?? undefined });
+      resolve({ stdout: stdout.toString(), stderr: stderr.toString(), timeMs, error: error ?? undefined });
     });
 
     p.stdin?.write(stdin);
