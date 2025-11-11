@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 
-import { BaseNode } from "../basenode";
-import { ProjectInfo, Subproject, Targets, Tests } from "../../types";
-import { extensionRelative } from "../../utils";
-import { TargetDirectoryNode } from "./targets";
-import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../introspection";
-import { TestRootNode } from "./tests";
+import { BaseNode } from "../basenode.js";
+import { ProjectInfo, Subproject, Targets, Tests } from "../../types.js";
+import { extensionRelative } from "../../utils.js";
+import { TargetDirectoryNode } from "./targets.js";
+import { getMesonBenchmarks, getMesonTargets, getMesonTests } from "../../introspection.js";
+import { TestRootNode } from "./tests.js";
 
 export class ProjectNode extends BaseNode {
   constructor(

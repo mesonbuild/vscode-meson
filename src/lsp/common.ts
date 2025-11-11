@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { LanguageServerClient } from ".";
-import { LanguageServer } from "../types";
-import { MesonLSPLanguageClient } from "./mesonlsp";
+import { LanguageServerClient } from "./index.js";
+import { LanguageServer } from "../types.js";
+import { MesonLSPLanguageClient } from "./mesonlsp.js";
 import { Uri } from "vscode";
 
 export function serverToClass(server: LanguageServer): any {

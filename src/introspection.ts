@@ -1,7 +1,7 @@
 import * as path from "path";
-import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils";
-import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types";
-import { type VersionArray, Version } from "./version";
+import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils.js";
+import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types.js";
+import { type VersionArray, Version } from "./version.js";
 
 export function getIntrospectionFile(buildDir: string, filename: string) {
   return path.join(buildDir, path.join("meson-info", filename));

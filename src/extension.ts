@@ -1,8 +1,8 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks";
-import { MesonProjectExplorer } from "./treeview";
-import { TargetNode } from "./treeview/nodes/targets";
+import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks.js";
+import { MesonProjectExplorer } from "./treeview/index.js";
+import { TargetNode } from "./treeview/nodes/targets.js";
 import {
   extensionConfiguration,
   genEnvFile,
@@ -13,16 +13,16 @@ import {
   whenFileExists,
   mesonRootDirs,
   shouldModifySetting,
-} from "./utils";
-import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index";
-import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider";
-import { testDebugHandler, testRunHandler, regenerateTests } from "./tests";
-import { activateLinters } from "./linters";
-import { activateFormatters } from "./formatters";
-import { SettingsKey, TaskQuickPickItem } from "./types";
-import { createLanguageServerClient } from "./lsp/common";
-import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDir, selectRootDir } from "./dialogs";
-import { getIntrospectionFile } from "./introspection";
+} from "./utils.js";
+import { MesonDebugConfigurationProvider, DebuggerType } from "./debug/index.js";
+import { CpptoolsProvider, registerCppToolsProvider } from "./cpptoolsconfigprovider.js";
+import { testDebugHandler, testRunHandler, regenerateTests } from "./tests.js";
+import { activateLinters } from "./linters.js";
+import { activateFormatters } from "./formatters.js";
+import { SettingsKey, TaskQuickPickItem } from "./types.js";
+import { createLanguageServerClient } from "./lsp/common.js";
+import { askShouldDownloadLanguageServer, askConfigureOnOpen, askAndSelectRootDir, selectRootDir } from "./dialogs.js";
+import { getIntrospectionFile } from "./introspection.js";
 
 export let extensionPath: string;
 export let workspaceState: vscode.Memento;

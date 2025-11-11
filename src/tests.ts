@@ -1,9 +1,9 @@
 import * as os from "os";
 import * as vscode from "vscode";
-import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils";
-import { Target, Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types";
-import { getMesonTests, getMesonTargets } from "./introspection";
-import { workspaceState } from "./extension";
+import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils.js";
+import { Target, Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types.js";
+import { getMesonTests, getMesonTargets } from "./introspection.js";
+import { workspaceState } from "./extension.js";
 
 // This is far from complete, but should suffice for the
 // "test is made of a single executable is made of a single source file" usecase.

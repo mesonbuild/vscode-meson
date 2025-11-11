@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as cpptools from "vscode-cpptools";
-import { getMesonBuildOptions, getMesonCompilers, getMesonDependencies } from "./introspection";
-import { getOutputChannel } from "./utils";
-import { Compiler, Dependencies } from "./types";
+import { getMesonBuildOptions, getMesonCompilers, getMesonDependencies } from "./introspection.js";
+import { getOutputChannel } from "./utils.js";
+import { Compiler, Dependencies } from "./types.js";
 
 export class CpptoolsProvider implements cpptools.CustomConfigurationProvider {
   cppToolsAPI?: cpptools.CppToolsApi;

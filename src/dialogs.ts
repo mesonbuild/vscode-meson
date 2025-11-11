@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { extensionConfiguration, extensionConfigurationSet } from "./utils";
-import { SettingsKey } from "./types";
+import { extensionConfiguration, extensionConfigurationSet } from "./utils.js";
+import { SettingsKey } from "./types.js";
 
 export async function askConfigureOnOpen(): Promise<boolean> {
   const configureOnOpen = extensionConfiguration(SettingsKey.configureOnOpen);

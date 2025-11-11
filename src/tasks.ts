@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { getMesonTargets, getMesonTests, getMesonBenchmarks } from "./introspection";
-import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils";
-import { Test, Target } from "./types";
-import { checkMesonIsConfigured } from "./utils";
-import { mesonProgram } from "./utils";
+import { getMesonTargets, getMesonTests, getMesonBenchmarks } from "./introspection.js";
+import { extensionConfiguration, getOutputChannel, getTargetName } from "./utils.js";
+import { Test, Target } from "./types.js";
+import { checkMesonIsConfigured } from "./utils.js";
+import { mesonProgram } from "./utils.js";
 
 interface MesonTaskDefinition extends vscode.TaskDefinition {
   type: "meson";

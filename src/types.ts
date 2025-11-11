@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { Version } from "./version";
+import type { Version } from "./version.js";
 
 type Dict<T> = { [x: string]: T };
 

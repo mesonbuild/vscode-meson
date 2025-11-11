@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as cp from "child_process";
 import * as vscode from "vscode";
-import * as which from "which";
+import which from "which";
 
 import { createHash, BinaryLike } from "crypto";
 import {
@@ -12,9 +12,9 @@ import {
   ModifiableExtension,
   type ToolCheckResult,
   type ToolCheckErrorResult,
-} from "./types";
-import { getMesonBuildOptions } from "./introspection";
-import { extensionPath, workspaceState } from "./extension";
+} from "./types.js";
+import { getMesonBuildOptions } from "./introspection.js";
+import { extensionPath, workspaceState } from "./extension.js";
 
 export interface ExecResult {
   stdout: string;

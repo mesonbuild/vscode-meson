@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { hash } from "../utils";
+import { hash } from "../utils.js";
 
 export abstract class BaseNode {
   constructor(protected readonly id: string) {}

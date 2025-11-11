@@ -1,9 +1,9 @@
 import * as os from "os";
 import * as vscode from "vscode";
 import * as path from "path";
-import { getMesonTargets } from "../introspection";
-import { Target } from "../types";
-import { extensionConfiguration, getTargetName } from "../utils";
+import { getMesonTargets } from "../introspection.js";
+import { Target } from "../types.js";
+import { extensionConfiguration, getTargetName } from "../utils.js";
 
 export enum DebuggerType {
   cppvsdbg = "cppvsdbg",

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 
-import { BaseNode } from "../basenode";
-import { Test, Tests } from "../../types";
-import { extensionRelative } from "../../utils";
+import { BaseNode } from "../basenode.js";
+import { Test, Tests } from "../../types.js";
+import { extensionRelative } from "../../utils.js";
 
 export class TestRootNode extends BaseNode {
   constructor(

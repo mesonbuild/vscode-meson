@@ -1,9 +1,9 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { extensionRelative } from "../../utils";
-import { BaseNode } from "../basenode";
-import { BaseDirectoryNode } from "./base";
+import { extensionRelative } from "../../utils.js";
+import { BaseNode } from "../basenode.js";
+import { BaseDirectoryNode } from "./base.js";
 
 abstract class BaseFileDirectoryNode extends BaseDirectoryNode<string> {
   override async getChildren() {

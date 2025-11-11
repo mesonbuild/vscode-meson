@@ -1,8 +1,8 @@
 import * as os from "os";
 import * as vscode from "vscode";
 
-import { Executable } from "vscode-languageclient/node";
-import { LanguageServerClient } from "../lsp";
+import { Executable } from "vscode-languageclient/node.js";
+import { LanguageServerClient } from "../lsp/index.js";
 
 export class MesonLSPLanguageClient extends LanguageServerClient {
   private static artifacts: { [key: string]: { name: string; hash: string } } = {
