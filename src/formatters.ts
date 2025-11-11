@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { extensionConfiguration, getOutputChannel } from "./utils";
-import { ToolCheckFunc, Tool, type FormattingProvider } from "./types";
-import * as muon from "./tools/muon";
-import * as meson from "./tools/meson";
+import { extensionConfiguration, getOutputChannel } from "./utils.js";
+import { ToolCheckFunc, Tool, type FormattingProvider } from "./types.js";
+import * as muon from "./tools/muon.js";
+import * as meson from "./tools/meson.js";
 
 type FormatterFunc = (tool: Tool, root: string, document: vscode.TextDocument) => Promise<vscode.TextEdit[]>;
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { BaseNode } from "./basenode";
-import { getMesonProjectInfo } from "../introspection";
-import { ProjectNode } from "./nodes/toplevel";
+import { BaseNode } from "./basenode.js";
+import { getMesonProjectInfo } from "../introspection.js";
+import { ProjectNode } from "./nodes/toplevel.js";
 
 class MesonProjectDataProvider implements vscode.TreeDataProvider<BaseNode> {
   private readonly _onDataChangeEmitter = new vscode.EventEmitter<BaseNode | void>();

@@ -1,4 +1,4 @@
-import * as Admzip from "adm-zip";
+import Admzip from "adm-zip";
 import * as which from "which";
 import * as https from "https";
 import * as crypto from "crypto";
@@ -14,10 +14,10 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-} from "vscode-languageclient/node";
-import * as storage from "../storage";
-import { LanguageServer } from "../types";
-import { serverToClass } from "./common";
+} from "vscode-languageclient/node.js";
+import * as storage from "../storage.js";
+import { LanguageServer } from "../types.js";
+import { serverToClass } from "./common.js";
 
 export abstract class LanguageServerClient {
   private static readonly clientOptions: LanguageClientOptions = {

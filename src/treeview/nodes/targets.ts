@@ -1,11 +1,11 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { BaseNode } from "../basenode";
-import { Target, Targets } from "../../types";
-import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources";
-import { extensionRelative, getTargetName } from "../../utils";
-import { BaseDirectoryNode } from "./base";
+import { BaseNode } from "../basenode.js";
+import { Target, Targets } from "../../types.js";
+import { TargetSourcesRootNode, TargetGeneratedSourcesRootNode } from "./sources.js";
+import { extensionRelative, getTargetName } from "../../utils.js";
+import { BaseDirectoryNode } from "./base.js";
 
 export class TargetDirectoryNode extends BaseDirectoryNode<Target> {
   constructor(parentId: string, folder: string, targets: Targets) {

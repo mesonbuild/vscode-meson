@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { execFeed, extensionConfiguration, getOutputChannel, mesonProgram } from "../utils";
-import { Tool, ToolCheckResult } from "../types";
-import { getMesonVersion } from "../introspection";
-import { Version } from "../version";
+import { execFeed, extensionConfiguration, getOutputChannel, mesonProgram } from "../utils.js";
+import { Tool, ToolCheckResult } from "../types.js";
+import { getMesonVersion } from "../introspection.js";
+import { Version } from "../version.js";
 
 export async function format(meson: Tool, root: string, document: vscode.TextDocument): Promise<vscode.TextEdit[]> {
   const originalDocumentText = document.getText();

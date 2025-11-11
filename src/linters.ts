@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { extensionConfiguration, getOutputChannel } from "./utils";
-import { ExtensionConfiguration, LinterConfiguration, ToolCheckFunc, Tool } from "./types";
-import * as muon from "./tools/muon";
+import { extensionConfiguration, getOutputChannel } from "./utils.js";
+import { ExtensionConfiguration, LinterConfiguration, ToolCheckFunc, Tool } from "./types.js";
+import * as muon from "./tools/muon.js";
 
 type LinterFunc = (tool: Tool, sourceRoot: string, document: vscode.TextDocument) => Promise<vscode.Diagnostic[]>;
 

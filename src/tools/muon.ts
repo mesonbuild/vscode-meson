@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils";
-import { Tool, ToolCheckResult } from "../types";
-import { Version, type VersionArray } from "../version";
+import { ExecResult, exec, execFeed, extensionConfiguration, getOutputChannel } from "../utils.js";
+import { Tool, ToolCheckResult } from "../types.js";
+import { Version, type VersionArray } from "../version.js";
 
 export async function lint(muon: Tool, root: string, document: vscode.TextDocument): Promise<vscode.Diagnostic[]> {
   const { stdout, stderr } = await execFeed(

@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { isThenable } from "../../utils";
-import { BaseNode } from "../basenode";
+import { isThenable } from "../../utils.js";
+import { BaseNode } from "../basenode.js";
 
 type FolderMap<T> = Map<string, T[]>;
 
