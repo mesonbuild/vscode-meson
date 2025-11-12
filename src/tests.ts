@@ -1,4 +1,4 @@
-import * as os from "os";
+import * as os from "node:os";
 import * as vscode from "vscode";
 import { ExecResult, exec, extensionConfiguration, getTargetName } from "./utils.js";
 import { Target, Targets, Test, Tests, DebugEnvironmentConfiguration } from "./types.js";
