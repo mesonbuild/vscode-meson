@@ -19,7 +19,15 @@ async function main() {
     // basically required as long as we have CJS dependencies
     // node supports loading mixed ESM and CJS, applying the ESM import optimizations to the ESM subset.
     // We'd lose out on that if we were to bundle everything into CJS
-    packages: "external",
+    //packages: "external",
+    external: [
+      "vscode",
+      "vscode-languageclient",
+      "vscode-cpptools",
+      "which",
+      "isexe",
+      "adm-zip",
+    ],
     logLevel: "warning",
     plugins: [
       /* add to the end of plugins array */
