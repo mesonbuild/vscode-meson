@@ -1,4 +1,4 @@
-import * as os from "os";
+import * as os from "node:os";
 import * as vscode from "vscode";
 import { getMesonTasks, getTasks, runTask, runFirstTask } from "./tasks.js";
 import { MesonProjectExplorer } from "./treeview/index.js";

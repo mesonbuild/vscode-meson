@@ -1,0 +1,13 @@
+**
+!dist/extension.js
+!graphics/**
+!language-configuration.json
+!res/**
+!snippets/**
+!syntaxes/**
+!package.json
+
+!node_modules/**/*.js
+!node_modules/**/package.json
+
+**/*.ts
