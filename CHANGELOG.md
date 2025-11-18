@@ -2,6 +2,17 @@
 
 ## next
 
+- Add support for `--source-file-path` format argument in Meson 1.9.0
+- Migrate to ES Modules
+- Add test coverage support
+- Allow for parallel test execution
+- Add test source lookup for tests made of one source file
+- Fix newlines in test output
+- Fix typo in askConfigureOnOpen dialog
+- Don't override ini language settings
+- Add lldb-dap support
+- Make debugger extension configurable
+
 ## 1.27.0
 
 - Add support for meson as formatter
