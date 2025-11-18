@@ -1,6 +1,6 @@
-import * as os from "os";
+import * as os from "node:os";
 import * as vscode from "vscode";
-import * as path from "path";
+import * as path from "node:path";
 import { getMesonTargets } from "../introspection.js";
 import { Target } from "../types.js";
 import { extensionConfiguration, getTargetName } from "../utils.js";
