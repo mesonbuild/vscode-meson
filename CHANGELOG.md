@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.28.0
 
 - Add support for `--source-file-path` format argument in Meson 1.9.0
 - Migrate to ES Modules
