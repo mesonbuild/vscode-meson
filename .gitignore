@@ -1,4 +1,6 @@
 /out
+/dist
+*.vsix
 /node_modules
 package-lock.json
 /testproj
