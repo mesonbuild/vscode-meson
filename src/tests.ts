@@ -60,8 +60,8 @@ async function rebuildTests(tests: Test[], buildDir: string): Promise<ExecResult
     buildDir,
     ...[...testDependencies].map((test) => {
       // `test.name` is not guaranteed to be the actual name that meson wants
-      // format is hash@@realname@type
-      return `"${/[^@]+@@(.+)@[^@]+/.exec(test.id)![1]}"`;
+      // format can be hash@@realname@type or realname@type
+      return `"${/(?:[^@]+@@)?(.+)@[^@]+/.exec(test.id)![1]}"`;
     }),
   ]);
 }
