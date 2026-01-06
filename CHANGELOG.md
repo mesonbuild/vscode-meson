@@ -2,6 +2,12 @@
 
 ## next
 
+## 1.28.1
+
+- Run builds from the builddir, so that vscode can map paths from error messages
+  etc. correctly
+- Fix building tests on windows
+
 ## 1.28.0
 
 - Add support for `--source-file-path` format argument in Meson 1.9.0
