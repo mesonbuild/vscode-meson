@@ -256,6 +256,7 @@
           "enum": [
             "Swift-MesonLSP",
             "mesonlsp",
+            "muon",
             null
           ],
           "description": "Select which language server to use. Swift-MesonLSP is a legacy alias for mesonlsp."
