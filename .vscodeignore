@@ -1,0 +1,17 @@
+**
+!dist/extension.js
+!graphics/**
+!language-configuration.json
+!LICENSE
+!res/**
+!snippets/**
+!syntaxes/**
+!package.json
+
+!node_modules/vscode-languageclient/**
+!node_modules/vscode-cpptools/**
+!node_modules/which/**
+!node_modules/isexe/**
+!node_modules/adm-zip/**
+
+**/*.ts
