@@ -16,8 +16,9 @@ import {
   TransportKind,
 } from "vscode-languageclient/node.js";
 import * as storage from "../storage.js";
-import { LanguageServer } from "../types.js";
+import { ExtensionConfiguration, LanguageServer } from "../types.js";
 import { serverToClass } from "./common.js";
+import { extensionConfiguration, resolveCommandAndArgs } from "../utils.js";
 
 export abstract class LanguageServerClient {
   private static readonly clientOptions: LanguageClientOptions = {
@@ -27,6 +28,7 @@ export abstract class LanguageServerClient {
   private readonly context: vscode.ExtensionContext;
 
   protected languageServerPath: vscode.Uri | null;
+  protected extraArgs: string[];
   protected referenceVersion: string;
   readonly server: LanguageServer;
 
@@ -40,11 +42,13 @@ export abstract class LanguageServerClient {
   protected constructor(
     server: LanguageServer,
     languageServerPath: vscode.Uri,
+    extraArgs: string[],
     context: vscode.ExtensionContext,
     referenceVersion: string,
   ) {
     this.server = server;
     this.languageServerPath = languageServerPath;
+    this.extraArgs = extraArgs;
     this.context = context;
     this.referenceVersion = referenceVersion;
   }
@@ -146,25 +150,26 @@ export abstract class LanguageServerClient {
     return uri;
   }
 
-  static resolveLanguageServerPath(server: LanguageServer, context: vscode.ExtensionContext): vscode.Uri | null {
-    const config = vscode.workspace.getConfiguration("mesonbuild");
-
-    const configLanguageServerPath = config["languageServerPath"];
-    if (configLanguageServerPath !== null && configLanguageServerPath != "") {
+  static resolveLanguageServerPath(
+    server: LanguageServer,
+    context: vscode.ExtensionContext,
+  ): [vscode.Uri | null, string[]] {
+    const [configLanguageServerPath, args] = resolveCommandAndArgs(extensionConfiguration("languageServerPath"));
+    if (configLanguageServerPath !== null && configLanguageServerPath !== "") {
       if (!path.isAbsolute(configLanguageServerPath)) {
         const binary = which.sync(configLanguageServerPath, { nothrow: true });
-        if (binary !== null) return vscode.Uri.from({ scheme: "file", path: binary });
+        if (binary !== null) return [vscode.Uri.from({ scheme: "file", path: binary }), args];
       }
-      return vscode.Uri.from({ scheme: "file", path: configLanguageServerPath });
+      return [vscode.Uri.from({ scheme: "file", path: configLanguageServerPath }), args];
     }
 
     const cached = LanguageServerClient.cachedLanguageServer(server, context);
-    if (cached !== null) return cached;
+    if (cached !== null) return [cached, args];
 
     const binary = which.sync(server!, { nothrow: true });
-    if (binary !== null) return vscode.Uri.from({ scheme: "file", path: binary });
+    if (binary !== null) return [vscode.Uri.from({ scheme: "file", path: binary }), args];
 
-    return null;
+    return [null, args];
   }
 
   protected static supportsSystem(): boolean {
@@ -184,7 +189,10 @@ export abstract class LanguageServerClient {
 
   async restart(): Promise<void> {
     await this.dispose();
-    this.languageServerPath = LanguageServerClient.resolveLanguageServerPath(this.server, this.context);
+    [this.languageServerPath, this.extraArgs] = LanguageServerClient.resolveLanguageServerPath(
+      this.server,
+      this.context,
+    );
     if (this.languageServerPath === null) {
       vscode.window.showErrorMessage(
         "Failed to restart the language server because a binary was not found and could not be downloaded",
@@ -201,7 +209,7 @@ export abstract class LanguageServerClient {
       transport: TransportKind.stdio,
     };
     const options = LanguageServerClient.clientOptions;
-    options.initializationOptions = vscode.workspace.getConfiguration(`mesonbuild.${this.server}`);
+    options.initializationOptions = extensionConfiguration(`mesonbuild.${this.server}` as keyof ExtensionConfiguration);
     this.ls = new LanguageClient(
       "mesonbuild",
       `Meson Language Server (${this.server})`,
@@ -213,7 +221,7 @@ export abstract class LanguageServerClient {
   }
 
   async reloadConfig(): Promise<void> {
-    const config = vscode.workspace.getConfiguration(`mesonbuild.${this.server}`);
+    const config = extensionConfiguration(`mesonbuild.${this.server}` as keyof ExtensionConfiguration);
     const params: DidChangeConfigurationParams = {
       settings: config,
     };
