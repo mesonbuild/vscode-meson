@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { execFeed, extensionConfiguration, getOutputChannel, mesonProgram } from "../utils.js";
+import { execFeed, extensionConfiguration, getOutputChannel } from "../utils.js";
 import { Tool, CheckResult } from "../types.js";
 import { getMesonVersion } from "../introspection.js";
 import { Version } from "../version.js";
@@ -52,8 +52,6 @@ const formattingWithStdinSupportedSinceVersion = new Version([1, 7, 0]);
 const formattingWithFileNameArgumentSinceVersion = new Version([1, 9, 0]);
 
 export async function check(): Promise<CheckResult<MesonTool>> {
-  const meson_path = mesonProgram();
-
   let mesonVersion;
   try {
     mesonVersion = await getMesonVersion();
@@ -84,5 +82,9 @@ export async function check(): Promise<CheckResult<MesonTool>> {
     supportsFileNameArgument,
   };
 
-  return CheckResult.newData<MesonTool>({ path: meson_path, version: mesonVersion, options });
+  return CheckResult.newData<MesonTool>({
+    path: extensionConfiguration("mesonPath"),
+    version: mesonVersion,
+    options: options,
+  });
 }

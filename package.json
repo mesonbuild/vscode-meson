@@ -184,12 +184,18 @@
           "description": "Specify the list of options used for running benchmarks. --benchmark is implicit."
         },
         "mesonbuild.mesonPath": {
-          "type": "string",
+          "type": [
+            "string",
+            "array"
+          ],
           "default": "meson",
           "description": "Specify the meson executable to use"
         },
         "mesonbuild.muonPath": {
-          "type": "string",
+          "type": [
+            "string",
+            "array"
+          ],
           "default": "muon",
           "description": "Specify the muon executable to use"
         },
@@ -273,7 +279,10 @@
           "description": "Select which language server to use. Swift-MesonLSP is a legacy alias for mesonlsp."
         },
         "mesonbuild.languageServerPath": {
-          "type": "string",
+          "type": [
+            "string",
+            "array"
+          ],
           "description": "Binary name or path to language server",
           "default": ""
         },

@@ -3,7 +3,7 @@ import type { Version } from "./version.js";
 
 type Dict<T> = { [x: string]: T };
 
-export type Tool<Options> = { path: string; version: Version; options: Options };
+export type Tool<Options> = { path: string[]; version: Version; options: Options };
 
 export type CheckSuccessResult<Data> = {
   data: Data;
@@ -75,8 +75,8 @@ export interface ExtensionConfiguration {
   testJobs: number;
   benchmarkOptions: string[];
   buildFolder: string;
-  mesonPath: string;
-  muonPath: string;
+  mesonPath: string[];
+  muonPath: string[];
   linting: { enabled: boolean };
   linter: {
     muon: LinterConfiguration;
@@ -90,7 +90,7 @@ export interface ExtensionConfiguration {
   debuggerExtension: "cpptools" | "vscode-lldb" | "lldb-dap" | "auto";
   debugOptions: object;
   languageServer: LanguageServer;
-  languageServerPath: string;
+  languageServerPath: string[];
   downloadLanguageServer: boolean | "ask";
   selectRootDir: boolean;
   modifySettings: boolean | ModifiableExtension[];

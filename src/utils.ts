@@ -5,14 +5,7 @@ import * as vscode from "vscode";
 import which from "which";
 
 import { createHash, BinaryLike } from "crypto";
-import {
-  ExtensionConfiguration,
-  Target,
-  SettingsKey,
-  ModifiableExtension,
-  type CheckResult,
-  type CheckErrorResult,
-} from "./types.js";
+import { ExtensionConfiguration, Target, SettingsKey, ModifiableExtension } from "./types.js";
 import { getMesonBuildOptions } from "./introspection.js";
 import { extensionPath, workspaceState } from "./extension.js";
 
@@ -23,12 +16,23 @@ export interface ExecResult {
   error?: cp.ExecFileException;
 }
 
+export function resolveCommandAndArgs(command: string | string[], args: string[] = []): [string, string[]] {
+  if (Array.isArray(command)) {
+    args = [...command.slice(1), ...args];
+    command = command[0];
+  }
+
+  return [command, args];
+}
+
 export async function exec(
-  command: string,
+  command: string | string[],
   args: string[],
   extraEnv: { [key: string]: string } | undefined = undefined,
   options: cp.ExecFileOptions = { shell: true },
 ) {
+  [command, args] = resolveCommandAndArgs(command, args);
+
   if (extraEnv) {
     options.env = { ...(options.env ?? process.env), ...extraEnv };
   }
@@ -46,11 +50,13 @@ export async function exec(
 }
 
 export async function execFeed(
-  command: string,
+  command: string | string[],
   args: string[],
   options: cp.ExecFileOptions = { shell: true },
   stdin: string,
 ) {
+  [command, args] = resolveCommandAndArgs(command, args);
+
   return new Promise<ExecResult>((resolve) => {
     const timeStart = Date.now();
     const p = cp.execFile(command, args, options, (error, stdout, stderr) => {
@@ -127,12 +133,47 @@ export function hash(input: BinaryLike) {
   return hashObj.digest("hex");
 }
 
-export function getConfiguration() {
+function getConfiguration() {
   return vscode.workspace.getConfiguration("mesonbuild");
 }
 
+type ConfigValue<K extends keyof ExtensionConfiguration> = NonNullable<ExtensionConfiguration[K]>;
+
+function resolveConfigurationStringValue<K extends keyof ExtensionConfiguration>(
+  value: ConfigValue<K>,
+): ConfigValue<K> {
+  if (typeof value === "string") {
+    const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0] : null;
+
+    if (workspaceFolder && value) {
+      const workspacePath = workspaceFolder.uri.fsPath;
+      value = value.replace(/\${workspaceFolder}/gi, workspacePath) as ConfigValue<K>;
+    }
+    return value;
+  } else {
+    return value;
+  }
+}
+
+const deprecateToStringArray = {
+  mesonPath: true,
+  muonPath: true,
+  languageServerPath: true,
+};
+
 export function extensionConfiguration<K extends keyof ExtensionConfiguration>(key: K) {
-  return getConfiguration().get<ExtensionConfiguration[K]>(key)!;
+  let value = getConfiguration().get<ExtensionConfiguration[K]>(key)!;
+
+  if (key in deprecateToStringArray && typeof value === "string") {
+    value = [value] as ConfigValue<K>;
+  }
+
+  if (typeof value === "string") {
+    value = resolveConfigurationStringValue(value);
+  } else if (Array.isArray(value)) {
+    value = value.map(resolveConfigurationStringValue) as ConfigValue<K>;
+  }
+  return value;
 }
 
 export function extensionConfigurationSet<K extends keyof ExtensionConfiguration>(
@@ -218,6 +259,7 @@ export function whenFileExists(ctx: vscode.ExtensionContext, file: string, liste
   }
 }
 
-export function mesonProgram(): string {
-  return which.sync(extensionConfiguration("mesonPath"));
+export function mesonProgram(): [string, string[]] {
+  const cmdArray = extensionConfiguration("mesonPath");
+  return [which.sync(cmdArray[0]), cmdArray.slice(1)];
 }
