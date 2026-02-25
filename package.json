@@ -47,7 +47,7 @@
     "onDebugDynamicConfigurations:cppdbg",
     "onDebugDynamicConfigurations:lldb"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
@@ -587,10 +587,11 @@
   },
   "scripts": {
     "compile": "tsc -p ./",
+    "esbuild": "node ./esbuild.js",
     "markdownlint:check": "npx -y markdownlint-cli2 **.md",
     "postinstall": "husky",
     "prettier:check": "prettier --check **.md **.ts **.yml **.json",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && node ./esbuild.js --production",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
@@ -598,6 +599,7 @@
     "@types/node": "^22.0.0",
     "@types/vscode": "^1.101.0",
     "@types/which": "^3.0.0",
+    "esbuild": "^0.27.0",
     "husky": "^9.0.0",
     "lint-staged": "^16.0.0",
     "prettier": "^3.0.3",

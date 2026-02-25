@@ -1,10 +1,10 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as cp from "child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as cp from "node:child_process";
 import * as vscode from "vscode";
 import which from "which";
 
-import { createHash, BinaryLike } from "crypto";
+import { createHash, BinaryLike } from "node:crypto";
 import {
   ExtensionConfiguration,
   Target,

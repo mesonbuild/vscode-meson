@@ -1,4 +1,4 @@
-import * as os from "os";
+import * as os from "node:os";
 import * as vscode from "vscode";
 
 import { Executable } from "vscode-languageclient/node.js";
