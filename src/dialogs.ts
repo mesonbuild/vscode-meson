@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as path from "path";
+import * as path from "node:path";
 import { extensionConfiguration, extensionConfigurationSet } from "./utils.js";
 import { SettingsKey } from "./types.js";
 

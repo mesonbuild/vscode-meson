@@ -7,10 +7,8 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceRoot}"
-      ],
-      "preLaunchTask": "compile"
+      "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+      "preLaunchTask": "build"
     }
   ]
 }

@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from "node:path";
 import { exec, extensionConfiguration, parseJSONFileIfExists, getOutputChannel } from "./utils.js";
 import { Targets, Dependencies, BuildOptions, Tests, ProjectInfo, Compilers } from "./types.js";
 import { type VersionArray, Version } from "./version.js";
