@@ -33,7 +33,7 @@ export async function createLanguageServerClient(
     return null;
   }
 
-  let languageServerPath = LanguageServerClient.resolveLanguageServerPath(server, context);
+  let [languageServerPath, args] = LanguageServerClient.resolveLanguageServerPath(server, context);
   if (languageServerPath === null) {
     if (klass.artifact() == null) {
       enum Options {
@@ -60,5 +60,5 @@ export async function createLanguageServerClient(
     }
   }
 
-  return new klass(languageServerPath, context, klass.version);
+  return new klass(languageServerPath, args, context, klass.version);
 }
