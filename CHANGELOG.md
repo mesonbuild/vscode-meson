@@ -2,6 +2,10 @@
 
 ## next
 
+## 1.28.2
+
+- fix a dependency import issue in lsp.ts
+
 ## 1.28.1
 
 - Run builds from the builddir, so that vscode can map paths from error messages
