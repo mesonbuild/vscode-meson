@@ -1,5 +1,5 @@
 import Admzip from "adm-zip";
-import * as which from "which";
+import which from "which";
 import * as https from "https";
 import * as crypto from "crypto";
 import * as fs from "fs";
