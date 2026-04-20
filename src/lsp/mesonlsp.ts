@@ -35,19 +35,24 @@ export class MesonLSPLanguageClient extends LanguageServerClient {
   get runExe(): Executable {
     return {
       command: this.languageServerPath!.fsPath,
-      args: ["--lsp"],
+      args: [...this.extraArgs, "--lsp"],
     };
   }
 
   get debugExe(): Executable {
     return {
       command: this.languageServerPath!.fsPath,
-      args: ["--lsp"],
+      args: [...this.extraArgs, "--lsp"],
     };
   }
 
-  constructor(languageServerPath: vscode.Uri, context: vscode.ExtensionContext, referenceVersion: string) {
-    super("mesonlsp", languageServerPath, context, referenceVersion);
+  constructor(
+    languageServerPath: vscode.Uri,
+    extraArgs: string[],
+    context: vscode.ExtensionContext,
+    referenceVersion: string,
+  ) {
+    super("mesonlsp", languageServerPath, extraArgs, context, referenceVersion);
   }
 
   static override artifact(): { url: string; hash: string } | null {
