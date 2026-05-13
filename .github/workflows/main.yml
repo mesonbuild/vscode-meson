@@ -20,10 +20,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
-      - name: yarn install
-        run: yarn install
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: tsc
-        run: tsc --noEmit --noErrorTruncation --pretty false
+        run: npx tsc --noEmit --noErrorTruncation --pretty false
   api-check:
     runs-on: ubuntu-latest
     steps:
