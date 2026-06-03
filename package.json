@@ -218,7 +218,7 @@
         "mesonbuild.linting.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Globally enable/disable linting"
+          "description": "Globally enable/disable linting. This option won't have any effect if a language server is found"
         },
         "mesonbuild.linter.muon.enabled": {
           "type": "boolean",
@@ -227,8 +227,8 @@
         },
         "mesonbuild.formatting.enabled": {
           "type": "boolean",
-          "default": false,
-          "description": "Globally enable/disable formatting"
+          "default": true,
+          "description": "Globally enable/disable formatting. This option won't have any effect if a language server is found"
         },
         "mesonbuild.formatting.provider": {
           "type": "string",
