@@ -638,7 +638,7 @@
     "vscode-textmate": "^9.0.0"
   },
   "dependencies": {
-    "adm-zip": "^0.5.10",
+    "adm-zip": "^0.6.0",
     "domhandler": "^5.0.3",
     "domutils": "^3.2.2",
     "htmlparser2": "^10.0.0",
